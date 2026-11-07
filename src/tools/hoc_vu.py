@@ -44,7 +44,9 @@ class HocVu:
 
     @staticmethod
     def _cite(doc_id: str, can_cu: dict) -> dict:
-        return {"doc_id": doc_id, "dieu": can_cu["dieu"], "khoan": can_cu.get("khoan")}
+        # Căn cứ có thể nằm ở văn bản khác phiên bản đang dùng (ví dụ văn bản sửa đổi).
+        return {"doc_id": can_cu.get("doc_id", doc_id), "dieu": can_cu["dieu"],
+                "khoan": can_cu.get("khoan")}
 
     def _rule(self, khoa: int | None, name: str) -> tuple[str, dict]:
         doc_id = self.phien_ban(khoa)
@@ -53,22 +55,54 @@ class HocVu:
         return doc_id, self.versions[doc_id][name]
 
     # ---- công cụ --------------------------------------------------------------------------
-    def tinh_diem_hoc_phan(self, khoa: int, diem_thanh_phan: list[dict]) -> dict:
-        """Điểm học phần = tổng điểm thành phần nhân trọng số, rồi quy đổi điểm chữ."""
+    def tinh_diem_hoc_phan(
+        self,
+        khoa: int,
+        diem_thuong_xuyen: float | None = None,
+        diem_giua_ky: float | None = None,
+        diem_cuoi_ky: float | None = None,
+        diem_thanh_phan: list[dict] | None = None,
+    ) -> dict:
+        """Điểm học phần rồi quy đổi điểm chữ. Cho ba điểm thường xuyên, giữa kỳ, cuối kỳ thì
+        dùng trọng số hiện hành; cho `diem_thanh_phan` (điểm kèm trọng số) thì tính theo trọng
+        số đó và cảnh báo nếu nó khác trọng số hiện hành."""
         doc_id, rule = self._rule(khoa, "diem_hoc_phan")
-        if not diem_thanh_phan:
-            raise ToolError("Cần ít nhất một điểm thành phần kèm trọng số.")
-        total_weight = sum(float(c["trong_so"]) for c in diem_thanh_phan)
+        current = rule.get("trong_so_hien_hanh")
+        named = (diem_thuong_xuyen, diem_giua_ky, diem_cuoi_ky)
+        warning = None
+        if all(v is not None for v in named) and current:
+            parts = [
+                {"diem": float(diem_thuong_xuyen), "trong_so": current["thuong_xuyen"]},
+                {"diem": float(diem_giua_ky), "trong_so": current["giua_ky"]},
+                {"diem": float(diem_cuoi_ky), "trong_so": current["cuoi_ky"]},
+            ]
+            weight_cites = [self._cite(doc_id, c) for c in current["can_cu"]]
+        elif diem_thanh_phan:
+            parts = [{"diem": float(c["diem"]), "trong_so": float(c["trong_so"])}
+                     for c in diem_thanh_phan]
+            weight_cites = [self._cite(doc_id, rule["can_cu"])]
+            official = sorted([current["thuong_xuyen"], current["giua_ky"], current["cuoi_ky"]]
+                              ) if current else None
+            if official and sorted(p["trong_so"] for p in parts) != official:
+                warning = (f"Trọng số đưa vào khác quy định hiện hành: thường xuyên "
+                           f"{current['thuong_xuyen']:.0%}, giữa kỳ {current['giua_ky']:.0%}, "
+                           f"cuối kỳ {current['cuoi_ky']:.0%}.")
+                weight_cites += [self._cite(doc_id, c) for c in current["can_cu"]]
+        elif any(v is not None for v in named):
+            raise ToolError("Cần đủ ba điểm: thường xuyên, giữa kỳ và cuối kỳ.")
+        else:
+            raise ToolError("Cần điểm các thành phần của học phần.")
+        total_weight = sum(p["trong_so"] for p in parts)
         if abs(total_weight - 1) > 1e-6:
             raise ToolError(f"Tổng trọng số phải bằng 1, đang là {total_weight:g}.")
-        raw = sum(float(c["diem"]) * float(c["trong_so"]) for c in diem_thanh_phan)
+        raw = sum(p["diem"] * p["trong_so"] for p in parts)
         result = self.quy_doi_diem(khoa, raw)
-        result["cong_thuc"] = " + ".join(
-            f"{float(c['trong_so']):g}×{float(c['diem']):g}" for c in diem_thanh_phan
-        )
-        # Kết luận ở đây là điểm chữ và đạt/không đạt: căn cứ là công thức và thang điểm chữ,
+        result["cong_thuc"] = " + ".join(f"{p['trong_so']:g}×{p['diem']:g}" for p in parts)
+        if warning:
+            result["canh_bao"] = warning
+        # Kết luận là điểm chữ và đạt/không đạt: căn cứ là trọng số đã dùng và thang điểm chữ,
         # không gồm bảng quy đổi thang 4 (chỉ dùng khi tính điểm trung bình).
-        result["can_cu"] = [self._cite(doc_id, rule["can_cu"]), result["can_cu"][0]]
+        result["can_cu"] = weight_cites + [result["can_cu"][0]]
         return result
 
     def quy_doi_diem(self, khoa: int, diem_10: float) -> dict:
@@ -246,10 +280,15 @@ _INT = {"type": "INTEGER"}
 
 FUNCTION_DECLARATIONS = [
     {"name": "tinh_diem_hoc_phan",
-     "description": "Tính điểm học phần từ các điểm thành phần và trọng số, quy đổi điểm chữ.",
-     "parameters": _obj({"khoa": _KHOA, "diem_thanh_phan": {"type": "ARRAY", "items": _obj(
-         {"diem": _NUM, "trong_so": {"type": "NUMBER", "description": "0 đến 1"}},
-         ["diem", "trong_so"])}}, ["khoa", "diem_thanh_phan"])},
+     "description": ("Tính điểm học phần và điểm chữ. Ưu tiên truyền ba điểm thường xuyên, "
+                     "giữa kỳ, cuối kỳ (dùng trọng số hiện hành); chỉ truyền diem_thanh_phan "
+                     "khi sinh viên nêu trọng số riêng."),
+     "parameters": _obj({"khoa": _KHOA, "diem_thuong_xuyen": _NUM, "diem_giua_ky": _NUM,
+                         "diem_cuoi_ky": _NUM,
+                         "diem_thanh_phan": {"type": "ARRAY", "items": _obj(
+                             {"diem": _NUM, "trong_so": {"type": "NUMBER",
+                                                         "description": "0 đến 1"}},
+                             ["diem", "trong_so"])}}, ["khoa"])},
     {"name": "quy_doi_diem",
      "description": "Quy đổi điểm học phần thang 10 sang điểm chữ và điểm số thang 4.",
      "parameters": _obj({"khoa": _KHOA, "diem_10": _NUM}, ["khoa", "diem_10"])},

@@ -74,3 +74,17 @@ documents:
     hieu_luc_ghi_chu: Hiệu lực từ ngày ký (bản đăng chưa ghi ngày); 12/03/2026 là ngày đăng
     khoa_nguon: Điều 1 khoản 2
     body_start: QUY ĐỊNH
+    # Trọng số điểm thành phần áp dụng cho toàn trường, mọi khóa. Theo xác nhận của sinh viên
+    # K68, cách tính 25/25/50 đã áp dụng từ ít nhất năm 2023 (qua đề cương học phần); văn bản
+    # trước 2026 quy định con số này chưa tìm thấy, nên căn cứ chính thức là quy định này.
+    sua_doi:
+      - doc_id: qc-dhxd-2022
+        dieu: 9
+        khoan: 1
+        noi_dung: trọng số điểm thành phần là thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%
+        can_cu: [{dieu: 5, khoan: 2}, {dieu: 6, khoan: 3}, {dieu: 6, khoan: 4}]
+      - doc_id: qc-dhxd-2016
+        dieu: 19
+        khoan: 1
+        noi_dung: trọng số điểm thành phần là thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%
+        can_cu: [{dieu: 5, khoan: 2}, {dieu: 6, khoan: 3}, {dieu: 6, khoan: 4}]

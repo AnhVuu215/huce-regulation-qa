@@ -22,10 +22,12 @@ Quy tắc:
    được cung cấp không quy định nội dung này. Không đoán, không bịa số liệu.
 4. Khi câu hỏi cần so sánh hoặc tính toán, trình bày phép tính và ngưỡng lấy từ đoạn văn bản.
 5. Trả lời ngắn gọn, rõ ràng bằng tiếng Việt, xưng hô trung lập với sinh viên.
-6. Có thể nêu "Điều X Khoản Y" trong câu trả lời, nhưng chỉ nêu những Điều có trong các đoạn."""
+6. Có thể nêu "Điều X Khoản Y" trong câu trả lời, nhưng chỉ nêu những Điều có trong các đoạn.
+7. Đoạn ghi "ĐÃ ĐƯỢC SỬA ĐỔI" có nội dung đã bị văn bản mới thay thế: trả lời theo văn bản
+   sửa đổi (đoạn của nó được đưa kèm), nêu rõ là quy định hiện hành, trích dẫn đoạn đó."""
 
 TOOLS_RULE = """
-7. Khi câu hỏi cần tính điểm, quy đổi điểm, xếp loại, xếp hạng tốt nghiệp, xếp năm học hoặc xét
+8. Khi câu hỏi cần tính điểm, quy đổi điểm, xếp loại, xếp hạng tốt nghiệp, xếp năm học hoặc xét
    cảnh báo, PHẢI gọi công cụ tương ứng và dùng đúng kết quả công cụ trả về; không tự tính.
    Nếu công cụ báo thiếu dữ liệu, nói rõ cần thêm thông tin gì. Kết quả công cụ đã kèm căn cứ,
    vẫn ghi số thứ tự các đoạn liên quan vào "trich_dan"."""
@@ -64,6 +66,20 @@ class Answer:
 def citation_label(unit: Unit, doc: Document) -> str:
     where = f"Điều {unit.dieu}" + (f" Khoản {unit.khoan}" if unit.khoan else "")
     return f"{where}, {doc.doc_title} ({doc.so_hieu})"
+
+
+def _amends(amendment, passage: Passage) -> bool:
+    return passage.doc_id == amendment.by_doc_id and any(
+        pu.dieu == u.dieu and (u.khoan is None or pu.khoan is None or pu.khoan == u.khoan)
+        for pu in passage.units for u in amendment.units
+    )
+
+
+def _drop_superseded(cited: list[Passage]) -> list[Passage]:
+    """Trích cả đoạn đã bị sửa lẫn đoạn sửa đổi thì chỉ giữ đoạn sửa đổi: căn cứ hiện hành là
+    văn bản mới, trích quy định đã bị thay thế dễ khiến sinh viên hiểu nhầm."""
+    return [p for p in cited
+            if not any(_amends(am, q) for am in p.amended_by for q in cited if q is not p)]
 
 
 def _parse(text: str) -> dict:
@@ -115,6 +131,21 @@ class QA:
         ranges = {(p.khoa_tu, p.khoa_den) for p in passages}
         return len([r for r in ranges if r != (None, None)]) > 1
 
+    def _with_amendments(self, passages: list[Passage]) -> list[Passage]:
+        """Đoạn đã bị sửa đổi thì kéo kèm các đoạn sửa đổi, kể cả khi truy xuất không lấy được
+        chúng: nếu không, LLM chỉ thấy quy định cũ và trả lời theo nó."""
+        result = list(passages)
+        for p in passages:
+            for am in p.amended_by:
+                for q in self.retriever.passages:
+                    if q in result or q.doc_id != am.by_doc_id:
+                        continue
+                    if any(qu.dieu == u.dieu and (u.khoan is None or qu.khoan is None
+                                                  or qu.khoan == u.khoan)
+                           for qu in q.units for u in am.units):
+                        result.append(q)
+        return result
+
     def answer(self, question: str, khoa: int | None) -> Answer:
         cfg = self.config
         passages = self.retriever.search(question, khoa, k=cfg.top_k)
@@ -138,9 +169,15 @@ class QA:
                 relevance=relevance,
             )
 
+        passages = self._with_amendments(passages)
         blocks = []
         for n, p in enumerate(passages, start=1):
-            blocks.append(f"[{n}] {citation_label(p.units[0], self.docs[p.doc_id])}\n{p.text}")
+            label = citation_label(p.units[0], self.docs[p.doc_id])
+            for am in p.amended_by:
+                by = self.docs[am.by_doc_id]
+                label += (f"\nĐÃ ĐƯỢC SỬA ĐỔI bởi {by.doc_title} ({by.so_hieu}): {am.noi_dung}. "
+                          "Áp dụng quy định của văn bản sửa đổi.")
+            blocks.append(f"[{n}] {label}\n{p.text}")
         who = f"Người hỏi là sinh viên khóa K{khoa}." if khoa else "Người hỏi không nêu khóa."
         context = "\n\n".join(blocks)
         prompt = f"{who}\n\nCác đoạn văn bản:\n\n{context}\n\nCâu hỏi: {question}"
@@ -174,6 +211,7 @@ class QA:
                     valid.append(passages[n - 1])
             else:
                 dropped.append(n)
+        valid = _drop_superseded(valid)
         # Hậu kiểm: mọi "Điều N" nêu trong câu trả lời phải có trong các đoạn đã truy xuất
         # hoặc trong căn cứ do công cụ trả về (căn cứ công cụ lấy từ file quy tắc đã kiểm thử).
         retrieved_dieu = {u.dieu for p in passages for u in p.units} | {u.dieu for u in tool_units}

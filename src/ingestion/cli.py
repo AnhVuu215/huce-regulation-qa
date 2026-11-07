@@ -7,7 +7,7 @@ from pathlib import Path
 from ingestion.chunker import Chunk, chunk_document
 from ingestion.parser import Dieu, check_structure, coverage, parse_document, stopped_early
 from ingestion.pdf_text import clean_lines, extract_pages
-from ingestion.registry import Document, load_registry, verify_file
+from ingestion.registry import Document, amendments_to, load_registry, verify_file
 
 ROOT = Path(__file__).resolve().parents[2]
 # Phần bị loại hợp lệ chỉ là tên Chương và khối chữ ký, nên tụt dưới ngưỡng là bị cắt cụt.
@@ -38,19 +38,20 @@ def parse_registered(doc: Document, root: Path = ROOT) -> list[Dieu]:
     return dieus
 
 
-def ingest(doc: Document, root: Path = ROOT) -> list[Chunk]:
+def ingest(doc: Document, root: Path = ROOT, amendments=()) -> list[Chunk]:
     dieus = parse_registered(doc, root)
     if problems := check_structure(dieus):
         raise ValueError(f"{doc.doc_id}: {problems}")
-    return chunk_document(doc, dieus)
+    return chunk_document(doc, dieus, amendments=amendments)
 
 
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     out_dir = ROOT / "data" / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
-    for doc in load_registry(ROOT / "data" / "registry.yaml").documents:
-        chunks = ingest(doc)
+    docs = load_registry(ROOT / "data" / "registry.yaml").documents
+    for doc in docs:
+        chunks = ingest(doc, amendments=amendments_to(docs, doc.doc_id))
         payload = [chunk.model_dump(mode="json") for chunk in chunks]
         out_path = out_dir / f"{doc.doc_id}.json"
         out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

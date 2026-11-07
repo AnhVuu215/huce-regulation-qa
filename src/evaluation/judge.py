@@ -13,12 +13,15 @@ JUDGE_SYSTEM = """Bạn là giám khảo chấm câu trả lời của một h�
 So câu trả lời của hệ thống với đáp án chuẩn và chỉ chấm nội dung: kết luận, con số, điều kiện.
 Không chấm văn phong, độ dài hay cách trích dẫn.
 
-- "dung": kết luận chính đúng, đủ các ý chính của đáp án chuẩn, không có khẳng định sai.
-- "dung_mot_phan": kết luận chính đúng nhưng thiếu một ý quan trọng, hoặc có một ý phụ sai.
+- "dung": kết luận chính đúng và không có khẳng định sai. Thiếu chi tiết phụ không làm thay
+  đổi việc sinh viên phải làm hay kết quả của họ vẫn là "dung".
+- "dung_mot_phan": kết luận chính đúng nhưng thiếu một ý làm thay đổi việc sinh viên phải làm
+  hoặc kết quả của họ (một điều kiện bắt buộc, một ngoại lệ, một con số), hoặc có một ý phụ sai.
 - "sai": kết luận chính sai hoặc không có, sai con số quan trọng, hoặc từ chối trả lời.
 
 Thông tin bổ sung đúng và không mâu thuẫn với đáp án chuẩn thì không bị trừ điểm.
-Viết "ly_do" ngắn gọn trước, nêu ý nào đúng, ý nào thiếu hoặc sai; sau đó mới kết luận."""
+Viết "ly_do" ngắn gọn bằng tiếng Việt có dấu trước, nêu ý nào đúng, ý nào thiếu hoặc sai và
+ý thiếu đó có làm thay đổi kết quả không; sau đó mới kết luận."""
 
 JUDGE_SCHEMA = {
     "type": "OBJECT",
