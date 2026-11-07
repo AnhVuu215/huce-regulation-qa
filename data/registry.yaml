@@ -16,6 +16,7 @@ documents:
     # Bản PDF là ảnh scan. OCR thô ở data/ocr/, bản dưới đây đã soát tay với ảnh gốc.
     # Chưa gồm phần Quyết định ban hành và 11 Phụ lục quy trình.
     text_file: data/text/qc-dhxd-2022.txt
+
   - doc_id: qc-dhxd-2016
     chunk_prefix: qc2016
     doc_title: Quy chế đào tạo đại học hệ chính quy theo hệ thống tín chỉ của Trường Đại học Xây dựng
@@ -35,3 +36,41 @@ documents:
         replace: "(0,3 ÷ 0,5)"
       - find: "[CÔNG THỨC]"
         replace: "A = Σ(ai × ni) / Σ(ni), lấy tổng theo i từ 1 đến n"
+
+  # Ba quy định 2026 dưới đây: bản đăng trên cổng sinh viên để trống số và ngày ký,
+  # nên hieu_luc_tu tạm lấy ngày đăng; áp dụng cho sinh viên đại học mọi khóa.
+  - doc_id: qd-do-an-tn-2026
+    chunk_prefix: datn2026
+    doc_title: Quy định tổ chức thực hiện và đánh giá Đồ án tốt nghiệp
+    so_hieu: Quyết định của Hiệu trưởng năm 2026 (bản đăng chưa ghi số)
+    file: data/raw/quy-dinh-do-an-tn-2026.pdf
+    sha256: 3f7b27cb241c0df9f43a02a90ffc3703d7f6642cafd7481d3d439e8abccdfdaa
+    source_url: https://sinhvien.huce.edu.vn/sinh-vien/tin-tuc/quy-dinh-to-chuc-va-danh-gia-do-an-tot-nghiep-truong-dai-hoc-xay-dung-ha-noi.html
+    hieu_luc_tu: 2026-03-21
+    hieu_luc_ghi_chu: Hiệu lực từ ngày ký (bản đăng chưa ghi ngày); 21/03/2026 là ngày đăng
+    khoa_nguon: Điều 1 khoản 2, trừ chương trình đặc thù (khoản 3)
+    body_start: QUY ĐỊNH
+
+  - doc_id: qd-thuc-tap-tn-2026
+    chunk_prefix: tttn2026
+    doc_title: Quy định tổ chức và đánh giá Thực tập tốt nghiệp
+    so_hieu: Quyết định của Hiệu trưởng năm 2026 (bản đăng chưa ghi số)
+    file: data/raw/quy-dinh-thuc-tap-tn-2026.pdf
+    sha256: 5f2346f34ad1110e75c78c1670cdd5f2ddcfdb28b18d5f54baff501c96d59fb8
+    source_url: https://sinhvien.huce.edu.vn/sinh-vien/tin-tuc/quy-dinh-to-chuc-va-danh-gia-thuc-tap-tot-nghiep-truong-dai-hoc-xay-dung-ha-noi.html
+    hieu_luc_tu: 2026-01-26
+    hieu_luc_ghi_chu: Hiệu lực từ ngày ký (bản đăng chưa ghi ngày); 26/01/2026 là ngày đăng
+    khoa_nguon: Điều 1 khoản 3
+    body_start: QUY ĐỊNH
+
+  - doc_id: qd-danh-gia-cdr-2026
+    chunk_prefix: cdr2026
+    doc_title: Quy định tổ chức đánh giá và công nhận kết quả học tập theo chuẩn đầu ra chương trình đào tạo bậc đại học
+    so_hieu: Quyết định của Hiệu trưởng tháng 3/2026 (bản đăng chưa ghi số)
+    file: data/raw/quy-dinh-danh-gia-cdr-2026.pdf
+    sha256: d307f5f74b41d732e839fe74af8c350b75ef2379272672db1bbbe0516f659cfb
+    source_url: https://sinhvien.huce.edu.vn/sinh-vien/tin-tuc/quy-dinh-to-chuc-danh-gia-va-cong-nhan-ket-qua-hoc-tap-theo-chuan-dau-ra-chuong-trinh-dao-tao-bac-dai-hoc.html
+    hieu_luc_tu: 2026-03-12
+    hieu_luc_ghi_chu: Hiệu lực từ ngày ký (bản đăng chưa ghi ngày); 12/03/2026 là ngày đăng
+    khoa_nguon: Điều 1 khoản 2
+    body_start: QUY ĐỊNH
