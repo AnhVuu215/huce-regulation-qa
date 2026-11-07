@@ -50,3 +50,19 @@ def test_kappa_known_value():
 def test_confusion_counts():
     table = confusion(["dung", "sai"], ["dung", "dung"], VERDICTS)
     assert table["dung"]["dung"] == 1 and table["sai"]["dung"] == 1
+
+
+def test_grading_sample_is_stratified_and_reproducible():
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "eval"))
+    from make_grading_sheet import stratified_sample
+
+    rows = [{"id": f"q{i:03}", "loai": loai} for i, loai in
+            enumerate(["tra_cuu"] * 12 + ["ket_hop"] * 8 + ["phien_ban"] * 2, 1)]
+    first = stratified_sample(rows, 0.2, seed=1)
+    assert first == stratified_sample(rows, 0.2, seed=1)
+    counts = {loai: sum(r["loai"] == loai for r in first) for loai in ("tra_cuu", "ket_hop",
+                                                                       "phien_ban")}
+    assert counts == {"tra_cuu": 2, "ket_hop": 2, "phien_ban": 1}
