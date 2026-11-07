@@ -6,6 +6,15 @@ versions:
   qc-dhxd-2022:
     diem_hoc_phan:
       can_cu: {dieu: 9, khoan: 1}   # tổng điểm thành phần nhân trọng số, tổng trọng số bằng 1
+      trong_so_hien_hanh:
+        # Quy định đánh giá theo chuẩn đầu ra 2026 sửa phần trọng số cho toàn trường.
+        thuong_xuyen: 0.25
+        giua_ky: 0.25
+        cuoi_ky: 0.5
+        can_cu:
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 5, khoan: 2}
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 6, khoan: 3}
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 6, khoan: 4}
     thang_diem_chu:
       can_cu: {dieu: 9, khoan: 4}
       lam_tron_diem_hoc_phan: 1   # Điều 9 khoản 1: điểm học phần làm tròn 1 chữ số thập phân
@@ -53,6 +62,15 @@ versions:
   qc-dhxd-2016:
     diem_hoc_phan:
       can_cu: {dieu: 22, khoan: 2}   # tổng điểm đánh giá bộ phận nhân trọng số
+      trong_so_hien_hanh:
+        # Quy định đánh giá theo chuẩn đầu ra 2026 sửa phần trọng số cho toàn trường.
+        thuong_xuyen: 0.25
+        giua_ky: 0.25
+        cuoi_ky: 0.5
+        can_cu:
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 5, khoan: 2}
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 6, khoan: 3}
+          - {doc_id: qd-danh-gia-cdr-2026, dieu: 6, khoan: 4}
     thang_diem_chu:
       can_cu: {dieu: 22, khoan: 2}
       lam_tron_diem_hoc_phan: 1
