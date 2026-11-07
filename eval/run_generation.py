@@ -107,7 +107,8 @@ def main() -> None:
             print(f"[{i}/{len(questions)}] {q.id} LỖI: {e}", flush=True)
             continue
         row = {
-            "id": q.id, "loai": q.loai, "nen_tu_choi": q.nen_tu_choi, "status": a.status,
+            "id": q.id, "loai": q.loai, "nguon": q.nguon, "nen_tu_choi": q.nen_tu_choi,
+            "status": a.status,
             "refused": a.status == "tu_choi", "uncertain": a.uncertain,
             "relevance": round(a.relevance, 3), "answer": a.text,
             "cited": a.cited_passages, "warnings": a.warnings,
@@ -166,6 +167,19 @@ def main() -> None:
         "by_type": {k: {"n": len(v), "trich_dan_dung": mean(v, "citation_correct"),
                         "tu_choi_nham": sum(r["refused"] for r in v)} for k, v in by_type.items()},
     }
+    # Câu tự viết và câu thật của sinh viên báo cáo riêng: câu tự viết dễ lạc quan.
+    summary["by_source"] = {}
+    for nguon in sorted({r["nguon"] for r in rows}):
+        src = [r for r in rows if r["nguon"] == nguon]
+        src_ans = [r for r in src if not r["nen_tu_choi"]]
+        src_out = [r for r in src if r["nen_tu_choi"]]
+        summary["by_source"][nguon] = {
+            "n": len(src), "trich_dan_dung": mean(src_ans, "citation_correct"),
+            "tu_choi_dung": f"{sum(r['refused'] for r in src_out)}/{len(src_out)}",
+            "tu_choi_nham": f"{sum(r['refused'] for r in src_ans)}/{len(src_ans)}",
+        }
+        if judge:
+            summary["by_source"][nguon]["do_dung_noi_dung"] = mean(src_ans, "judge_score")
     if judge:
         summary["do_dung_noi_dung"] = mean(answerable, "judge_score")
         summary["phan_bo_cham"] = dict(Counter(r["judge"] for r in answerable))
