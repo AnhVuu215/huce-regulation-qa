@@ -432,7 +432,7 @@
     "dieu_title": "Đánh giá học phần",
     "khoan": null,
     "text": "Điều 19. Đánh giá học phần\nĐiểm tổng hợp đánh giá học phần (sau đây gọi tắt là điểm học phần) được tính như sau:\n1. Đối với các học phần chỉ có lý thuyết hoặc có cả lý thuyết và thực hành:\nĐiểm học phần = 0,3*ĐQT + 0,7*ĐKT Trong đó:\nĐQT- điểm đánh giá quá trình học tập, tùy theo tính chất của học phần được tính căn cứ vào các điểm đánh giá bộ phận, bao gồm: điểm kiểm tra thường xuyên trong quá trình học tập; điểm đánh giá nhận thức và thái độ tham gia thảo luận; điểm đánh giá phần thực hành; điểm chuyên cần; điểm thi giữa học phần; điểm tiểu luận; điểm bài tập lớn;\nĐKT- điểm thi kết thúc học phần\n2. Đối với các học phần đồ án môn học:\nĐiểm học phần = k1*ĐQT + k2*ĐKT với k1 = (0,3 ÷ 0,5) và k2 = (1-k1) giá trị cụ thể do bộ môn đề xuất, được Hiệu trưởng phê duyệt và phải được quy định trong đề cương chi tiết của học phần.\nĐQT: Điểm trung bình cộng của các giảng viên hướng dẫn.\nĐKT: Điểm trung bình cộng của các giảng viên chấm đồ án.\n3. Đối với các học phần thực hành, thí nghiệm: Sinh viên phải tham dự đầy đủ các bài thực hành. Điểm trung bình cộng của điểm các bài thực hành trong học kỳ là điểm của học phần thực hành.\n4. Đối với học phần đồ án môn học, điểm thi kết thúc học phần là bắt buộc, sinh viên vắng mặt không có lý do chính đáng sẽ không được công nhận điểm quá trình.",
-    "sua_doi_boi": null
+    "sua_doi_boi": "qd-danh-gia-cdr-2026: trọng số điểm thành phần là thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%"
   },
   {
     "chunk_id": "qc2016-d20",
