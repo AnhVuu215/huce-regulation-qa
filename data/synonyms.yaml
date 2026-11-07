@@ -1,0 +1,40 @@
+# Ngôn ngữ sinh viên -> thuật ngữ trong văn bản. Khi câu hỏi chứa một cụm bên trái,
+# truy vấn được bổ sung thêm thuật ngữ bên phải (chỉ dùng để tìm kiếm, không sửa câu hỏi).
+- terms: [rớt, trượt, tạch, thi lại, học lại]
+  expand: học phần không đạt điểm F học lại
+- terms: [đuổi học, bị đuổi, bị out]
+  expand: buộc thôi học
+- terms: [gpa, cpa, điểm tổng kết, điểm tb]
+  expand: điểm trung bình tích lũy
+- terms: [ra trường, lấy bằng, nhận bằng]
+  expand: công nhận tốt nghiệp cấp bằng tốt nghiệp
+- terms: [bằng loại, loại bằng, bằng giỏi, bằng khá, xếp loại bằng]
+  expand: hạng tốt nghiệp
+- terms: [bảo lưu, nghỉ một thời gian, tạm nghỉ]
+  expand: nghỉ học tạm thời bảo lưu kết quả
+- terms: [song bằng, hai bằng, bằng kép, học thêm ngành]
+  expand: học cùng lúc hai chương trình chương trình thứ hai
+- terms: [nợ môn, nợ tín]
+  expand: tín chỉ nợ đọng không đạt
+- terms: [cấm thi, nghỉ học bao nhiêu, nghỉ quá]
+  expand: nghỉ học không có lý do chính đáng thời lượng điểm F
+- terms: [bỏ thi, không đi thi, ngủ quên, vắng thi]
+  expand: vắng mặt trong buổi thi không có lý do chính đáng nhận điểm 0
+- terms: [thi hộ, nhờ thi, gian lận]
+  expand: thi hộ nhờ người thi hộ kỷ luật đình chỉ học tập
+- terms: [đi nghĩa vụ, nghĩa vụ quân sự, nhập ngũ]
+  expand: điều động vào lực lượng vũ trang
+- terms: [chuyển ngành, đổi ngành]
+  expand: chuyển sang học một chương trình ngành đào tạo khác
+- terms: [kéo điểm, nâng điểm, gỡ điểm, cải thiện]
+  expand: cải thiện điểm trung bình chung tích lũy học lại
+- terms: [tín, tc]
+  expand: tín chỉ
+- terms: [năm mấy, sinh viên năm]
+  expand: trình độ năm học xếp hạng năm đào tạo
+- terms: [học phí muộn, chậm học phí, nộp muộn]
+  expand: nộp học phí muộn thời hạn quy định
+- terms: [đồ án, datn]
+  expand: đồ án tốt nghiệp ĐATN
+- terms: [thực tập, tttn]
+  expand: thực tập tốt nghiệp TTTN
