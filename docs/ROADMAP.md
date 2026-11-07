@@ -186,6 +186,33 @@ Bài học (đưa vào "Những gì không hiệu quả"):
 - [!] 6.4 Chấm tay 20%, báo cáo độ khớp với judge: bảng chấm mù 9 câu ở
   `eval/human/cham-tay.csv` (lấy mẫu phân tầng, seed 2026). Chủ dự án điền cột `nguoi_cham`
   (dung / dung_mot_phan / sai), rồi chạy `eval/judge_agreement.py` để có tỷ lệ trùng và kappa.
+- [x] 6.4b Sửa lỗi do chấm tay phát hiện: văn bản mới sửa quy tắc của văn bản cũ cho mọi khóa
+  (2026-11-08, nhánh `fix/assessment-weights-2026`)
+
+  Registry ghi quan hệ sửa đổi (`sua_doi`): quy định đánh giá theo chuẩn đầu ra 2026 thay trọng
+  số điểm thành phần của quy chế 2022 (Điều 9 khoản 1) và quy chế 2016 (Điều 19 khoản 1) bằng
+  25/25/50 (Điều 5 khoản 2, Điều 6 khoản 3, Điều 6 khoản 4). Đoạn bị sửa mang `sua_doi_boi`,
+  khi được truy xuất thì đoạn sửa đổi được kéo kèm vào ngữ cảnh, và câu trả lời trích đoạn sửa
+  đổi thay vì đoạn đã bị thay thế. Công cụ tính điểm học phần dùng 25/25/50 cho mọi khóa và cảnh
+  báo khi trọng số đưa vào khác. Theo sinh viên K68, cách tính này đã áp dụng từ ít nhất 2023;
+  văn bản trước 2026 ghi con số này chưa tìm thấy.
+
+  | 53 câu, gemini-3.5-flash-lite, công cụ auto | trước | sau |
+  |---|---|---|
+  | độ đúng nội dung (giám khảo) | 0,889 (45 câu) | **0,917** (48 câu) |
+  | trích dẫn đúng | 0,933 | **0,938** |
+  | tính toán đúng | 8/8 | 8/8 (q038 viết lại theo 25/25/50) |
+  | câu văn bản sửa đổi (q051-q053) | chưa có | 3/3, kể cả K65 |
+  | từ chối đúng / nhầm | 5/5, 1/45 | 5/5, 1/48 |
+
+  Tiêu chí giám khảo đổi trong cùng nhánh (chỉ trừ điểm khi thiếu ý làm thay đổi kết quả), nên
+  một phần mức tăng độ đúng nội dung đến từ tiêu chí chứ không từ hệ thống. Độ khớp với người chấm
+  chưa đo lại với tiêu chí mới: 9 câu đã chấm thuộc lần chạy cũ, và tiêu chí được chỉnh sau khi
+  xem chính 9 câu đó, nên đo lại trên chúng sẽ lạc quan; cần một mẫu chấm tay mới.
+
+  Lỗi hạ tầng gặp khi chạy: bên trả lời và giám khảo giãn cách lời gọi riêng nên cùng nhau vượt
+  hạn mức theo phút của gói miễn phí; nay giãn cách dùng chung theo mô hình, chờ đúng retryDelay,
+  và một câu lỗi không còn dừng cả lần chạy.
 - [ ] 6.5 Báo cáo đánh giá
 
 **Cổng:** báo cáo đủ các tầng chỉ số, có độ khớp judge và người.

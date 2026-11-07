@@ -15,6 +15,23 @@ class Patch(BaseModel):
     replace: str
 
 
+class ViTri(BaseModel):
+    dieu: int
+    khoan: int | None = None
+
+
+class SuaDoi(BaseModel):
+    """Văn bản này sửa đổi một Điều/Khoản của văn bản khác. Khai báo ở văn bản sửa đổi;
+    `can_cu` là các Điều/Khoản của chính văn bản này thay thế nội dung bị sửa."""
+
+    doc_id: str
+    dieu: int
+    khoan: int | None = None
+    noi_dung: str
+    can_cu: list[ViTri]
+    ghi_chu: str | None = None
+
+
 class Document(BaseModel):
     doc_id: str
     chunk_prefix: str
@@ -36,12 +53,13 @@ class Document(BaseModel):
     # Dòng mở đầu phần nội dung chính, để bỏ qua Quyết định ban hành (có Điều 1-3 riêng).
     body_start: str | None = None
     patches: list[Patch] = Field(default_factory=list)
+    # Văn bản mới sửa quy tắc của văn bản cũ cho mọi khóa (khác với phiên bản theo khóa).
+    sua_doi: list[SuaDoi] = Field(default_factory=list)
 
     def ap_dung_cho(self, khoa: int) -> bool:
         return (self.khoa_tu is None or khoa >= self.khoa_tu) and (
             self.khoa_den is None or khoa <= self.khoa_den
         )
-
 
     @model_validator(mode="after")
     def _check_khoa(self) -> "Document":
@@ -59,7 +77,16 @@ def load_registry(path: Path) -> Registry:
     ids = [doc.doc_id for doc in registry.documents]
     if len(ids) != len(set(ids)):
         raise ValueError("doc_id bị trùng trong registry")
+    for doc in registry.documents:
+        for sd in doc.sua_doi:
+            if sd.doc_id not in ids or sd.doc_id == doc.doc_id:
+                raise ValueError(f"{doc.doc_id}: sửa đổi trỏ tới văn bản không hợp lệ {sd.doc_id}")
     return registry
+
+
+def amendments_to(docs: list[Document], target_doc_id: str) -> list[tuple[str, SuaDoi]]:
+    """Các sửa đổi nhắm vào văn bản `target_doc_id`, kèm doc_id của văn bản sửa đổi."""
+    return [(d.doc_id, sd) for d in docs for sd in d.sua_doi if sd.doc_id == target_doc_id]
 
 
 def verify_file(doc: Document, root: Path) -> Path:

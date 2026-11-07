@@ -20,11 +20,14 @@ def hv(docs):
 
 
 def test_every_rule_citation_exists_in_corpus(hv, docs):
+    parsed = {}
     for doc_id, version in hv.versions.items():
-        dieus = {d.number: d for d in parse_registered(docs[doc_id], ROOT)}
         for name, rule in version.items():
             for cite in _citations(rule):
-                dieu = dieus.get(cite["dieu"])
+                target = cite.get("doc_id", doc_id)
+                if target not in parsed:
+                    parsed[target] = {d.number: d for d in parse_registered(docs[target], ROOT)}
+                dieu = parsed[target].get(cite["dieu"])
                 assert dieu is not None, (doc_id, name, cite)
                 if cite.get("khoan"):
                     assert cite["khoan"] in {k.number for k in dieu.khoan}, (doc_id, name, cite)
@@ -119,10 +122,36 @@ def test_warning_matches_q037_and_q039(hv):
     assert hv.kiem_tra_canh_bao(65, diem_trung_binh_hoc_ky=0.75, la_hoc_ky_dau=True)["bi_canh_bao"]
 
 
-def test_module_score_matches_q038(hv):
-    r = hv.tinh_diem_hoc_phan(68, [{"diem": 6.0, "trong_so": 0.4}, {"diem": 2.0, "trong_so": 0.6}])
-    assert (r["diem_hoc_phan"], r["diem_chu"], r["dat"]) == (3.6, "F", False)
-    assert r["can_cu"][0] == {"doc_id": "qc-dhxd-2022", "dieu": 9, "khoan": 1}
+def test_module_score_with_current_weights_matches_q038(hv):
+    # 0,25×6,0 + 0,25×5,0 + 0,5×2,0 = 3,75 -> làm tròn nửa lên 3,8 -> F
+    r = hv.tinh_diem_hoc_phan(68, diem_thuong_xuyen=6.0, diem_giua_ky=5.0, diem_cuoi_ky=2.0)
+    assert (r["diem_hoc_phan"], r["diem_chu"], r["dat"]) == (3.8, "F", False)
+    assert "canh_bao" not in r
+    assert {"doc_id": "qd-danh-gia-cdr-2026", "dieu": 6, "khoan": 4} in r["can_cu"]
+
+
+def test_current_weights_apply_to_every_cohort(hv):
+    old = hv.tinh_diem_hoc_phan(65, diem_thuong_xuyen=6.0, diem_giua_ky=5.0, diem_cuoi_ky=2.0)
+    assert old["diem_hoc_phan"] == 3.8
+
+
+def test_custom_weights_are_computed_but_flagged(hv):
+    r = hv.tinh_diem_hoc_phan(68, diem_thanh_phan=[{"diem": 6.0, "trong_so": 0.4},
+                                                   {"diem": 2.0, "trong_so": 0.6}])
+    assert (r["diem_hoc_phan"], r["diem_chu"]) == (3.6, "F")
+    assert "25%" in r["canh_bao"] and "50%" in r["canh_bao"]
+
+
+def test_custom_weights_equal_to_current_are_not_flagged(hv):
+    r = hv.tinh_diem_hoc_phan(68, diem_thanh_phan=[{"diem": 7, "trong_so": 0.25},
+                                                   {"diem": 7, "trong_so": 0.25},
+                                                   {"diem": 7, "trong_so": 0.5}])
+    assert "canh_bao" not in r
+
+
+def test_partial_component_scores_are_rejected(hv):
+    with pytest.raises(ToolError):
+        hv.tinh_diem_hoc_phan(68, diem_thuong_xuyen=6.0, diem_cuoi_ky=2.0)
 
 
 def test_call_returns_errors_to_llm_instead_of_raising(hv):
@@ -147,6 +176,8 @@ def test_graduation_rank_cites_the_thresholds_it_used(hv):
     assert _cited(hv.xep_hang_tot_nghiep(68, 1.9)) == {(13, 1)}
 
 
-def test_module_score_cites_formula_and_letter_scale_only(hv):
-    r = hv.tinh_diem_hoc_phan(68, [{"diem": 6.0, "trong_so": 0.4}, {"diem": 2.0, "trong_so": 0.6}])
-    assert _cited(r) == {(9, 1), (9, 4)}
+def test_module_score_cites_weights_and_letter_scale_only(hv):
+    r = hv.tinh_diem_hoc_phan(68, diem_thuong_xuyen=6.0, diem_giua_ky=5.0, diem_cuoi_ky=2.0)
+    assert {(c["doc_id"], c["dieu"], c["khoan"]) for c in r["can_cu"]} == {
+        ("qd-danh-gia-cdr-2026", 5, 2), ("qd-danh-gia-cdr-2026", 6, 3),
+        ("qd-danh-gia-cdr-2026", 6, 4), ("qc-dhxd-2022", 9, 4)}

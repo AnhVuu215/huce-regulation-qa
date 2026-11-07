@@ -1,0 +1,1719 @@
+{
+ "summary": {
+  "model": "gemini-3.5-flash-lite",
+  "retrieval": "khong_rerank+loc_khoa",
+  "tools": true,
+  "n": 53,
+  "tinh_toan_dung": 1.0,
+  "dap_an_ngan_phien_ban": 1.0,
+  "cau_goi_cong_cu": 8,
+  "trich_dan_dung": 0.896,
+  "citation_precision": 0.942,
+  "citation_recall": 0.892,
+  "tu_choi_dung": "5/5",
+  "tu_choi_nham": "1/48",
+  "khong_chac_chan": "0/48",
+  "fallback_used": 0,
+  "latency_s_p50": 4.37,
+  "latency_s_p95": 8.98,
+  "tokens_per_question": 2592.509,
+  "by_type": {
+   "tra_cuu": {
+    "n": 12,
+    "trich_dan_dung": 1.0,
+    "tu_choi_nham": 0,
+    "do_dung_noi_dung": 0.917
+   },
+   "dien_dat_sv": {
+    "n": 11,
+    "trich_dan_dung": 1.0,
+    "tu_choi_nham": 0,
+    "do_dung_noi_dung": 0.909
+   },
+   "ket_hop": {
+    "n": 8,
+    "trich_dan_dung": 0.75,
+    "tu_choi_nham": 1,
+    "do_dung_noi_dung": 0.75
+   },
+   "tinh_toan": {
+    "n": 8,
+    "trich_dan_dung": 1.0,
+    "tu_choi_nham": 0,
+    "do_dung_noi_dung": 1.0
+   },
+   "phien_ban": {
+    "n": 9,
+    "trich_dan_dung": 0.667,
+    "tu_choi_nham": 0,
+    "do_dung_noi_dung": 1.0
+   }
+  },
+  "do_dung_noi_dung": 0.917,
+  "phan_bo_cham": {
+   "dung_mot_phan": 6,
+   "dung": 41,
+   "sai": 1
+  }
+ },
+ "questions": [
+  {
+   "id": "q001",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.737,
+   "answer": "Theo Điều 3 Khoản 2, một tín chỉ được tính tương đương 50 giờ học tập định mức của người học, bao gồm cả thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra đánh giá.",
+   "cited": [
+    "qc2022-d3-k2-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 3 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.99,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2148,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống trả lời đúng số giờ học tập định mức là 50 giờ và bao gồm các thành phần cơ bản, tuy nhiên thiếu phần quy định chi tiết về số giờ trên lớp tối thiểu (15 giờ giảng hoặc 30 giờ thực hành, thí nghiệm, thảo luận). Việc thiếu ý này làm thiếu thông tin quan trọng về cấu thành thời gian học trên lớp.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q002",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.602,
+   "answer": "Theo Điều 9 Khoản 4 điểm a của Quy chế đào tạo trình độ đại học, điểm chữ B+ ứng với khoảng điểm học phần từ 8,0 đến 8,4.",
+   "cited": [
+    "qc2022-d9-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.42,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2581,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời chính xác khoảng điểm học phần tương ứng với điểm chữ B+ là từ 8,0 đến 8,4 theo đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q003",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.677,
+   "answer": "Đối với đào tạo theo hình thức chính quy và vừa làm vừa học, tối đa 30% tổng khối lượng của chương trình đào tạo được thực hiện bằng lớp học trực tuyến. Trong trường hợp thiên tai, dịch bệnh phức tạp và các trường hợp bất khả kháng, Trường sẽ thực hiện theo hướng dẫn của Bộ Giáo dục và Đào tạo.",
+   "cited": [
+    "qc2022-d8-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 8 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.52,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1933,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng con số tối đa 30% tổng khối lượng chương trình đào tạo và bổ sung thêm thông tin về trường hợp thiên tai, dịch bệnh không mâu thuẫn với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q004",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.772,
+   "answer": "Theo Điều 13 Khoản 2, những sinh viên đủ điều kiện tốt nghiệp được Hiệu trưởng ra quyết định công nhận tốt nghiệp và cấp bằng tốt nghiệp trong thời hạn 45 ngày làm việc tính từ thời điểm sinh viên đáp ứng đầy đủ điều kiện tốt nghiệp và hoàn thành nghĩa vụ với Trường.",
+   "cited": [
+    "qc2022-d13-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 13 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.83,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1169,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu chính xác thời hạn 45 ngày làm việc và các điều kiện liên quan đúng như đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q005",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.599,
+   "answer": "Theo Khoản 3 Điều 12 Quy chế đào tạo trình độ đại học của Trường Đại học Xây dựng Hà Nội, khối lượng tối đa được công nhận, chuyển đổi không vượt quá 50% khối lượng học tập tối thiểu của chương trình đào tạo.",
+   "cited": [
+    "qc2022-d12"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 12"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.95,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1889,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời chính xác con số giới hạn khối lượng tối đa được công nhận, chuyển đổi tín chỉ là không vượt quá 50% khối lượng học tập tối thiểu của chương trình đào tạo.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q006",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.696,
+   "answer": "Theo quy chế, số lượng tín chỉ mà sinh viên tích lũy tại trường khác (hoặc trong hợp tác đào tạo giữa các trường) không vượt quá 25% tổng khối lượng của chương trình đào tạo.",
+   "cited": [
+    "qc2022-d16"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 16"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.64,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1924,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống trả lời đúng tỷ lệ tối đa 25% tổng khối lượng chương trình đào tạo nhưng thiếu điều kiện phải được Hiệu trưởng hai trường đồng ý, làm thiếu một điều kiện bắt buộc. Kết luận: dung_mot_phan.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q007",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.719,
+   "answer": "Theo Điều 6 Khoản 2, một năm học có 02 học kỳ chính, mỗi học kỳ chính có ít nhất 15 tuần thực học và 3 tuần thi. Ngoài ra, Hiệu trưởng có thể xem xét quyết định tổ chức thêm một học kỳ phụ (có ít nhất 5 tuần thực học và 1 tuần thi).",
+   "cited": [
+    "qc2022-d6-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 6 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.96,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1898,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng số lượng học kỳ chính, thời gian thực học và thời gian thi của cả học kỳ chính lẫn học kỳ phụ giống với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q008",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.653,
+   "answer": "Theo Điều 4 Khoản 1 Điểm b Quy chế đào tạo trình độ đại học của Trường Đại học Xây dựng Hà Nội, thời gian tổ chức hoạt động giảng dạy hình thức chính quy trong ngày là trong khoảng từ 6 giờ 30 phút đến 20 giờ 30 phút các ngày trong tuần từ thứ 2 đến thứ 7.",
+   "cited": [
+    "qc2022-d4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.27,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1874,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu chính xác thời gian từ 6 giờ 30 đến 20 giờ 30 từ thứ 2 đến thứ 7 theo đúng đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q009",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.637,
+   "answer": "Đồ án tốt nghiệp thực hiện theo nhóm từ hai (02) đến ba (03) sinh viên tùy theo quy định của Khoa/Nhóm chuyên môn theo Điều 7 Khoản 1.",
+   "cited": [
+    "datn2026-d7"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-do-an-tn-2026 Điều 7"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.45,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1835,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng số lượng thành viên tối đa (từ 2 đến 3 sinh viên) và điều kiện tùy theo quy định của Khoa/Nhóm chuyên môn, chỉ thiếu ý phụ về điểm của từng sinh viên được đánh giá riêng nhưng không làm thay đổi kết quả hay việc sinh viên phải làm.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q010",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.642,
+   "answer": "Theo Điều 4 Khoản 2, thời gian thực hiện đồ án tốt nghiệp cho mỗi đợt đối với trình độ Kỹ sư là 15 tuần, không tính thời gian thực hiện đánh giá tại các mốc, phản biện và bảo vệ.",
+   "cited": [
+    "datn2026-d4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-do-an-tn-2026 Điều 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 6.63,
+   "cached": true,
+   "llm_errors": [
+    "gemini-3.5-flash-lite: HTTP 429 GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+   ],
+   "tool_calls": [],
+   "tokens": 1904,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng thời gian 15 tuần đối với trình độ kỹ sư và nêu đúng điều kiện không tính thời gian đánh giá, phản biện, bảo vệ.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q011",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.626,
+   "answer": "Theo Điều 27 Khoản 2b, trọng số chấm điểm của từng mốc đồ án tốt nghiệp như sau: Mốc M1 là 20% tổng điểm học phần, Mốc M2 là 30% tổng điểm học phần, và Mốc M3 là 50% tổng điểm học phần.",
+   "cited": [
+    "datn2026-d27-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-do-an-tn-2026 Điều 27 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.13,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 3088,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống nêu chính xác trọng số điểm các mốc M1 (20%), M2 (30%), và M3 (50%) đúng với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q012",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.804,
+   "answer": "Theo Điều 11, việc rút bớt học phần đã đăng ký được thực hiện sau 2 tuần kể từ đầu học kỳ chính, hoặc sau 1 tuần kể từ đầu học kỳ phụ. Thời hạn tối đa được rút bớt học phần là 1 tuần.",
+   "cited": [
+    "qc2016-d11"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 11"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.85,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1625,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng về thời gian bắt đầu và thời hạn tối đa để rút bớt học phần đối với cả học kỳ chính và học kỳ phụ, khớp với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q013",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.573,
+   "answer": "Theo quy định, sinh viên nghỉ học không có lý do chính đáng vượt quá 20% thời lượng thiết kế của học phần sẽ nhận điểm F cho học phần đó (Điều 9 Khoản 3). Ngoài ra, sinh viên cần tham gia tối thiểu 80% thời lượng giảng dạy thiết kế của học phần (bao gồm giờ học trên lớp trực tiếp và giờ học trực tuyến) để đủ điều kiện dự thi đánh giá cuối kỳ (Điều 16 Khoản 20a).",
+   "cited": [
+    "qc2022-d9-k3",
+    "cdr2026-d16-k20-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 3",
+    "qd-danh-gia-cdr-2026 Điều 16 Khoản 20"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.67,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1831,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đầy đủ và chính xác cả hai ý: phải tham gia tối thiểu 80% thời lượng để đủ điều kiện dự thi và nghỉ quá 20% không có lý do chính đáng sẽ bị điểm F.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q014",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.561,
+   "answer": "Theo Điều 3 Khoản 2, sinh viên không đạt một học phần bắt buộc sẽ phải học lại học phần đó hoặc học một học phần tương đương theo quy định trong chương trình đào tạo, hoặc học một học phần thay thế nếu học phần đó không còn được giảng dạy.",
+   "cited": [
+    "qc2022-d3-k2-p3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 3 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.25,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1680,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đầy đủ các trường hợp: học lại chính môn đó, học học phần tương đương hoặc học học phần thay thế, trùng khớp hoàn toàn với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q015",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.614,
+   "answer": "Sinh viên thi không đạt (trượt) kết quả học phần được thi lại bài thi kết thúc học phần để cải thiện điểm từ không đạt thành đạt, áp dụng đối với các học phần có điểm trung bình các bài đánh giá thường xuyên đạt từ 5,0 điểm trở lên. Điểm học phần sau khi thi lại không vượt quá mức điểm C+ (theo Điều 9 Khoản 9).",
+   "cited": [
+    "qc2022-d9-k9"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 9"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.98,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2070,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "He thong tra loi dung quy dinh ve dieu kien diem trung binh danh gia thuong xuyen tu 5,0 tro len va diem hoc phan toi da khong qua C+, khop hoan toan voi dap an chuan.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q016",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.583,
+   "answer": "Theo Điều 16 Khoản 20 điểm b của Quy định tổ chức đánh giá và công nhận kết quả học tập theo chuẩn đầu ra chương trình đào tạo bậc đại học, người học đủ điều kiện tham dự kỳ thi nhưng vắng thi không có lý do chính đáng thì coi như đã tham dự kỳ thi đó và phải nhận điểm \"0\" (không).",
+   "cited": [
+    "cdr2026-d16-k20-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-danh-gia-cdr-2026 Điều 16 Khoản 20"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.35,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1730,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống trả lời đúng trường hợp vắng thi không có lý do chính đáng bị điểm 0, nhưng thiếu trường hợp có lý do chính đáng được thi lại đợt khác. Việc thiếu ý này làm thay đổi kết quả đối với sinh viên có lý do chính đáng.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q017",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Theo Điều 13 Khoản 1, sinh viên được Trường xét và công nhận tốt nghiệp khi có điểm trung bình tích lũy của toàn khóa học đạt từ 2.0 trở lên, đồng thời phải đáp ứng đủ các điều kiện về tích lũy học phần, số tín chỉ, hoàn thành nội dung bắt buộc, đạt chuẩn đầu ra và không đang trong thời gian bị truy cứu trách nhiệm hình sự hoặc kỷ luật đình chỉ học tập.",
+   "cited": [
+    "qc2022-d13-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 13 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.15,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1327,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đúng mức điểm trung bình tích lũy toàn khóa từ 2.0 trở lên và đầy đủ các điều kiện phụ đi kèm như đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q018",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.636,
+   "answer": "Sinh viên thi hộ hoặc nhờ người thi hộ đều bị kỷ luật ở mức đình chỉ học tập 01 năm đối với trường hợp vi phạm lần thứ nhất và buộc thôi học đối với trường hợp vi phạm lần thứ hai theo Điều 19 Khoản 2.",
+   "cited": [
+    "qc2022-d19"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 19"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.53,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1746,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đầy đủ và chính xác các hình thức kỷ luật (đình chỉ 01 năm cho lần đầu, buộc thôi học cho lần thứ hai) và áp dụng cho cả hai đối tượng. Kết luận: dung",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q019",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.681,
+   "answer": "Theo Điều 15 Khoản 1 điểm a Quy chế đào tạo trình độ đại học của Trường Đại học Xây dựng Hà Nội, sinh viên đang là sinh viên trình độ năm thứ nhất không thuộc đối tượng được xem xét chuyển sang học một chương trình hoặc một ngành đào tạo khác.",
+   "cited": [
+    "qc2022-d15-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 15 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 5.17,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1622,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng kết luận sinh viên năm thứ nhất không được chuyển ngành theo quy định.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q020",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Theo quy định, sinh viên thuộc hình thức đào tạo chính quy bị buộc thôi học có thể xin chuyển sang hệ vừa làm vừa học của Trường nếu còn trong thời gian học tập theo quy định và được Hiệu trưởng xem xét quyết định cho bảo lưu một phần kết quả học tập ở chương trình cũ.",
+   "cited": [
+    "qc2022-d11-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 11 Khoản 3"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.38,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1740,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đúng và đầy đủ các điều kiện để sinh viên bị buộc thôi học hệ chính quy được chuyển sang hệ vừa làm vừa học (còn thời gian học, bảo lưu kết quả theo quyết định của Hiệu trưởng), không làm thay đổi kết quả.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q021",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.544,
+   "answer": "Theo Điều 7 Khoản 3 điểm b, giới hạn khối lượng học tập tối đa của sinh viên trong mỗi học kỳ không vượt quá 3/2 (tương đương 1,5 lần) khối lượng trung bình một học kỳ theo kế hoạch học tập chuẩn của ngành/chuyên ngành.",
+   "cited": [
+    "qc2022-d7"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 7"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.92,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2159,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống trả lời đúng giới hạn tối đa tín chỉ đăng ký mỗi kỳ (không vượt quá 3/2 khối lượng trung bình kỳ chuẩn) nhưng thiếu giới hạn tối thiểu (không ít hơn 2/3), ý thiếu này là một điều kiện quan trọng của quy chế nên kết luận là đúng một phần.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q022",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.57,
+   "answer": "Theo Điều 14 Khoản 1 Điểm a của Quy chế đào tạo trình độ đại học, sinh viên được xin nghỉ học tạm thời và bảo lưu kết quả đã học trong trường hợp được điều động vào lực lượng vũ trang.",
+   "cited": [
+    "qc2022-d14"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 14"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.09,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2046,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng hoàn toàn nội dung sinh viên được nghỉ học tạm thời và bảo lưu kết quả khi đi nghĩa vụ quân sự.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q023",
+   "loai": "dien_dat_sv",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.648,
+   "answer": "Theo Khoản 3 Điều 12 Quy chế đào tạo đại học hệ chính quy theo hệ thống tín chỉ, sinh viên được quyền đăng ký học lại hoặc học đổi sang học phần khác đối với các học phần bị điểm D, D+ để cải thiện điểm trung bình chung tích lũy.",
+   "cited": [
+    "qc2016-d12"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 12"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.89,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2169,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng và đầy đủ theo đáp án chuẩn, xác nhận sinh viên được học lại học phần điểm D để cải thiện điểm.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q024",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.647,
+   "answer": "Theo Điều 17 Khoản 3, trong quá trình học cùng lúc hai chương trình (song bằng), nếu điểm trung bình tích luỹ của chương trình thứ nhất đạt dưới điểm trung bình hoặc thuộc diện cảnh báo kết quả học tập thì sinh viên phải dừng học chương trình thứ hai ở học kỳ tiếp theo và sẽ bị loại khỏi danh sách đã đăng ký học chương trình thứ hai.",
+   "cited": [
+    "qc2022-d17-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 17 Khoản 3"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.23,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1245,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đầy đủ và chính xác các điều kiện cũng như hệ quả khi sinh viên học song bằng mà bị cảnh báo học tập hoặc điểm tích lũy dưới trung bình (phải dừng học chương trình thứ hai và bị loại khỏi danh sách).",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q025",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.65,
+   "answer": "Theo quy chế, sinh viên nộp học phí muộn so với thời hạn quy định của Trường sẽ không được đăng ký học tập ở học kỳ tiếp theo chứ không quy định bị cảnh báo học tập (Điều 19 Khoản 4).",
+   "cited": [
+    "qc2022-d19"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 19"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.37,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1655,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống đã trả lời đúng ý chính là nộp học phí muộn không dẫn đến việc bị cảnh báo học tập trực tiếp mà dẫn đến việc không được đăng ký học tập ở học kỳ tiếp theo. Tuy nhiên, hệ thống thiếu ý giải thích thêm là sinh viên không đăng ký học tập mà không có lý do chính đáng thì mới bị cảnh báo học tập, nhưng kết luận chính về việc nộp học phí muộn không bị cảnh báo học tập là đúng.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q026",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.674,
+   "answer": "Theo khoản 2 Điều 14 của Quy chế đào tạo trình độ đại học, thời gian nghỉ học tạm thời vì nhu cầu cá nhân được tính vào thời gian học chính thức quy định tại khoản 5 Điều 2 của Quy chế này.",
+   "cited": [
+    "qc2022-d14"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 14"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.1,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1400,
+   "citation_precision": 1.0,
+   "citation_recall": 0.6666666666666666,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng ý chính là thời gian nghỉ học tạm thời vì nhu cầu cá nhân có bị tính vào thời gian học tối đa, nhưng thiếu các chi tiết phụ về giới hạn thời gian nghỉ tối đa và điều kiện đã học ít nhất 1 học kỳ. Tuy nhiên, việc thiếu các chi tiết phụ này không làm thay đổi kết luận chính, nên kết quả vẫn được tính là đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q027",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.647,
+   "answer": "Theo Điều 13 Khoản 4, sinh viên đã hết thời gian học tập tối đa theo quy định nhưng chưa đủ điều kiện tốt nghiệp do chưa đạt chuẩn đầu ra về ngoại ngữ, công nghệ thông tin, trong thời hạn 03 năm tính từ khi thôi học được hoàn thiện các điều kiện còn thiếu và đề nghị xét công nhận tốt nghiệp.",
+   "cited": [
+    "qc2022-d13-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 13 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.81,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1336,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng ý chính là sinh viên hết thời gian học nhưng thiếu chuẩn ngoại ngữ thì được hoàn thiện trong 03 năm kể từ khi thôi học, tuy nhiên thiếu ý khẳng định đây là trường hợp buộc thôi học nhưng ý thiếu này không làm thay đổi kết quả xử lý của sinh viên.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q028",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.597,
+   "answer": "Quy chế được cung cấp không quy định cụ thể thời điểm sinh viên được bắt đầu làm đồ án tốt nghiệp hay thời gian thực hiện kéo dài trong bao lâu.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.19,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1741,
+   "citation_precision": 0.0,
+   "citation_recall": 0.0,
+   "citation_correct": 0.0,
+   "judge": "sai",
+   "judge_reason": "Không trả lời câu hỏi có căn cứ.",
+   "judge_score": 0.0
+  },
+  {
+   "id": "q029",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.684,
+   "answer": "Theo quy chế, Thực tập tốt nghiệp là học phần bắt buộc trong chương trình đào tạo [1]. Điều kiện công nhận hoàn thành học phần Thực tập tốt nghiệp (theo Điều 15 Khoản 3) bao gồm: a) Tham gia tất cả các chặng đánh giá; b) Có điểm CLO1, CLO2 ở mức 1 trở lên (với sinh viên chương trình tài năng, STEM đạt mức 2 trở lên); c) Có điểm học phần đạt Mức 1 trở lên; d) Có đầy đủ minh chứng bắt buộc theo yêu cầu. Các đoạn văn bản được cung cấp không quy định cụ thể số tín chỉ của học phần này.",
+   "cited": [
+    "tttn2026-d3-k1",
+    "tttn2026-d15"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-thuc-tap-tn-2026 Điều 3 Khoản 1",
+    "qd-thuc-tap-tn-2026 Điều 15"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.95,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2038,
+   "citation_precision": 0.5,
+   "citation_recall": 0.5,
+   "citation_correct": 0.0,
+   "judge": "dung_mot_phan",
+   "judge_reason": "Hệ thống trả lời đúng tất cả các điều kiện để được công nhận hoàn thành thực tập tốt nghiệp (đạt CLO, điểm học phần, minh chứng), nhưng thiếu thông tin về số tín chỉ (8 tín chỉ) và thời gian thực tập. Việc thiếu thông tin về số tín chỉ làm thiếu ý phụ nhưng không làm thay đổi kết quả sinh viên phải làm, tuy nhiên hệ thống từ chối cung cấp số tín chỉ nên xếp loại đúng một phần.",
+   "judge_score": 0.5
+  },
+  {
+   "id": "q030",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.668,
+   "answer": "Theo Điều 9 Khoản 5 điểm b, sinh viên đã có điểm học phần đạt khi đăng ký học lại hoặc học đổi sang học phần khác để cải thiện điểm thì điểm đánh giá có kết quả cao nhất là điểm chính thức của học phần. Theo Điều 13 Khoản 3, hạng tốt nghiệp của sinh viên có điểm trung bình tích lũy loại xuất sắc và giỏi sẽ bị giảm đi một mức nếu khối lượng các học phần phải học lại vượt quá 5% so với tổng số tín chỉ quy định cho toàn chương trình hoặc sinh viên đã bị kỷ luật từ mức cảnh cáo trở lên trong thời gian học.",
+   "cited": [
+    "qc2022-d9-k5",
+    "qc2022-d13-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 5",
+    "qc-dhxd-2022 Điều 13 Khoản 3"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.27,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1865,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng quy định về điểm cải thiện là điểm cao nhất, và nêu đúng điều kiện bị hạ hạng tốt nghiệp khi học lại vượt quá 5% tổng số tín chỉ.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q031",
+   "loai": "ket_hop",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.758,
+   "answer": "Sinh viên đang trong thời gian bị xếp hạng học lực yếu được đăng ký khối lượng học tập không quá 14 tín chỉ cho mỗi học kỳ (theo Điều 10 Khoản 4). Đồng thời, theo Điều 17 Khoản 2, điều kiện để học cùng lúc hai chương trình là sau khi kết thúc học kỳ thứ nhất năm học đầu tiên của chương trình thứ nhất và sinh viên không thuộc diện xếp hạng học lực yếu, do đó sinh viên bị xếp học lực yếu không đủ điều kiện học thêm chương trình thứ hai.",
+   "cited": [
+    "qc2016-d10-k4",
+    "qc2016-d17"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 10 Khoản 4",
+    "qc-dhxd-2016 Điều 17"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 5.06,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2019,
+   "citation_precision": 1.0,
+   "citation_recall": 0.6666666666666666,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "He thong da tra loi dung ca hai y: so tin chi toi da duoc dang ky la 14 (thieu y toi thieu 10 nhung khong anh huong den ket luan chinh) va khong du dieu kien hoc cung luc hai chuong trinh vi dang xep hoc luc yeu.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q032",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.638,
+   "answer": "Với điểm trung bình tích lũy là 3,15, học lực của sinh viên được xếp loại Khá theo Điều 10 Khoản 4 của Quy chế đào tạo.",
+   "cited": [
+    "qc2022-d10-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 10 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 7.81,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_loai_hoc_luc"
+   ],
+   "tokens": 6159,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời nêu đúng kết quả xếp loại Khá, khớp với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q033",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.623,
+   "answer": "Với điểm trung bình tích lũy toàn khóa đạt 3.65 (thuộc loại xuất sắc) nhưng có khối lượng học lại 12 tín chỉ trên tổng số 150 tín chỉ của chương trình (chiếm 8.0%, vượt quá mức 5%), hạng tốt nghiệp của sinh viên bị giảm đi một mức từ Xuất sắc xuống Giỏi theo quy định tại Điểu 13 Khoản 3 của Quy chế đào tạo.",
+   "cited": [
+    "qc2022-d13-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 13 Khoản 3",
+    "qc-dhxd-2022 Điều 10 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.28,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_hang_tot_nghiep"
+   ],
+   "tokens": 6516,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng kết luận (loại Giỏi), tính đúng tỷ lệ học lại (8%), nêu đúng quy định bị giảm một mức và giải thích chính xác các điều kiện.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q034",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.617,
+   "answer": "Theo Điều 10 Khoản 2 Quy chế đào tạo, điểm trung bình học kỳ của bạn được tính bằng tổng tích số giữa điểm số quy đổi (tương ứng với các điểm chữ B+, C+, D+) và số tín chỉ của từng học phần, chia cho tổng số tín chỉ (8 tín chỉ). Điểm trung bình học kỳ của bạn là 2.5.",
+   "cited": [
+    "qc2022-d10-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 10 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.7,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "tinh_diem_trung_binh"
+   ],
+   "tokens": 6530,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống đã tính đúng điểm trung bình học kỳ là 2.5 dựa trên các điểm chữ tương ứng với 8.2, 6.7 và 5.2 và số tín chỉ, kết quả chính xác.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q035",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.597,
+   "answer": "Theo Điều 28 Khoản 1 của quy chế đào tạo, sinh viên có điểm trung bình chung tích lũy toàn khóa học từ 2,50 đến 3,19 sẽ được công nhận tốt nghiệp loại khá. Với điểm trung bình tích lũy là 3,15, sinh viên đạt loại khá.",
+   "cited": [
+    "qc2016-d28-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 28 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.01,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_hang_tot_nghiep"
+   ],
+   "tokens": 6739,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời chính xác xếp loại tốt nghiệp (loại khá) và khoảng điểm tương ứng, không có nội dung sai sót.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q036",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.591,
+   "answer": "Theo Điều 10 Khoản 5, với chương trình 120 tín chỉ học trong 4 năm, số tín chỉ trung bình một năm học theo kế hoạch chuẩn (M) là 30 tín chỉ. Với 65 tín chỉ tích lũy (N), thỏa mãn điều kiện 2M ≤ N < 3M (60 ≤ 65 < 90), sinh viên được xếp trình độ năm thứ ba.",
+   "cited": [
+    "qc2022-d10-k5"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 10 Khoản 5"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.38,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_trinh_do_nam"
+   ],
+   "tokens": 6040,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng cách tính, đúng con số tích lũy và xác định chính xác sinh viên là năm thứ ba.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q037",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.659,
+   "answer": "Sinh viên đăng ký 18 tín chỉ và không đạt 10 tín chỉ (chiếm 55,6%, vượt quá 50% khối lượng đã đăng ký trong học kỳ) nên sẽ bị cảnh báo học tập theo Điểm a Khoản 1 Điều 11 của Quy chế đào tạo.",
+   "cited": [
+    "qc2022-d11-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 11 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.4,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "kiem_tra_canh_bao"
+   ],
+   "tokens": 5723,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng kết luận bị cảnh báo học tập, tính toán chính xác tỷ lệ tín chỉ không đạt (55,6%) và nêu đúng điều kiện vượt quá 50% khối lượng đăng ký.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q038",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.642,
+   "answer": "Với điểm thường xuyên 6,0, giữa kỳ 5,0 và cuối kỳ 2,0, điểm học phần của sinh viên là 3,8 (điểm chữ F), xếp loại không đạt (dưới 4,0) theo Điều 9 Khoản 4. Do có điểm trung bình các bài đánh giá thường xuyên đạt từ 5,0 điểm trở lên và học phần chưa đạt, sinh viên được thi lại bài thi kết thúc học phần để cải thiện điểm học phần từ không đạt thành đạt theo Điều 9 Khoản 9.",
+   "cited": [
+    "qc2022-d9-k9",
+    "qc2022-d9-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 9",
+    "qc-dhxd-2022 Điều 9 Khoản 4",
+    "qd-danh-gia-cdr-2026 Điều 5 Khoản 2",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 3",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 5.88,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "tinh_diem_hoc_phan"
+   ],
+   "tokens": 6396,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống tính đúng điểm học phần 3,8 (F, không đạt), đồng thời trả lời đúng điều kiện được thi lại do điểm thường xuyên đạt từ 5,0 trở lên.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q039",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.664,
+   "answer": "Theo Điều 16 Khoản 1, sinh viên bị cảnh báo kết quả học tập nếu điểm trung bình chung học kỳ đạt dưới 0,80 đối với học kỳ đầu của khóa học. Với điểm trung bình học kỳ đầu là 0,75, sinh viên thuộc diện bị cảnh báo kết quả học tập.",
+   "cited": [
+    "qc2016-d16-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 16 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.98,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "kiem_tra_canh_bao"
+   ],
+   "tokens": 6740,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời đã đưa ra kết luận chính xác rằng sinh viên bị cảnh báo học tập vì điểm trung bình học kỳ đầu dưới 0,80.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q040",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.739,
+   "answer": "Theo Điều 16 Khoản 2 điểm a, sinh viên bị buộc thôi học nếu có số lần cảnh báo kết quả học tập vượt quá 2 lần liên tiếp hoặc vượt quá 3 lần không liên tiếp.",
+   "cited": [
+    "qc2016-d16-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 16 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.01,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1738,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng chính xác các con số điều kiện buộc thôi học (vượt quá 2 lần liên tiếp hoặc vượt quá 3 lần không liên tiếp) khớp hoàn toàn với đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q041",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.707,
+   "answer": "Theo Điều 11 Khoản 2 điểm a, sinh viên bị buộc thôi học nếu số lần cảnh báo học tập hoặc mức cảnh báo học tập vượt quá 3 lần liên tiếp; hoặc quá 4 lần không liên tiếp.",
+   "cited": [
+    "qc2022-d11-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 11 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.1,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1762,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống nêu đúng chính xác số lần cảnh báo học tập dẫn đến buộc thôi học là vượt quá 3 lần liên tiếp hoặc quá 4 lần không liên tiếp.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q042",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.744,
+   "answer": "Theo Điều 17 Khoản 2 Quy chế đào tạo, điều kiện để sinh viên học cùng lúc hai chương trình bao gồm: a) Ngành, chuyên ngành đào tạo chính ở chương trình thứ hai phải khác ngành, chuyên ngành đào tạo chính ở chương trình thứ nhất; b) Sau khi đã kết thúc học kỳ thứ nhất năm học đầu tiên của chương trình thứ nhất và sinh viên không thuộc diện xếp hạng học lực yếu; c) Trong quá trình học, nếu điểm trung bình chung học kỳ đạt dưới 2,00 thì phải dừng học thêm chương trình thứ hai ở học kỳ tiếp theo.",
+   "cited": [
+    "qc2016-d17"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 17"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.53,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1922,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống đã nêu đầy đủ các điều kiện chính theo đáp án chuẩn gồm ngành chương trình thứ hai khác chương trình thứ nhất, đã kết thúc học kỳ 1 năm đầu và không thuộc diện học lực yếu, đồng thời bổ sung thêm quy định về điểm trung bình chung dưới 2.00 phải dừng học. Kết luận chính xác.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q043",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.717,
+   "answer": "Theo Điều 17 Khoản 2, điều kiện để sinh viên đăng ký học chương trình thứ hai là: Sớm nhất khi đã được xếp trình độ năm thứ hai của chương trình thứ nhất. Tại thời điểm đăng ký, sinh viên phải đáp ứng các điều kiện khác của cơ sở đào tạo và 01 trong 02 điều kiện sau: a) Học lực tính theo điểm trung bình tích lũy xếp loại khá trở lên và đáp ứng ngưỡng bảo đảm chất lượng của chương trình thứ hai trong năm tuyển sinh; b) Học lực tính theo điểm trung bình tích lũy xếp loại trung bình và đáp ứng điều kiện trúng tuyển của chương trình thứ hai trong năm tuyển sinh.",
+   "cited": [
+    "qc2022-d17-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 17 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.31,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1302,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đầy đủ và chính xác tất cả các điều kiện theo đáp án chuẩn gồm thời điểm học (năm thứ hai), học lực khá kèm ngưỡng chất lượng hoặc học lực trung bình kèm điều kiện trúng tuyển.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q044",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.697,
+   "answer": "Theo Điều 6 Khoản 3, thời gian tối đa hoàn thành chương trình bao gồm thời gian thiết kế cho chương trình (5 năm đối với khóa học) cộng với 6 học kỳ. Tùy theo điều kiện đào tạo của nhà trường, Hiệu trưởng quy định thời gian tối đa cho mỗi chương trình nhưng không quá hai lần thời gian thiết kế. Đối với các đối tượng được hưởng chính sách ưu tiên theo quy định tại Quy chế tuyển sinh đại học, cao đẳng hệ chính quy, sinh viên không bị hạn chế về thời gian tối đa để hoàn thành chương trình.",
+   "cited": [
+    "qc2016-d6"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 6"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.71,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2076,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Câu trả lời của hệ thống đã nêu đúng và đầy đủ các ý chính về thời gian tối đa hoàn thành khóa học theo đáp án chuẩn, đồng thời bổ sung thêm thông tin chính xác từ quy chế.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q045",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.687,
+   "answer": "Theo Điều 2 Khoản 5, thời gian tối đa để sinh viên hoàn thành khóa học không vượt quá 02 lần thời gian theo kế hoạch học tập chuẩn toàn khóa đối với mỗi hình thức đào tạo. Đối với sinh viên học liên thông đã được miễn trừ khối lượng tín chỉ tích lũy, thời gian tối đa không vượt quá 2 lần kế hoạch học tập chuẩn toàn khóa sau khi giảm tương ứng với khối lượng được miễn trừ.",
+   "cited": [
+    "qc2022-d2-k5"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 2 Khoản 5"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.69,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1815,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng thời gian tối đa không vượt quá 2 lần thời gian kế hoạch chuẩn toàn khóa, đồng thời bổ sung thêm thông tin chính xác về trường hợp học liên thông không làm thay đổi kết luận chính.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q046",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.535,
+   "answer": "Quy chế được cung cấp không quy định nội dung này.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 5.19,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 3266,
+   "judge": "dung",
+   "judge_reason": "Từ chối đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q047",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Quy chế được cung cấp không quy định ngày cụ thể bắt đầu lịch thi cuối kỳ của học kỳ này.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.31,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1889,
+   "judge": "dung",
+   "judge_reason": "Từ chối đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q048",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.573,
+   "answer": "Quy chế được cung cấp không quy định nội dung này.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.65,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1578,
+   "judge": "dung",
+   "judge_reason": "Từ chối đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q049",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.577,
+   "answer": "Quy chế được cung cấp không quy định nội dung này.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.23,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2547,
+   "judge": "dung",
+   "judge_reason": "Từ chối đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q050",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.532,
+   "answer": "Quy chế được cung cấp không quy định nội dung này.",
+   "cited": [],
+   "warnings": [],
+   "citations": [],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.74,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1640,
+   "judge": "dung",
+   "judge_reason": "Từ chối đúng.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q051",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.735,
+   "answer": "Theo quy định hiện hành, điểm học phần được đánh giá qua tối thiểu hai điểm thành phần (ngoại trừ các học phần có khối lượng 01 tín chỉ). Trọng số các điểm thành phần gồm: đánh giá thường xuyên chiếm 25%, giữa kỳ chiếm 25%, và cuối kỳ chiếm 50%.",
+   "cited": [
+    "qc2022-d9-k1-p1",
+    "qc2022-d9-k1-p2",
+    "cdr2026-d5-k2",
+    "cdr2026-d6-k3",
+    "cdr2026-d6-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2022 Điều 9 Khoản 1",
+    "qc-dhxd-2022 Điều 9 Khoản 1",
+    "qd-danh-gia-cdr-2026 Điều 5 Khoản 2",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 3",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 4"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.9,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 3114,
+   "citation_precision": 0.6,
+   "citation_recall": 1.0,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng các thành phần điểm và trọng số tương ứng (thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%) theo đáp án chuẩn, đồng thời bổ sung thêm thông tin về số lượng điểm thành phần mà không làm thay đổi kết quả. Kết luận: dung.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q052",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.712,
+   "answer": "Theo quy định hiện hành tại văn bản sửa đổi (Quyết định của Hiệu trưởng tháng 3/2026), trọng số điểm thành phần của học phần gồm: thường xuyên chiếm 25%, giữa kỳ chiếm 25%, và cuối kỳ chiếm 50%.",
+   "cited": [
+    "qc2016-d19",
+    "cdr2026-d35-k3",
+    "cdr2026-d6-k4",
+    "cdr2026-d6-k3",
+    "cdr2026-d5-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qc-dhxd-2016 Điều 19",
+    "qd-danh-gia-cdr-2026 Điều 35 Khoản 3",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 4",
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 3",
+    "qd-danh-gia-cdr-2026 Điều 5 Khoản 2"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 3.98,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2200,
+   "citation_precision": 0.6,
+   "citation_recall": 1.0,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng các thành phần điểm và trọng số chính xác (thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%) theo đáp án chuẩn.",
+   "judge_score": 1.0
+  },
+  {
+   "id": "q053",
+   "loai": "phien_ban",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.713,
+   "answer": "Theo quy định hiện hành, tỷ trọng đánh giá cuối kỳ (bài thi kết thúc học phần) là 50% tổng điểm học phần (GPA) theo thang điểm 10.",
+   "cited": [
+    "cdr2026-d6-k4",
+    "qc2022-d9-k1-p2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "citations": [
+    "qd-danh-gia-cdr-2026 Điều 6 Khoản 4",
+    "qc-dhxd-2022 Điều 9 Khoản 1"
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 16.76,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2424,
+   "citation_precision": 0.5,
+   "citation_recall": 1.0,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0,
+   "judge": "dung",
+   "judge_reason": "Hệ thống trả lời đúng tỷ trọng của bài thi cuối kỳ là 50% tổng điểm học phần, thông tin bổ sung về thang điểm 10 không mâu thuẫn với đáp án chuẩn.",
+   "judge_score": 1.0
+  }
+ ],
+ "qa_config": {
+  "top_k": 6,
+  "relevance_threshold": 0.5,
+  "tools_mode": "auto"
+ }
+}

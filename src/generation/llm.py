@@ -64,13 +64,14 @@ class GeminiClient:
         self.timeout_s = timeout_s
         self.retries = retries
         self.min_interval_s = min_interval_s
-        self._last_call = 0.0
 
     def _post(self, model: str, body: dict) -> dict:
-        wait = self.min_interval_s - (time.monotonic() - self._last_call)
+        # Hạn mức tính theo mô hình cho cả project, nên mọi client trong tiến trình (bên trả lời
+        # và giám khảo) dùng chung một mốc thời gian theo mô hình.
+        wait = self.min_interval_s - (time.monotonic() - _LAST_CALL.get(model, 0.0))
         if wait > 0:
             time.sleep(wait)
-        self._last_call = time.monotonic()
+        _LAST_CALL[model] = time.monotonic()
         req = urllib.request.Request(
             f"{self.BASE}/{model}:generateContent",
             data=json.dumps(body).encode("utf-8"),
@@ -85,12 +86,13 @@ class GeminiClient:
             try:
                 return self._post(model, body)
             except urllib.error.HTTPError as e:
-                detail = _quota_detail(e)
+                detail, retry_after = _quota_detail(e)
                 errors.append(f"{model}: HTTP {e.code}{' ' + detail if detail else ''}")
                 if e.code in (400, 401, 403, 404) or "PerDay" in detail:
                     # Lỗi cấu hình hoặc hết hạn mức theo ngày: thử lại vô ích.
                     raise _SwitchModel from e
-                time.sleep(2 ** attempt * 5)
+                # Hạn mức theo phút: chờ đúng thời gian máy chủ yêu cầu, không đoán.
+                time.sleep(retry_after if retry_after else 2 ** attempt * 5)
             except (TimeoutError, urllib.error.URLError, OSError) as e:
                 errors.append(f"{model}: {type(e).__name__}")
                 time.sleep(2 ** attempt * 2)
@@ -151,20 +153,30 @@ class GeminiClient:
 
 
 MAX_TOOL_ROUNDS = 4
+MAX_RETRY_DELAY_S = 90
+_LAST_CALL: dict[str, float] = {}
 
 
 class _SwitchModel(Exception):
     """Mô hình hiện tại không dùng được cho lời gọi này; chuyển sang mô hình kế tiếp."""
 
 
-def _quota_detail(error: urllib.error.HTTPError) -> str:
-    """Lấy tên hạn mức bị vượt từ thân lỗi 429 của Gemini (ví dụ ...PerDayPerProject...)."""
+def _quota_detail(error: urllib.error.HTTPError) -> tuple[str, float | None]:
+    """Tên hạn mức bị vượt (ví dụ ...PerMinutePerProject...) và thời gian máy chủ yêu cầu chờ
+    (RetryInfo.retryDelay, giới hạn ở MAX_RETRY_DELAY_S) từ thân lỗi 429 của Gemini."""
     try:
         details = json.loads(error.read() or b"{}").get("error", {}).get("details", [])
     except (json.JSONDecodeError, ValueError):
-        return ""
+        return "", None
     ids = [v.get("quotaId", "") for d in details for v in d.get("violations", [])]
-    return ",".join(i for i in ids if i)
+    delay = next((d.get("retryDelay") for d in details if d.get("retryDelay")), None)
+    seconds = None
+    if isinstance(delay, str) and delay.endswith("s"):
+        try:
+            seconds = min(float(delay[:-1]) + 1, MAX_RETRY_DELAY_S)
+        except ValueError:
+            seconds = None
+    return ",".join(i for i in ids if i), seconds
 
 
 class CachedLLM:

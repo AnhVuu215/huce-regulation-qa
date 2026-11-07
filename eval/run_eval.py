@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from evaluation.metrics import score  # noqa: E402
 from evaluation.testset import load_testset, validate  # noqa: E402
 from ingestion.cli import parse_registered  # noqa: E402
-from ingestion.registry import load_registry  # noqa: E402
+from ingestion.registry import amendments_to, load_registry  # noqa: E402
 from retrieval.corpus import structural_passages, window_passages  # noqa: E402
 from retrieval.dense import Embedder  # noqa: E402
 from retrieval.pipeline import RetrievalConfig, Retriever, load_synonyms  # noqa: E402
@@ -56,7 +56,8 @@ def build_retriever(config: RetrievalConfig, docs, parsed, embedder, reranker) -
                 doc, parsed[doc.doc_id], config.window_words, config.window_overlap
             )
         else:
-            passages += structural_passages(doc, parsed[doc.doc_id])
+            passages += structural_passages(doc, parsed[doc.doc_id],
+                                            amendments_to(list(docs.values()), doc.doc_id))
     return Retriever(config, passages, embedder, reranker,
                      load_synonyms(ROOT / "data" / "synonyms.yaml"))
 

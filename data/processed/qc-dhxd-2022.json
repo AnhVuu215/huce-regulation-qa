@@ -447,7 +447,7 @@
     "dieu_title": "Đánh giá và tính điểm học phần",
     "khoan": 1,
     "text": "Điều 9. Đánh giá và tính điểm học phần\n1. Đối với mỗi học phần, điểm học phần được đánh giá qua tối thiểu hai điểm thành phần (ngoại trừ các học phần có khối lượng 01 tín chỉ). Các điểm thành phần được đánh giá theo thang điểm 10 làm tròn đến 1 chữ số thập phân. Số lượng điểm thành phần, phương pháp đánh giá, hình thức đánh giá và trọng số của mỗi điểm thành phần được quy định trong đề cương của mỗi học phần.\nĐiểm học phần (ĐHP) được tính theo công thức và làm tròn đến một chữ số thập phân:\nĐHP = Σ(ki × ĐTXi) + kt × ĐT, lấy tổng theo i từ 1 đến n Trong đó:\nĐTXi: Điểm bài đánh giá thường xuyên thứ i;\nki: Trọng số của bài đánh giá thường xuyên thứ i n: Số lượng bài đánh giá thường xuyên.\nkt: Trọng số của bài thi kết thúc học phần (không nhỏ hơn 0,5) ĐT: Điểm bài thi kết thúc học phần.\nVới Σki + kt = 1 (các trị số ki, kt được quy định trong đề cương học phần).\nHình thức đánh giá trực tuyến được áp dụng khi đảm bảo trung thực, công bằng và khách quan như đánh giá trực tiếp, đồng thời đóng góp không quá 50% trọng số điểm học phần; riêng việc tổ chức bảo vệ và đánh giá đồ án tốt nghiệp được thực hiện trực tuyến với trọng số cao hơn khi đáp ứng thêm các điều kiện sau đây:\na) Việc đánh giá được thực hiện thông qua một hội đồng chuyên môn gồm ít nhất 3 thành viên;\nb) Hình thức bảo vệ và đánh giá trực tuyến được sự đồng thuận của, các thành viên hội đồng và người học;",
-    "sua_doi_boi": null
+    "sua_doi_boi": "qd-danh-gia-cdr-2026: trọng số điểm thành phần là thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%"
   },
   {
     "chunk_id": "qc2022-d9-k1-p2",
@@ -462,7 +462,7 @@
     "dieu_title": "Đánh giá và tính điểm học phần",
     "khoan": 1,
     "text": "Điều 9. Đánh giá và tính điểm học phần\n1. Đối với mỗi học phần, điểm học phần được đánh giá qua tối thiểu hai điểm thành phần (ngoại trừ các học phần có khối lượng 01 tín chỉ). Các điểm thành phần được đánh giá theo thang điểm 10 làm tròn đến 1 chữ số thập phân. Số lượng điểm thành phần, phương pháp đánh giá, hình thức đánh giá và trọng số của mỗi điểm thành phần được quy định trong đề cương của mỗi học phần.\nĐiểm học phần (ĐHP) được tính theo công thức và làm tròn đến một chữ số thập phân:\nĐHP = Σ(ki × ĐTXi) + kt × ĐT, lấy tổng theo i từ 1 đến n Trong đó:\nĐTXi: Điểm bài đánh giá thường xuyên thứ i;\nki: Trọng số của bài đánh giá thường xuyên thứ i n: Số lượng bài đánh giá thường xuyên.\nkt: Trọng số của bài thi kết thúc học phần (không nhỏ hơn 0,5) ĐT: Điểm bài thi kết thúc học phần.\nVới Σki + kt = 1 (các trị số ki, kt được quy định trong đề cương học phần).\nHình thức đánh giá trực tuyến được áp dụng khi đảm bảo trung thực, công bằng và khách quan như đánh giá trực tiếp, đồng thời đóng góp không quá 50% trọng số điểm học phần; riêng việc tổ chức bảo vệ và đánh giá đồ án tốt nghiệp được thực hiện trực tuyến với trọng số cao hơn khi đáp ứng thêm các điều kiện sau đây:\nc) Diễn biến của buổi bảo vệ trực tuyến được ghi hình, ghi âm đầy đủ và lưu trữ.",
-    "sua_doi_boi": null
+    "sua_doi_boi": "qd-danh-gia-cdr-2026: trọng số điểm thành phần là thường xuyên 25%, giữa kỳ 25%, cuối kỳ 50%"
   },
   {
     "chunk_id": "qc2022-d9-k2",
