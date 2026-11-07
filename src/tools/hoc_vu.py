@@ -4,6 +4,7 @@ Mọi ngưỡng lấy từ data/rules/hoc-vu.yaml; mọi kết quả kèm căn c
 dùng công cụ vẫn được hậu kiểm trích dẫn. Thiếu dữ liệu thì báo thiếu, không đoán.
 """
 
+import hashlib
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
@@ -26,6 +27,11 @@ class HocVu:
         data = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
         self.versions: dict[str, dict] = data["versions"]
         self.docs = docs
+        # Đổi khi file quy tắc hoặc code công cụ đổi: dùng làm khóa cache cho câu trả lời có
+        # gọi công cụ, để không bao giờ dùng lại kết quả của phiên bản công cụ cũ.
+        digest = hashlib.sha1(rules_path.read_bytes())
+        digest.update(Path(__file__).read_bytes())
+        self.fingerprint = digest.hexdigest()
 
     # ---- phiên bản và căn cứ -------------------------------------------------------------
     def phien_ban(self, khoa: int | None) -> str:

@@ -146,3 +146,16 @@ def test_tools_add_rule_to_system_prompt():
     llm = FakeLLM(reply("x", [1]))
     QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer("?", 68)
     assert "PHẢI gọi công cụ" in llm.calls[0][0]
+
+
+def test_cache_expires_when_tool_fingerprint_changes(tmp_path):
+    inner = FakeLLM(lambda p: "ok")
+    llm = CachedLLM(inner, tmp_path, "fake")
+
+    def handler(name, args):
+        return {}
+
+    for fingerprint in ["v1", "v1", "v2"]:
+        handler.fingerprint = fingerprint
+        llm.generate("s", "p", tools=[{"name": "t"}], tool_handler=handler)
+    assert len(inner.calls) == 2

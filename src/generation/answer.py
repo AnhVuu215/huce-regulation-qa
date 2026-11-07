@@ -96,6 +96,7 @@ class QA:
             if khoa is not None:
                 args["khoa"] = khoa
             return self.tools.call(name, args)
+        handle.fingerprint = getattr(self.tools, "fingerprint", None)
         return handle
 
     def _needs_khoa(self, passages: list[Passage]) -> bool:

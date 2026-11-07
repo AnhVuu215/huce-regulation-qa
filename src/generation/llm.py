@@ -181,8 +181,11 @@ class CachedLLM:
 
     def generate(self, system: str, prompt: str, json_schema: dict | None = None,
                  tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
-        # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được.
-        parts = [system, prompt, json_schema] + ([tools] if tools else [])
+        # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được. Có công cụ thì
+        # khóa gồm cả dấu vân tay của công cụ: đổi quy tắc hay code công cụ là cache tự hết hạn.
+        parts = [system, prompt, json_schema]
+        if tools:
+            parts += [tools, getattr(tool_handler, "fingerprint", None)]
         key = hashlib.sha1(json.dumps(parts, ensure_ascii=False).encode("utf-8")).hexdigest()
         path = self.dir / f"{key}.json"
         if path.exists():
