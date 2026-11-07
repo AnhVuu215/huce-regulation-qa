@@ -118,3 +118,31 @@ def test_cache_skips_answers_from_fallback_model(tmp_path):
     llm = CachedLLM(FakeLLM(lambda p: "ok"), tmp_path, "gemini-main")
     llm.generate("s", "p")
     assert list((tmp_path / "gemini-main").iterdir()) == []
+
+
+class RecordingTools:
+    """Công cụ giả: ghi lại tham số nhận được, trả về một kết quả kèm căn cứ."""
+
+    def __init__(self):
+        self.received = []
+
+    def call(self, name, args):
+        self.received.append((name, dict(args)))
+        return {"xep_loai": "Khá", "can_cu": [{"doc_id": "new", "dieu": 10, "khoan": 4}]}
+
+
+def test_tool_call_uses_asker_cohort_and_becomes_citation():
+    tools = RecordingTools()
+    llm = FakeLLM(reply("Theo Điều 10, học lực loại Khá.", [1]),
+                  tool_requests=[("xep_loai_hoc_luc", {"khoa": 65, "diem_trung_binh": 3.15})])
+    qa = QA(StubRetriever([P_NEW, P_OLD]), llm, DOCS, QAConfig(), tools=tools)
+    a = qa.answer("GPA 3,15 thì học lực loại gì?", 68)
+    assert tools.received == [("xep_loai_hoc_luc", {"khoa": 68, "diem_trung_binh": 3.15})]
+    assert Unit("new", 10, 4) in a.citations
+    assert a.unverified_mentions == []  # Điều 10 đến từ căn cứ của công cụ
+
+
+def test_tools_add_rule_to_system_prompt():
+    llm = FakeLLM(reply("x", [1]))
+    QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer("?", 68)
+    assert "PHẢI gọi công cụ" in llm.calls[0][0]
