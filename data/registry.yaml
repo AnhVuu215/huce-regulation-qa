@@ -1,0 +1,22 @@
+# Danh mục văn bản. Thêm phiên bản mới chỉ cần thêm một mục, không sửa code.
+# Nguồn chính thức: huce.edu.vn/van-ban và sinhvien.huce.edu.vn (mục Quy chế - Quy định).
+documents:
+  - doc_id: qc-dhxd-2016
+    chunk_prefix: qc2016
+    doc_title: Quy chế đào tạo đại học hệ chính quy theo hệ thống tín chỉ của Trường Đại học Xây dựng
+    so_hieu: Quyết định số 33 ngày 07/01/2016
+    file: data/raw/qc-dhxd-2016.pdf
+    sha256: 9ea0364bb4e0318b75be5b8ed10951eccca08fc80fbd4d8b1f9ec4163527055a
+    # Cùng sha256 với bản trên huce.edu.vn và sinhvien.huce.edu.vn.
+    source_url: https://sinhvien.huce.edu.vn/sinh-vien/tin-tuc/quy-che-dao-tao-dai-hoc-he-chinh-quy-theo-he-thong-tin-chi-cua-truong-dai-hoc-xay-dung-ha-noi.html
+    # Là ngày ban hành. Điều 34 chỉ ghi áp dụng từ học kỳ II năm học 2015-2016.
+    hieu_luc_tu: 2016-01-07
+    hieu_luc_ghi_chu: Áp dụng từ học kỳ II năm học 2015-2016 (Điều 34)
+    khoa_den: 66
+    khoa_nguon: Tiêu đề trên sinhvien.huce.edu.vn "áp dụng cho sinh viên K66 trở về trước"
+    patches:
+      # Ký tự font Symbol trong PDF: U+F0B8 là dấu chia, biểu thị khoảng giá trị.
+      - find: "(0,3  0,5)"
+        replace: "(0,3 ÷ 0,5)"
+      - find: "[CÔNG THỨC]"
+        replace: "A = Σ(ai × ni) / Σ(ni), lấy tổng theo i từ 1 đến n"
