@@ -192,3 +192,18 @@ def test_amended_passage_brings_in_amending_provision():
     assert "[2] Điều 6 Khoản 4" in prompt
     assert a.cited_passages == ["r-d6-k4"]
     assert a.unverified_mentions == []
+
+
+def test_quota_error_reports_server_retry_delay():
+    import io
+    import urllib.error
+
+    from generation.llm import _quota_detail
+
+    body = json.dumps({"error": {"details": [
+        {"violations": [{"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}]},
+        {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "31s"},
+    ]}}).encode()
+    err = urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
+    detail, delay = _quota_detail(err)
+    assert "PerMinute" in detail and delay == 32.0
