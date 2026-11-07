@@ -171,3 +171,24 @@ def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected
     llm = FakeLLM(reply("x", [1]))
     QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer(question, 68)
     assert ("PHẢI gọi công cụ" in llm.calls[0][0]) is expected
+
+
+def test_amended_passage_brings_in_amending_provision():
+    from retrieval.corpus import Amendment
+
+    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
+                                     so_hieu="2026", file="x", sha256="x",
+                                     hieu_luc_tu="2026-03-12")}
+    amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
+    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
+                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
+                                                      (Unit("rule", 6, 4),)),))
+    retriever = StubRetriever([amended])
+    retriever.passages = [amended, amending]
+    llm = FakeLLM(reply("Cuối kỳ 50% theo Điều 6.", [2]))
+    a = QA(retriever, llm, docs, QAConfig()).answer("Thi cuối kỳ chiếm bao nhiêu?", 68)
+    prompt = llm.calls[0][1]
+    assert "ĐÃ ĐƯỢC SỬA ĐỔI bởi Quy định mới" in prompt
+    assert "[2] Điều 6 Khoản 4" in prompt
+    assert a.cited_passages == ["r-d6-k4"]
+    assert a.unverified_mentions == []
