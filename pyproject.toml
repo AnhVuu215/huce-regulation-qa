@@ -1,0 +1,40 @@
+[project]
+name = "huce-regulation-qa"
+version = "0.1.0"
+description = "Hỏi đáp quy chế đào tạo HUCE có trích dẫn Điều/Khoản (RAG)"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "pydantic>=2.7",
+    "pymupdf>=1.24",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+# Mô hình embedding/reranker: nặng, CI không cài. Cài bằng: uv sync --group ml
+ml = [
+    "numpy>=1.26",
+    "sentence-transformers>=3.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
