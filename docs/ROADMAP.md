@@ -160,8 +160,32 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   - Câu sai còn lại ở nhóm tính toán (q038): mô hình tự gọi thêm công cụ quy đổi điểm, kéo theo
     một căn cứ ngoài bộ test.
 - [!] 6.2 Mở rộng bộ test lên 150–200 câu, ưu tiên câu thật của sinh viên
-- [ ] 6.3 LLM-as-judge
-- [!] 6.4 Chấm tay 20%, báo cáo độ khớp với judge
+- [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
+
+  Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
+  do trước khi kết luận. Cấu hình: truy xuất `khong_rerank+loc_khoa`, công cụ chế độ auto.
+
+  | loại | n | độ đúng nội dung | trích dẫn đúng |
+  |---|---|---|---|
+  | tra_cuu | 12 | 0,833 | 1,000 |
+  | dien_dat_sv | 11 | 0,909 | 1,000 |
+  | ket_hop | 8 | 0,750 | 0,750 |
+  | tinh_toan | 8 | 1,000 | 0,875 |
+  | phien_ban | 6 | 1,000 | 1,000 |
+  | **tất cả** | 45 | **0,889** | 0,933 |
+
+  Phân bố: 36 đúng, 8 đúng một phần, 1 sai (q028, lỗi truy xuất đã biết). Độ đúng tính đúng = 1,
+  đúng một phần = 0,5, sai = 0.
+
+  - Trích dẫn đúng không bảo đảm đủ ý: câu trả lời hay bỏ điều kiện đi kèm, ví dụ q006 nêu giới
+    hạn 25% tín chỉ học trường khác nhưng bỏ điều kiện Hiệu trưởng hai trường phải đồng ý.
+    Hướng sửa: yêu cầu nêu đủ điều kiện và ngoại lệ trong prompt, đo lại bằng giám khảo.
+  - Giám khảo chưa nhất quán: q012, q021 tự ghi "không ảnh hưởng kết luận chính" nhưng vẫn chấm
+    đúng một phần. Chưa sửa tiêu chí trước khi có kết quả chấm tay, để không tối ưu giám khảo
+    theo cảm nhận.
+- [!] 6.4 Chấm tay 20%, báo cáo độ khớp với judge: bảng chấm mù 9 câu ở
+  `eval/human/cham-tay.csv` (lấy mẫu phân tầng, seed 2026). Chủ dự án điền cột `nguoi_cham`
+  (dung / dung_mot_phan / sai), rồi chạy `eval/judge_agreement.py` để có tỷ lệ trùng và kappa.
 - [ ] 6.5 Báo cáo đánh giá
 
 **Cổng:** báo cáo đủ các tầng chỉ số, có độ khớp judge và người.
