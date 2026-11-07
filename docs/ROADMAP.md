@@ -183,9 +183,26 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   - Giám khảo chưa nhất quán: q012, q021 tự ghi "không ảnh hưởng kết luận chính" nhưng vẫn chấm
     đúng một phần. Chưa sửa tiêu chí trước khi có kết quả chấm tay, để không tối ưu giám khảo
     theo cảm nhận.
-- [!] 6.4 Chấm tay 20%, báo cáo độ khớp với judge: bảng chấm mù 9 câu ở
-  `eval/human/cham-tay.csv` (lấy mẫu phân tầng, seed 2026). Chủ dự án điền cột `nguoi_cham`
-  (dung / dung_mot_phan / sai), rồi chạy `eval/judge_agreement.py` để có tỷ lệ trùng và kappa.
+- [x] 6.4 Chấm tay 20%, báo cáo độ khớp với judge (2026-11-07)
+
+  Chủ dự án chấm mù 9 câu (lấy mẫu phân tầng, seed 2026) trên trang chấm bằng nút bấm; kết quả ở
+  `eval/human/cham-tay.csv`.
+
+  | chỉ số | giá trị |
+  |---|---|
+  | tỷ lệ trùng giám khảo và người | 0,778 (7/9) |
+  | Cohen's kappa | -0,06 |
+
+  Kappa gần 0 vì người chấm 8/9 câu là đúng: nhãn lệch hẳn về một phía nên trùng do ngẫu nhiên đã
+  cao, và 9 câu là quá ít để kappa ổn định. Hai câu lệch mới là kết luận chính:
+  - q009: người chấm đúng, giám khảo đúng một phần. Giám khảo khắt khe hơn người ở ý phụ, nên
+    độ đúng nội dung 0,889 của giám khảo nhiều khả năng thấp hơn thực tế.
+  - q038: người chấm sai, giám khảo đúng. Người chấm chỉ ra trọng số điểm hiện hành khác giả định
+    của câu hỏi: quy định đánh giá theo chuẩn đầu ra 2026 ấn định thường xuyên 25% (Điều 5 khoản
+    2), giữa kỳ 25% (Điều 6 khoản 3), cuối kỳ 50% (Điều 6 khoản 4), còn câu hỏi và công cụ dùng
+    trọng số thi 0,6 theo quy chế 2022. Giám khảo không thấy lỗi vì đáp án chuẩn cũng dựa trên
+    quy chế 2022. Đây là lỗi thật của hệ thống: văn bản mới sửa quy tắc của văn bản cũ cho mọi
+    khóa, loại phiên bản mà hệ thống chưa xử lý.
 - [x] 6.4b Sửa lỗi do chấm tay phát hiện: văn bản mới sửa quy tắc của văn bản cũ cho mọi khóa
   (2026-11-08, nhánh `fix/assessment-weights-2026`)
 
