@@ -25,10 +25,13 @@ class LLMResponse:
     cached: bool = False
     # Lỗi gặp trước khi có câu trả lời (ví dụ mô hình chính hết hạn mức, phải dùng dự phòng).
     errors: list[str] = field(default_factory=list)
+    # Các lần gọi công cụ trong lời gọi này: {"name", "args", "result"}.
+    tool_calls: list[dict] = field(default_factory=list)
 
 
 class LLM(Protocol):
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None) -> LLMResponse:
+    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
+                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
         ...
 
 
@@ -76,47 +79,82 @@ class GeminiClient:
         with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:
             return json.load(resp)
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None) -> LLMResponse:
-        body: dict = {
-            "systemInstruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        }
+    def _request(self, model: str, body: dict, errors: list[str]) -> dict:
+        """Một request có thử lại; lỗi không thể cứu thì ném _SwitchModel để chuyển mô hình."""
+        for attempt in range(self.retries + 1):
+            try:
+                return self._post(model, body)
+            except urllib.error.HTTPError as e:
+                detail = _quota_detail(e)
+                errors.append(f"{model}: HTTP {e.code}{' ' + detail if detail else ''}")
+                if e.code in (400, 401, 403, 404) or "PerDay" in detail:
+                    # Lỗi cấu hình hoặc hết hạn mức theo ngày: thử lại vô ích.
+                    raise _SwitchModel from e
+                time.sleep(2 ** attempt * 5)
+            except (TimeoutError, urllib.error.URLError, OSError) as e:
+                errors.append(f"{model}: {type(e).__name__}")
+                time.sleep(2 ** attempt * 2)
+        raise _SwitchModel
+
+    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
+                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
+        """Sinh câu trả lời. Có `tools` thì chạy vòng gọi công cụ: mô hình yêu cầu, `tool_handler`
+        thực thi, kết quả gửi lại cho tới khi mô hình trả lời (tối đa MAX_TOOL_ROUNDS vòng)."""
+        base: dict = {"systemInstruction": {"parts": [{"text": system}]}}
         if json_schema:
-            body["generationConfig"] = {
+            base["generationConfig"] = {
                 "responseMimeType": "application/json",
                 "responseSchema": json_schema,
             }
-        errors = []
+        if tools:
+            base["tools"] = [{"functionDeclarations": tools}]
+        errors: list[str] = []
         for model in self.models:
-            for attempt in range(self.retries + 1):
-                start = time.perf_counter()
-                try:
-                    data = self._post(model, body)
-                except urllib.error.HTTPError as e:
-                    detail = _quota_detail(e)
-                    errors.append(f"{model}: HTTP {e.code}{' ' + detail if detail else ''}")
-                    if e.code in (400, 401, 403, 404) or "PerDay" in detail:
-                        # Lỗi cấu hình hoặc hết hạn mức theo ngày: thử lại vô ích, chuyển mô hình.
-                        break
-                    time.sleep(2 ** attempt * 5)
-                    continue
-                except (TimeoutError, urllib.error.URLError, OSError) as e:
-                    errors.append(f"{model}: {type(e).__name__}")
-                    time.sleep(2 ** attempt * 2)
-                    continue
-                parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
-                text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
-                usage = data.get("usageMetadata", {})
-                return LLMResponse(
-                    text=text,
-                    model=model,
-                    latency_s=time.perf_counter() - start,
-                    input_tokens=usage.get("promptTokenCount", 0),
-                    output_tokens=usage.get("candidatesTokenCount", 0),
-                    thinking_tokens=usage.get("thoughtsTokenCount", 0),
-                    errors=errors,
-                )
+            contents = [{"role": "user", "parts": [{"text": prompt}]}]
+            usage_total = {"promptTokenCount": 0, "candidatesTokenCount": 0,
+                           "thoughtsTokenCount": 0}
+            calls: list[dict] = []
+            start = time.perf_counter()
+            try:
+                for _ in range(MAX_TOOL_ROUNDS + 1):
+                    data = self._request(model, {**base, "contents": contents}, errors)
+                    for key in usage_total:
+                        usage_total[key] += data.get("usageMetadata", {}).get(key, 0)
+                    content = data.get("candidates", [{}])[0].get("content", {})
+                    parts = content.get("parts", [])
+                    requested = [p["functionCall"] for p in parts if "functionCall" in p]
+                    if not requested or tool_handler is None:
+                        text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                        return LLMResponse(
+                            text=text, model=model, latency_s=time.perf_counter() - start,
+                            input_tokens=usage_total["promptTokenCount"],
+                            output_tokens=usage_total["candidatesTokenCount"],
+                            thinking_tokens=usage_total["thoughtsTokenCount"],
+                            errors=errors, tool_calls=calls,
+                        )
+                    # Gửi lại nguyên nội dung mô hình (kèm thoughtSignature), rồi kết quả công cụ.
+                    contents.append(content)
+                    responses = []
+                    for fc in requested:
+                        result = tool_handler(fc["name"], dict(fc.get("args", {})))
+                        calls.append({"name": fc["name"], "args": fc.get("args", {}),
+                                      "result": result})
+                        reply = {"name": fc["name"], "response": result}
+                        if "id" in fc:
+                            reply["id"] = fc["id"]
+                        responses.append({"functionResponse": reply})
+                    contents.append({"role": "user", "parts": responses})
+                errors.append(f"{model}: quá {MAX_TOOL_ROUNDS} vòng gọi công cụ")
+            except _SwitchModel:
+                continue
         raise LLMError("Mọi mô hình đều lỗi: " + "; ".join(errors))
+
+
+MAX_TOOL_ROUNDS = 4
+
+
+class _SwitchModel(Exception):
+    """Mô hình hiện tại không dùng được cho lời gọi này; chuyển sang mô hình kế tiếp."""
 
 
 def _quota_detail(error: urllib.error.HTTPError) -> str:
@@ -141,27 +179,40 @@ class CachedLLM:
         self.dir = cache_dir / namespace
         self.dir.mkdir(parents=True, exist_ok=True)
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None) -> LLMResponse:
-        key = hashlib.sha1(
-            json.dumps([system, prompt, json_schema], ensure_ascii=False).encode("utf-8")
-        ).hexdigest()
+    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
+                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
+        # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được. Có công cụ thì
+        # khóa gồm cả dấu vân tay của công cụ: đổi quy tắc hay code công cụ là cache tự hết hạn.
+        parts = [system, prompt, json_schema]
+        if tools:
+            parts += [tools, getattr(tool_handler, "fingerprint", None)]
+        key = hashlib.sha1(json.dumps(parts, ensure_ascii=False).encode("utf-8")).hexdigest()
         path = self.dir / f"{key}.json"
         if path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
             return LLMResponse(**{**data, "cached": True})
-        response = self.inner.generate(system, prompt, json_schema)
+        response = self.inner.generate(system, prompt, json_schema, tools, tool_handler)
         if response.model == self.namespace:
             path.write_text(json.dumps(asdict(response), ensure_ascii=False), encoding="utf-8")
         return response
 
 
 class FakeLLM:
-    """LLM giả lập cho test: trả lời theo hàm do test cung cấp, ghi lại prompt đã nhận."""
+    """LLM giả lập cho test: trả lời theo hàm do test cung cấp, ghi lại prompt đã nhận.
+    `tool_requests` là các lời gọi công cụ (tên, tham số) mà mô hình giả lập sẽ yêu cầu."""
 
-    def __init__(self, respond):
+    def __init__(self, respond, tool_requests: list[tuple[str, dict]] | None = None):
         self.respond = respond
+        self.tool_requests = tool_requests or []
         self.calls: list[tuple[str, str]] = []
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None) -> LLMResponse:
+    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
+                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
         self.calls.append((system, prompt))
-        return LLMResponse(text=self.respond(prompt), model="fake", latency_s=0.0)
+        tool_calls = []
+        if tools and tool_handler:
+            for name, args in self.tool_requests:
+                tool_calls.append({"name": name, "args": args,
+                                   "result": tool_handler(name, dict(args))})
+        return LLMResponse(text=self.respond(prompt), model="fake", latency_s=0.0,
+                           tool_calls=tool_calls)

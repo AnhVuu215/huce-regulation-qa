@@ -1,0 +1,97 @@
+# Ngưỡng học vụ trích từ quy chế, để tính toán bằng code thay vì để LLM tự tính.
+# Mỗi phiên bản ứng với một văn bản trong registry; mỗi bảng ghi căn cứ Điều/Khoản.
+# Ngưỡng ghi theo dạng "từ X trở lên" (cận dưới, tính cả X), sắp xếp từ cao xuống thấp.
+
+versions:
+  qc-dhxd-2022:
+    diem_hoc_phan:
+      can_cu: {dieu: 9, khoan: 1}   # tổng điểm thành phần nhân trọng số, tổng trọng số bằng 1
+    thang_diem_chu:
+      can_cu: {dieu: 9, khoan: 4}
+      lam_tron_diem_hoc_phan: 1   # Điều 9 khoản 1: điểm học phần làm tròn 1 chữ số thập phân
+      muc:
+        - {chu: A, tu: 8.5}
+        - {chu: B+, tu: 8.0}
+        - {chu: B, tu: 7.0}
+        - {chu: C+, tu: 6.5}
+        - {chu: C, tu: 5.5}
+        - {chu: D+, tu: 5.0}
+        - {chu: D, tu: 4.0}
+        - {chu: F, tu: 0.0}
+    diem_so:
+      can_cu: {dieu: 10, khoan: 2}
+      lam_tron_diem_trung_binh: 2   # Điều 10 khoản 2: làm tròn đến 2 chữ số thập phân
+      quy_doi: {A: 4.0, B+: 3.5, B: 3.0, C+: 2.5, C: 2.0, D+: 1.5, D: 1.0, F: 0.0}
+    xep_loai_hoc_luc:
+      can_cu: {dieu: 10, khoan: 4}
+      muc:
+        - {loai: Xuất sắc, tu: 3.6}
+        - {loai: Giỏi, tu: 3.2}
+        - {loai: Khá, tu: 2.5}
+        - {loai: Trung bình, tu: 2.0}
+        - {loai: Yếu, tu: 1.0}
+        - {loai: Kém, tu: 0.0}
+    tot_nghiep:
+      dieu_kien_gpa: {tu: 2.0, can_cu: {dieu: 13, khoan: 1}}
+      # Hạng tốt nghiệp theo điểm trung bình tích lũy toàn khóa, dùng thang xếp loại học lực.
+      hang: {theo: xep_loai_hoc_luc, can_cu: {dieu: 13, khoan: 3}}
+      ha_hang:
+        can_cu: {dieu: 13, khoan: 3}
+        ap_dung_cho: [Xuất sắc, Giỏi]
+        ty_le_hoc_lai_vuot: 0.05
+    trinh_do_nam:
+      # N: tín chỉ tích lũy, M: tín chỉ trung bình một năm theo kế hoạch học tập chuẩn.
+      can_cu: {dieu: 10, khoan: 5}
+      boi_so_M: [1, 2, 3, 4]   # năm thứ k khi (k-1)M <= N < kM
+    canh_bao:
+      can_cu: {dieu: 11, khoan: 1}
+      ty_le_khong_dat_vuot: 0.5
+      no_dong_vuot: 24
+      gpa_hoc_ky_duoi: {hoc_ky_dau: 0.8, hoc_ky_khac: 1.0}
+      gpa_tich_luy_duoi: {1: 1.2, 2: 1.4, 3: 1.6, cac_nam_sau: 1.8}
+
+  qc-dhxd-2016:
+    diem_hoc_phan:
+      can_cu: {dieu: 22, khoan: 2}   # tổng điểm đánh giá bộ phận nhân trọng số
+    thang_diem_chu:
+      can_cu: {dieu: 22, khoan: 2}
+      lam_tron_diem_hoc_phan: 1
+      muc:
+        - {chu: A, tu: 8.5}
+        - {chu: B+, tu: 8.0}
+        - {chu: B, tu: 7.0}
+        - {chu: C+, tu: 6.5}
+        - {chu: C, tu: 5.5}
+        - {chu: D+, tu: 5.0}
+        - {chu: D, tu: 4.0}
+        - {chu: F, tu: 0.0}
+    diem_so:
+      can_cu: {dieu: 23, khoan: 1}
+      lam_tron_diem_trung_binh: 2   # Điều 23 khoản 2
+      quy_doi: {A: 4.0, B+: 3.5, B: 3.0, C+: 2.5, C: 2.0, D+: 1.5, D: 1.0, F: 0.0}
+    xep_loai_hoc_luc:
+      # Quy chế 2016 chỉ phân hai hạng học lực theo điểm trung bình tích lũy.
+      can_cu: {dieu: 14, khoan: 2}
+      muc:
+        - {loai: Bình thường, tu: 2.0}
+        - {loai: Yếu, tu: 0.0}
+    tot_nghiep:
+      dieu_kien_gpa: {tu: 2.0, can_cu: {dieu: 27, khoan: 1}}
+      hang:
+        can_cu: {dieu: 28, khoan: 1}
+        muc:
+          - {loai: Xuất sắc, tu: 3.6}
+          - {loai: Giỏi, tu: 3.2}
+          - {loai: Khá, tu: 2.5}
+          - {loai: Trung bình, tu: 2.0}
+      ha_hang:
+        can_cu: {dieu: 28, khoan: 2}
+        ap_dung_cho: [Xuất sắc, Giỏi]
+        ty_le_hoc_lai_vuot: 0.05
+    trinh_do_nam:
+      # Ngưỡng cố định, ghi trong quy chế cho chương trình 180 tín chỉ.
+      can_cu: {dieu: 14, khoan: 1}
+      nguong_tin_chi: [34, 68, 102, 136]
+    canh_bao:
+      can_cu: {dieu: 16, khoan: 1}
+      gpa_hoc_ky_duoi: {hoc_ky_dau: 0.8, hoc_ky_khac: 1.0}

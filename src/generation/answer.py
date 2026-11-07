@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from generation.llm import LLM, LLMResponse
 from ingestion.registry import Document
 from retrieval.corpus import Passage, Unit
+from tools.hoc_vu import FUNCTION_DECLARATIONS
 
 DISCLAIMER = (
     "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng "
@@ -22,6 +23,12 @@ Quy tắc:
 4. Khi câu hỏi cần so sánh hoặc tính toán, trình bày phép tính và ngưỡng lấy từ đoạn văn bản.
 5. Trả lời ngắn gọn, rõ ràng bằng tiếng Việt, xưng hô trung lập với sinh viên.
 6. Có thể nêu "Điều X Khoản Y" trong câu trả lời, nhưng chỉ nêu những Điều có trong các đoạn."""
+
+TOOLS_RULE = """
+7. Khi câu hỏi cần tính điểm, quy đổi điểm, xếp loại, xếp hạng tốt nghiệp, xếp năm học hoặc xét
+   cảnh báo, PHẢI gọi công cụ tương ứng và dùng đúng kết quả công cụ trả về; không tự tính.
+   Nếu công cụ báo thiếu dữ liệu, nói rõ cần thêm thông tin gì. Kết quả công cụ đã kèm căn cứ,
+   vẫn ghi số thứ tự các đoạn liên quan vào "trich_dan"."""
 
 SCHEMA = {
     "type": "OBJECT",
@@ -71,14 +78,37 @@ class QAConfig:
     # (thấp nhất 0,544) và câu ngoài phạm vi (cao nhất 0,610) chồng lên nhau, nên ngưỡng chỉ
     # chặn câu lạc đề rõ ràng; việc từ chối chính do LLM quyết định theo quy tắc trong prompt.
     relevance_threshold: float = 0.50
+    # Khi nào cho LLM gọi công cụ tính toán: "always" | "never" | "auto" (câu hỏi có con số).
+    # Bật cho mọi câu làm gấp đôi token và khiến mô hình gọi công cụ cả khi không cần tính.
+    tools_mode: str = "auto"
+
+
+NUMBER = re.compile(r"\d")
+
+
+def needs_calculation(question: str) -> bool:
+    """Câu cần tính toán luôn kèm số liệu của người hỏi ("GPA 3,15", "18 tín", "120 tín chỉ")."""
+    return NUMBER.search(question) is not None
 
 
 class QA:
-    def __init__(self, retriever, llm: LLM, docs: dict[str, Document], config: QAConfig):
+    def __init__(self, retriever, llm: LLM, docs: dict[str, Document], config: QAConfig,
+                 tools=None):
+        """`tools`: đối tượng công cụ học vụ (tools.hoc_vu.HocVu); None thì LLM tự trình bày."""
         self.retriever = retriever
         self.llm = llm
         self.docs = docs
         self.config = config
+        self.tools = tools
+
+    def _tool_handler(self, khoa: int | None):
+        def handle(name: str, args: dict) -> dict:
+            # Khóa đã biết thì ghi đè tham số của LLM: không thể tính nhầm theo quy chế khóa khác.
+            if khoa is not None:
+                args["khoa"] = khoa
+            return self.tools.call(name, args)
+        handle.fingerprint = getattr(self.tools, "fingerprint", None)
+        return handle
 
     def _needs_khoa(self, passages: list[Passage]) -> bool:
         """Kết quả trải trên nhiều phiên bản giới hạn theo khóa: phải biết khóa mới trả lời được."""
@@ -114,7 +144,20 @@ class QA:
         who = f"Người hỏi là sinh viên khóa K{khoa}." if khoa else "Người hỏi không nêu khóa."
         context = "\n\n".join(blocks)
         prompt = f"{who}\n\nCác đoạn văn bản:\n\n{context}\n\nCâu hỏi: {question}"
-        response = self.llm.generate(SYSTEM, prompt, SCHEMA)
+        use_tools = self.tools is not None and (
+            cfg.tools_mode == "always"
+            or (cfg.tools_mode == "auto" and needs_calculation(question))
+        )
+        if use_tools:
+            response = self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
+                                         FUNCTION_DECLARATIONS, self._tool_handler(khoa))
+        else:
+            response = self.llm.generate(SYSTEM, prompt, SCHEMA)
+        tool_units = [
+            Unit(c["doc_id"], c["dieu"], c.get("khoan"))
+            for call in response.tool_calls
+            for c in call["result"].get("can_cu", [])
+        ]
 
         try:
             data = _parse(response.text)
@@ -131,15 +174,18 @@ class QA:
                     valid.append(passages[n - 1])
             else:
                 dropped.append(n)
-        # Hậu kiểm: mọi "Điều N" nêu trong câu trả lời phải có trong các đoạn đã truy xuất.
-        retrieved_dieu = {u.dieu for p in passages for u in p.units}
+        # Hậu kiểm: mọi "Điều N" nêu trong câu trả lời phải có trong các đoạn đã truy xuất
+        # hoặc trong căn cứ do công cụ trả về (căn cứ công cụ lấy từ file quy tắc đã kiểm thử).
+        retrieved_dieu = {u.dieu for p in passages for u in p.units} | {u.dieu for u in tool_units}
         mentions = {int(m) for m in DIEU_MENTION.findall(data.get("tra_loi", ""))}
         unverified = sorted(mentions - retrieved_dieu)
+        citations = [u for p in valid for u in p.units]
+        citations += [u for u in dict.fromkeys(tool_units) if u not in citations]
 
         result = Answer(
             status=status,
             text=data.get("tra_loi", ""),
-            citations=[u for p in valid for u in p.units],
+            citations=citations,
             cited_passages=[p.passage_id for p in valid],
             retrieved=retrieved,
             relevance=relevance,

@@ -1,0 +1,262 @@
+{
+ "summary": {
+  "model": "gemini-3.5-flash-lite",
+  "retrieval": "khong_rerank+loc_khoa",
+  "tools": true,
+  "n": 8,
+  "tinh_toan_dung": 1.0,
+  "cau_goi_cong_cu": 8,
+  "trich_dan_dung": 0.625,
+  "citation_precision": 0.844,
+  "citation_recall": 0.875,
+  "tu_choi_dung": "0/0",
+  "tu_choi_nham": "0/8",
+  "khong_chac_chan": "0/8",
+  "fallback_used": 0,
+  "latency_s_p50": 14.45,
+  "latency_s_p95": 30.5,
+  "tokens_per_question": 6099.375,
+  "by_type": {
+   "tinh_toan": {
+    "n": 8,
+    "trich_dan_dung": 0.625,
+    "tu_choi_nham": 0
+   }
+  }
+ },
+ "questions": [
+  {
+   "id": "q032",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.638,
+   "answer": "Theo Điều 10 Khoản 4, với điểm trung bình tích lũy là 3,15 (thuộc khoảng từ 2,5 đến cận 3,2), học lực của sinh viên được xếp loại Khá.",
+   "cited": [
+    "qc2022-d10-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 30.5,
+   "cached": false,
+   "llm_errors": [
+    "gemini-3.5-flash-lite: HTTP 503"
+   ],
+   "tool_calls": [
+    "xep_loai_hoc_luc"
+   ],
+   "tokens": 5918,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q033",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.623,
+   "answer": "Với điểm trung bình tích lũy (GPA) toàn khóa là 3,65, sinh viên đạt mức điểm loại Xuất sắc. Tuy nhiên, do khối lượng các học phần phải học lại là 12 tín chỉ trên tổng số 150 tín chỉ của toàn chương trình (chiếm 8%, vượt quá mức 5% quy định), hạng tốt nghiệp của sinh viên bị giảm đi một mức theo điểm a khoản 3 Điều 13. Do đó, sinh viên tốt nghiệp loại Giỏi.",
+   "cited": [
+    "qc2022-d13-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 6.17,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_hang_tot_nghiep"
+   ],
+   "tokens": 6276,
+   "citation_precision": 0.5,
+   "citation_recall": 0.5,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q034",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.617,
+   "answer": "Điểm trung bình học kỳ của sinh viên là 2.5 theo Điều 10 Khoản 2 Quy chế đào tạo trình độ đại học của Trường Đại học Xây dựng Hà Nội.",
+   "cited": [
+    "qc2022-d10-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 7.68,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "tinh_diem_trung_binh"
+   ],
+   "tokens": 6239,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q035",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.597,
+   "answer": "Theo Điều 28 Khoản 1 của Quy chế, sinh viên có điểm trung bình chung tích lũy toàn khóa học từ 2,50 đến 3,19 sẽ được xếp hạng tốt nghiệp loại Khá. Với điểm tích lũy 3,15, sinh viên tốt nghiệp loại Khá.",
+   "cited": [
+    "qc2016-d28-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 20.31,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_hang_tot_nghiep"
+   ],
+   "tokens": 6512,
+   "citation_precision": 0.5,
+   "citation_recall": 1.0,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q036",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.591,
+   "answer": "Căn cứ Điều 10 Khoản 5 của Quy chế đào tạo trình độ đại học, số tín chỉ trung bình một năm học theo kế hoạch học tập chuẩn (M) của chương trình 120 tín chỉ học trong 4 năm là 30 tín chỉ. Với 65 tín chỉ tích lũy (N), thỏa mãn điều kiện 2M ≤ N < 3M (60 ≤ 65 < 90), sinh viên được xếp trình độ năm thứ ba.",
+   "cited": [
+    "qc2022-d10-k5"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 14.45,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "xep_trinh_do_nam"
+   ],
+   "tokens": 5800,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q037",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.659,
+   "answer": "Theo Điều 11 Khoản 1 Điểm a của Quy chế đào tạo, sinh viên sẽ bị cảnh báo học tập do tổng số tín chỉ không đạt trong học kỳ vượt quá 50% khối lượng đã đăng ký (sinh viên đăng ký 18 tín chỉ và trượt 10 tín chỉ, chiếm 55,6%).",
+   "cited": [
+    "qc2022-d11-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 5.92,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "kiem_tra_canh_bao"
+   ],
+   "tokens": 5479,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q038",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Điểm học phần của sinh viên được tính theo công thức: 0,4 x 6,0 + 0,6 x 2,0 = 3,6 điểm, đạt điểm chữ F (không đạt). Do điểm trung bình các bài đánh giá thường xuyên là 6,0 điểm (đạt từ 5,0 điểm trở lên), sinh viên được phép thi lại bài thi kết thúc học phần để cải thiện điểm học phần từ không đạt thành đạt, với mức điểm sau khi thi lại không vượt quá C+.",
+   "cited": [
+    "qc2022-d9-k9",
+    "qc2022-d9-k1-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.13,
+   "cached": false,
+   "llm_errors": [],
+   "tool_calls": [
+    "tinh_diem_hoc_phan"
+   ],
+   "tokens": 6073,
+   "citation_precision": 0.75,
+   "citation_recall": 1.0,
+   "citation_correct": 0.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q039",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.664,
+   "answer": "Theo Điều 16 Khoản 1, sinh viên bị cảnh báo kết quả học tập nếu điểm trung bình chung học kỳ đạt dưới 0,80 đối với học kỳ đầu của khóa học. Với điểm trung bình học kỳ đầu tiên là 0,75 (dưới 0,80), sinh viên thuộc trường hợp bị cảnh báo kết quả học tập.",
+   "cited": [
+    "qc2016-d16-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 28.83,
+   "cached": false,
+   "llm_errors": [
+    "gemini-3.5-flash-lite: HTTP 503"
+   ],
+   "tool_calls": [
+    "kiem_tra_canh_bao"
+   ],
+   "tokens": 6498,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  }
+ ],
+ "qa_config": {
+  "top_k": 6,
+  "relevance_threshold": 0.5
+ }
+}

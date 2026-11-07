@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from evaluation.metrics import score, unit_matches
-from evaluation.testset import CanCu, load_testset, validate
+from evaluation.metrics import score, short_answer_correct, unit_matches
+from evaluation.testset import CanCu, DapAnNgan, load_testset, validate
 from ingestion.cli import parse_registered
 from ingestion.registry import load_registry
 from retrieval.corpus import Passage, Unit, window_passages
@@ -70,3 +70,15 @@ def test_window_passages_label_every_word(corpus):
     total_words = sum(len(d.heading.split()) + len(d.body.split()) for d in parsed[doc.doc_id])
     assert sum(len(w.text.split()) for w in windows) >= total_words
     assert any(len({u.dieu for u in w.units}) > 1 for w in windows)  # cửa sổ vắt qua Điều
+
+
+def test_short_answer_check_handles_negation():
+    spec = DapAnNgan(phai_co=[["bị cảnh báo"]], khong_duoc_co=["không bị cảnh báo"])
+    assert short_answer_correct("Có, bạn bị cảnh báo học tập.", spec)
+    assert not short_answer_correct("Bạn không bị cảnh báo.", spec)
+
+
+def test_reference_answers_pass_their_own_short_checks():
+    for q in load_testset(ROOT / "eval" / "testset.jsonl"):
+        if q.dap_an_ngan:
+            assert short_answer_correct(q.answer, q.dap_an_ngan), q.id
