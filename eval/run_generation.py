@@ -1,0 +1,125 @@
+"""Đánh giá tầng trả lời: trích dẫn đúng, từ chối đúng/nhầm, độ trễ, token.
+
+    uv run --group ml python eval/run_generation.py                  # gemini-3.5-flash-lite
+    uv run --group ml python eval/run_generation.py --model gemini-3.6-flash --no-fallback
+    uv run --group ml python eval/run_generation.py --limit 10       # eval rút gọn khi phát triển
+
+Câu trả lời LLM được cache trong .cache/llm: chạy lại không gọi mạng.
+Gói miễn phí: gemini-3.6-flash chỉ 20 lượt/ngày nên không dùng làm mặc định.
+"""
+
+import argparse
+import json
+import statistics
+import sys
+from collections import defaultdict
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path[:0] = [str(ROOT / "src"), str(ROOT / "eval")]
+
+from run_eval import CACHE, EXTRA, build_retriever, load_corpus  # noqa: E402
+
+from evaluation.metrics import unit_matches  # noqa: E402
+from evaluation.testset import load_testset  # noqa: E402
+from generation.answer import QA, QAConfig  # noqa: E402
+from generation.llm import CachedLLM, GeminiClient, load_env  # noqa: E402
+from retrieval.dense import Embedder  # noqa: E402
+
+RETRIEVAL = "khong_rerank+loc_khoa"
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
+FALLBACK = "gemini-3.5-flash-lite"
+
+
+def score_citations(answer, gold) -> dict:
+    cited = answer.citations
+    relevant = [u for u in cited if any(unit_matches(u, g) for g in gold)]
+    covered = [g for g in gold if any(unit_matches(u, g) for u in cited)]
+    precision = len(relevant) / len(cited) if cited else 0.0
+    recall = len(covered) / len(gold) if gold else 0.0
+    return {
+        "citation_precision": precision,
+        "citation_recall": recall,
+        # "Trích dẫn đúng": có trích dẫn, mọi trích dẫn đều đúng căn cứ, và chạm ít nhất một căn cứ.
+        "citation_correct": float(bool(cited) and precision == 1.0 and recall > 0),
+    }
+
+
+def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--no-fallback", action="store_true",
+                        help="đo riêng một mô hình, không chuyển sang dự phòng")
+    parser.add_argument("--limit", type=int, default=0)
+    args = parser.parse_args()
+
+    load_env(ROOT / ".env")
+    use_fallback = not args.no_fallback and args.model != FALLBACK
+    models = [args.model] + ([FALLBACK] if use_fallback else [])
+    llm = CachedLLM(GeminiClient(models), CACHE / "llm", namespace=args.model)
+    docs, parsed = load_corpus()
+    retriever = build_retriever(EXTRA[RETRIEVAL], docs, parsed,
+                                Embedder(cache_dir=CACHE / "embeddings"), None)
+    qa = QA(retriever, llm, docs, QAConfig())
+    questions = load_testset(ROOT / "eval" / "testset.jsonl")
+    if args.limit:
+        questions = questions[: args.limit] + [q for q in questions if q.nen_tu_choi][:2]
+
+    rows = []
+    for i, q in enumerate(questions, 1):
+        a = qa.answer(q.question, q.khoa)
+        row = {
+            "id": q.id, "loai": q.loai, "nen_tu_choi": q.nen_tu_choi, "status": a.status,
+            "refused": a.status == "tu_choi", "uncertain": a.uncertain,
+            "relevance": round(a.relevance, 3), "answer": a.text,
+            "cited": a.cited_passages, "warnings": a.warnings,
+            "model": a.llm.model if a.llm else None,
+            "latency_s": round(a.llm.latency_s, 2) if a.llm else 0.0,
+            "cached": a.llm.cached if a.llm else None,
+            "llm_errors": a.llm.errors if a.llm else [],
+            "tokens": (a.llm.input_tokens + a.llm.output_tokens + a.llm.thinking_tokens)
+            if a.llm else 0,
+        }
+        if not q.nen_tu_choi:
+            row.update(score_citations(a, q.can_cu))
+        rows.append(row)
+        print(f"[{i}/{len(questions)}] {q.id} {a.status}"
+              f"{' (cache)' if a.llm and a.llm.cached else ''}", flush=True)
+
+    answerable = [r for r in rows if not r["nen_tu_choi"]]
+    out_scope = [r for r in rows if r["nen_tu_choi"]]
+    by_type = defaultdict(list)
+    for r in answerable:
+        by_type[r["loai"]].append(r)
+    fresh = sorted(r["latency_s"] for r in rows if r["cached"] is False)
+
+    def mean(items, key):
+        return round(statistics.mean(r[key] for r in items), 3) if items else None
+
+    summary = {
+        "model": args.model, "retrieval": RETRIEVAL, "n": len(rows),
+        "trich_dan_dung": mean(answerable, "citation_correct"),
+        "citation_precision": mean(answerable, "citation_precision"),
+        "citation_recall": mean(answerable, "citation_recall"),
+        "tu_choi_dung": f"{sum(r['refused'] for r in out_scope)}/{len(out_scope)}",
+        "tu_choi_nham": f"{sum(r['refused'] for r in answerable)}/{len(answerable)}",
+        "khong_chac_chan": f"{sum(r['uncertain'] for r in answerable)}/{len(answerable)}",
+        "fallback_used": sum(1 for r in rows if r["model"] not in (None, args.model)),
+        "latency_s_p50": fresh[len(fresh) // 2] if fresh else None,
+        "latency_s_p95": fresh[int(len(fresh) * 0.95)] if fresh else None,
+        "tokens_per_question": mean([r for r in rows if r["tokens"]], "tokens"),
+        "by_type": {k: {"n": len(v), "trich_dan_dung": mean(v, "citation_correct"),
+                        "tu_choi_nham": sum(r["refused"] for r in v)} for k, v in by_type.items()},
+    }
+    out = ROOT / "eval" / "results" / f"{datetime.now():%Y%m%d-%H%M%S}-generation-{args.model}.json"
+    payload = {"summary": summary, "questions": rows, "qa_config": asdict(QAConfig())}
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(json.dumps(summary, ensure_ascii=False, indent=1))
+    print("->", out.relative_to(ROOT))
+
+
+if __name__ == "__main__":
+    main()
