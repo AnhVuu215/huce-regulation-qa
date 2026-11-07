@@ -134,3 +134,19 @@ def test_call_returns_errors_to_llm_instead_of_raising(hv):
 def test_declarations_match_methods(hv):
     assert all(callable(getattr(hv, name)) for name in TOOL_NAMES)
     assert len(TOOL_NAMES) == len(FUNCTION_DECLARATIONS)
+
+
+def _cited(result):
+    return {(c["dieu"], c["khoan"]) for c in result["can_cu"]}
+
+
+def test_graduation_rank_cites_the_thresholds_it_used(hv):
+    # 2022: hạng theo ngưỡng Điều 10 khoản 4; 2016: ngưỡng riêng ở Điều 28 khoản 1.
+    assert _cited(hv.xep_hang_tot_nghiep(68, 3.65)) == {(13, 3), (10, 4)}
+    assert _cited(hv.xep_hang_tot_nghiep(65, 3.15)) == {(28, 1)}
+    assert _cited(hv.xep_hang_tot_nghiep(68, 1.9)) == {(13, 1)}
+
+
+def test_module_score_cites_formula_and_letter_scale_only(hv):
+    r = hv.tinh_diem_hoc_phan(68, [{"diem": 6.0, "trong_so": 0.4}, {"diem": 2.0, "trong_so": 0.6}])
+    assert _cited(r) == {(9, 1), (9, 4)}

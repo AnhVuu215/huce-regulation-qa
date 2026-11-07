@@ -60,7 +60,9 @@ class HocVu:
         result["cong_thuc"] = " + ".join(
             f"{float(c['trong_so']):g}×{float(c['diem']):g}" for c in diem_thanh_phan
         )
-        result["can_cu"].insert(0, self._cite(doc_id, rule["can_cu"]))
+        # Kết luận ở đây là điểm chữ và đạt/không đạt: căn cứ là công thức và thang điểm chữ,
+        # không gồm bảng quy đổi thang 4 (chỉ dùng khi tính điểm trung bình).
+        result["can_cu"] = [self._cite(doc_id, rule["can_cu"]), result["can_cu"][0]]
         return result
 
     def quy_doi_diem(self, khoa: int, diem_10: float) -> dict:
@@ -119,19 +121,25 @@ class HocVu:
         tong_tin_chi_chuong_trinh: int | None = None,
         bi_ky_luat_tu_canh_cao: bool = False,
     ) -> dict:
+        # Chỉ trích những căn cứ quyết định kết luận: điều kiện điểm chỉ khi không đạt,
+        # và bảng ngưỡng thực sự dùng để xếp hạng.
         doc_id, rule = self._rule(khoa, "tot_nghiep")
         gpa = float(diem_trung_binh_tich_luy)
-        cite = [self._cite(doc_id, rule["dieu_kien_gpa"]["can_cu"])]
         if gpa < rule["dieu_kien_gpa"]["tu"]:
             return {"du_dieu_kien_diem": False, "hang": None,
                     "ghi_chu": f"Điểm trung bình tích lũy dưới {rule['dieu_kien_gpa']['tu']}.",
-                    "can_cu": cite}
+                    "can_cu": [self._cite(doc_id, rule["dieu_kien_gpa"]["can_cu"])]}
         hang_rule = rule["hang"]
-        levels = (self.versions[doc_id]["xep_loai_hoc_luc"]["muc"]
-                  if hang_rule.get("theo") == "xep_loai_hoc_luc" else hang_rule["muc"])
+        cite = [self._cite(doc_id, hang_rule["can_cu"])]
+        if hang_rule.get("theo") == "xep_loai_hoc_luc":
+            # Quy chế 2022: hạng tốt nghiệp dùng ngưỡng xếp loại học lực (Điều 10 khoản 4).
+            standing = self.versions[doc_id]["xep_loai_hoc_luc"]
+            levels = standing["muc"]
+            cite.append(self._cite(doc_id, standing["can_cu"]))
+        else:
+            levels = hang_rule["muc"]
         names = [m["loai"] for m in levels]
         hang = next(m["loai"] for m in levels if gpa >= m["tu"])
-        cite.append(self._cite(doc_id, hang_rule["can_cu"]))
 
         reasons = []
         ha = rule["ha_hang"]
