@@ -142,9 +142,10 @@ def test_tool_call_uses_asker_cohort_and_becomes_citation():
     assert a.unverified_mentions == []  # Điều 10 đến từ căn cứ của công cụ
 
 
-def test_tools_add_rule_to_system_prompt():
+def test_always_mode_adds_tool_rule_to_system_prompt():
     llm = FakeLLM(reply("x", [1]))
-    QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer("?", 68)
+    config = QAConfig(tools_mode="always")
+    QA(StubRetriever([P_NEW]), llm, DOCS, config, tools=RecordingTools()).answer("?", 68)
     assert "PHẢI gọi công cụ" in llm.calls[0][0]
 
 
@@ -159,3 +160,14 @@ def test_cache_expires_when_tool_fingerprint_changes(tmp_path):
         handler.fingerprint = fingerprint
         llm.generate("s", "p", tools=[{"name": "t"}], tool_handler=handler)
     assert len(inner.calls) == 2
+
+
+@pytest.mark.parametrize(("question", "expected"), [
+    ("GPA 3,15 thì học lực loại gì?", True),
+    ("Kỳ này em đăng ký 18 tín và trượt 10 tín", True),
+    ("GPA bao nhiêu thì được ra trường?", False),
+])
+def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected):
+    llm = FakeLLM(reply("x", [1]))
+    QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer(question, 68)
+    assert ("PHẢI gọi công cụ" in llm.calls[0][0]) is expected

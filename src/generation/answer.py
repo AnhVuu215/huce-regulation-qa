@@ -78,6 +78,17 @@ class QAConfig:
     # (thấp nhất 0,544) và câu ngoài phạm vi (cao nhất 0,610) chồng lên nhau, nên ngưỡng chỉ
     # chặn câu lạc đề rõ ràng; việc từ chối chính do LLM quyết định theo quy tắc trong prompt.
     relevance_threshold: float = 0.50
+    # Khi nào cho LLM gọi công cụ tính toán: "always" | "never" | "auto" (câu hỏi có con số).
+    # Bật cho mọi câu làm gấp đôi token và khiến mô hình gọi công cụ cả khi không cần tính.
+    tools_mode: str = "auto"
+
+
+NUMBER = re.compile(r"\d")
+
+
+def needs_calculation(question: str) -> bool:
+    """Câu cần tính toán luôn kèm số liệu của người hỏi ("GPA 3,15", "18 tín", "120 tín chỉ")."""
+    return NUMBER.search(question) is not None
 
 
 class QA:
@@ -133,7 +144,11 @@ class QA:
         who = f"Người hỏi là sinh viên khóa K{khoa}." if khoa else "Người hỏi không nêu khóa."
         context = "\n\n".join(blocks)
         prompt = f"{who}\n\nCác đoạn văn bản:\n\n{context}\n\nCâu hỏi: {question}"
-        if self.tools is not None:
+        use_tools = self.tools is not None and (
+            cfg.tools_mode == "always"
+            or (cfg.tools_mode == "auto" and needs_calculation(question))
+        )
+        if use_tools:
             response = self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
                                          FUNCTION_DECLARATIONS, self._tool_handler(khoa))
         else:
