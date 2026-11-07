@@ -1,0 +1,242 @@
+{
+ "summary": {
+  "model": "gemini-3.5-flash-lite",
+  "retrieval": "khong_rerank+loc_khoa",
+  "tools": false,
+  "n": 8,
+  "tinh_toan_dung": 0.875,
+  "cau_goi_cong_cu": 0,
+  "trich_dan_dung": 1.0,
+  "citation_precision": 1.0,
+  "citation_recall": 0.833,
+  "tu_choi_dung": "0/0",
+  "tu_choi_nham": "0/8",
+  "khong_chac_chan": "0/8",
+  "fallback_used": 0,
+  "latency_s_p50": null,
+  "latency_s_p95": null,
+  "tokens_per_question": 1924.375,
+  "by_type": {
+   "tinh_toan": {
+    "n": 8,
+    "trich_dan_dung": 1.0,
+    "tu_choi_nham": 0
+   }
+  }
+ },
+ "questions": [
+  {
+   "id": "q032",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.638,
+   "answer": "Theo Điều 10 Khoản 4, với điểm trung bình tích lũy là 3,15 (thuộc khoảng từ 2,5 đến cận 3,2), học lực của sinh viên được xếp loại Khá.",
+   "cited": [
+    "qc2022-d10-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 8.92,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1819,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q033",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.623,
+   "answer": "Theo Điều 13 Khoản 3, hạng tốt nghiệp của sinh viên có điểm trung bình tích lũy loại xuất sắc và giỏi sẽ bị giảm đi một mức nếu khối lượng các học phần phải học lại vượt quá 5% so với tổng số tín chỉ quy định cho toàn chương trình. Với tổng số 150 tín chỉ toàn chương trình, 5% số tín chỉ là: 150 * 5% = 7,5 tín chỉ. Do bạn học lại 12 tín chỉ (vượt quá ngưỡng 7,5 tín chỉ), hạng tốt nghiệp của bạn sẽ bị giảm đi một mức so với GPA toàn khóa 3.65 (loại xuất sắc hoặc giỏi).",
+   "cited": [
+    "qc2022-d13-k3"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.97,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1956,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q034",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.617,
+   "answer": "Theo Điều 10 Khoản 2, điểm trung bình học kỳ được tính bằng công thức A = Σ(ai × ni) / Σni. Với các môn học lần lượt là 8,2 điểm (3 tín chỉ), 6,7 điểm (2 tín chỉ) và 5,2 điểm (3 tín chỉ), điểm trung bình học kỳ của sinh viên là: ((8,2 × 3) + (6,7 × 2) + (5,2 × 3)) / (3 + 2 + 3) = (24,6 + 13,4 + 15,6) / 8 = 53,6 / 8 = 6,70 (làm tròn đến 2 chữ số thập phân).",
+   "cited": [
+    "qc2022-d10-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 10.04,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2005,
+   "citation_precision": 1.0,
+   "citation_recall": 0.5,
+   "citation_correct": 1.0,
+   "short_answer_correct": 0.0
+  },
+  {
+   "id": "q035",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.597,
+   "answer": "Theo Điều 28 Khoản 1, hạng tốt nghiệp được xác định theo điểm trung bình chung tích lũy của toàn khóa học. Với điểm trung bình chung tích lũy đạt 3,15, sinh viên tốt nghiệp loại khá (mức điểm từ 2,50 đến 3,19).",
+   "cited": [
+    "qc2016-d28-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 4.17,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2083,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q036",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.591,
+   "answer": "Theo Điều 10 Khoản 5, sinh viên được xếp trình độ năm học căn cứ vào số tín chỉ tích lũy được từ đầu khóa học (N) và số tín chỉ trung bình một năm học theo kế hoạch học tập chuẩn (M). Với chương trình 120 tín chỉ học trong 4 năm, số tín chỉ trung bình một năm học theo kế hoạch học tập chuẩn là M = 120 / 4 = 30 tín chỉ. Với số tín chỉ tích lũy N = 65 tín chỉ, ta có: 2M (2 * 30 = 60) <= N (65) < 3M (3 * 30 = 90). Do đó, sinh viên được xếp trình độ năm thứ ba (Điều 10 Khoản 5 điểm c).",
+   "cited": [
+    "qc2022-d10-k5"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.8,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1827,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q037",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.659,
+   "answer": "Theo Điều 11 Khoản 1 Điểm a, sinh viên sẽ bị cảnh báo học tập nếu tổng số tín chỉ không đạt trong học kỳ vượt quá 50% khối lượng đã đăng ký học trong học kỳ đó. Trong trường hợp của sinh viên, đăng ký 18 tín chỉ và trượt 10 tín chỉ (10 tín chỉ lớn hơn 50% của 18 tín chỉ là 9 tín chỉ), do đó sinh viên sẽ bị cảnh báo học tập.",
+   "cited": [
+    "qc2022-d11-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.73,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 1609,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q038",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Theo Điều 9 Khoản 1, điểm học phần (ĐHP) được tính bằng công thức: ĐHP = Σ(ki × ĐTXi) + kt × ĐT. Với điểm quá trình (các bài đánh giá thường xuyên) là 6,0 (tổng ki × ĐTXi tương đương với trọng số 0,4) và điểm thi cuối kỳ là 2,0 với trọng số bài thi kt = 0,6, điểm học phần của sinh viên là: ĐHP = 6,0 × 0,4 + 2,0 × 0,6 = 2,4 + 1,2 = 3,6 điểm (không đạt vì dưới 5,0 điểm). Theo Điều 9 Khoản 9, sinh viên được thi lại bài thi kết thúc học phần để cải thiện điểm từ không đạt thành đạt đối với các học phần có điểm trung bình các bài đánh giá thường xuyên đạt từ 5,0 điểm trở lên. Vì điểm đánh giá thường xuyên của sinh viên là 6,0 (đạt từ 5,0 trở lên), sinh viên đủ điều kiện thi lại, và điểm học phần sau khi thi lại không vượt quá mức điểm C+.",
+   "cited": [
+    "qc2022-d9-k9",
+    "qc2022-d9-k1-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 2.42,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2004,
+   "citation_precision": 1.0,
+   "citation_recall": 0.6666666666666666,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  },
+  {
+   "id": "q039",
+   "loai": "tinh_toan",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.664,
+   "answer": "Theo Điều 16 Khoản 1 của Quy chế đào tạo, sinh viên sẽ bị cảnh báo kết quả học tập nếu điểm trung bình chung học kỳ đạt dưới 0,80 đối với học kỳ đầu của khóa học. Do đó, với điểm trung bình học kỳ là 0,75 ở học kỳ đầu tiên, sinh viên thuộc diện bị cảnh báo kết quả học tập.",
+   "cited": [
+    "qc2016-d16-k1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.5-flash-lite",
+   "latency_s": 1.75,
+   "cached": true,
+   "llm_errors": [],
+   "tool_calls": [],
+   "tokens": 2092,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0,
+   "short_answer_correct": 1.0
+  }
+ ],
+ "qa_config": {
+  "top_k": 6,
+  "relevance_threshold": 0.5
+ }
+}
