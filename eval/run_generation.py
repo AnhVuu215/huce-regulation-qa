@@ -26,7 +26,7 @@ from evaluation.judge import SCORE, Judge  # noqa: E402
 from evaluation.metrics import short_answer_correct, unit_matches  # noqa: E402
 from evaluation.testset import load_testset  # noqa: E402
 from generation.answer import QA, QAConfig  # noqa: E402
-from generation.llm import CachedLLM, GeminiClient, load_env  # noqa: E402
+from generation.llm import CachedLLM, GeminiClient, LLMError, load_env  # noqa: E402
 from retrieval.dense import Embedder  # noqa: E402
 from tools.hoc_vu import HocVu  # noqa: E402
 
@@ -96,9 +96,16 @@ def main() -> None:
     if args.limit:
         questions = questions[: args.limit] + [q for q in questions if q.nen_tu_choi][:2]
 
-    rows = []
+    rows, failed = [], []
     for i, q in enumerate(questions, 1):
-        a = qa.answer(q.question, q.khoa)
+        try:
+            a = qa.answer(q.question, q.khoa)
+            verdict = judge_row(judge, q, a) if judge else None
+        except LLMError as e:
+            # Một câu lỗi không dừng cả lần chạy; câu đã xong nằm trong cache khi chạy lại.
+            failed.append(q.id)
+            print(f"[{i}/{len(questions)}] {q.id} LỖI: {e}", flush=True)
+            continue
         row = {
             "id": q.id, "loai": q.loai, "nen_tu_choi": q.nen_tu_choi, "status": a.status,
             "refused": a.status == "tu_choi", "uncertain": a.uncertain,
@@ -118,12 +125,16 @@ def main() -> None:
             row.update(score_citations(a, q.can_cu))
         if q.dap_an_ngan:
             row["short_answer_correct"] = float(short_answer_correct(a.text, q.dap_an_ngan))
-        if judge:
-            row["judge"], row["judge_reason"] = judge_row(judge, q, a)
+        if verdict:
+            row["judge"], row["judge_reason"] = verdict
             row["judge_score"] = SCORE[row["judge"]]
         rows.append(row)
         print(f"[{i}/{len(questions)}] {q.id} {a.status}"
               f"{' (cache)' if a.llm and a.llm.cached else ''}", flush=True)
+
+    if failed:
+        # Không ghi kết quả thiếu câu: con số sẽ bị hiểu nhầm là của cả bộ test.
+        raise SystemExit(f"{len(failed)} câu lỗi ({', '.join(failed)}); chạy lại để hoàn tất.")
 
     answerable = [r for r in rows if not r["nen_tu_choi"]]
     out_scope = [r for r in rows if r["nen_tu_choi"]]
