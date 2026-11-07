@@ -68,6 +68,20 @@ def citation_label(unit: Unit, doc: Document) -> str:
     return f"{where}, {doc.doc_title} ({doc.so_hieu})"
 
 
+def _amends(amendment, passage: Passage) -> bool:
+    return passage.doc_id == amendment.by_doc_id and any(
+        pu.dieu == u.dieu and (u.khoan is None or pu.khoan is None or pu.khoan == u.khoan)
+        for pu in passage.units for u in amendment.units
+    )
+
+
+def _drop_superseded(cited: list[Passage]) -> list[Passage]:
+    """Trích cả đoạn đã bị sửa lẫn đoạn sửa đổi thì chỉ giữ đoạn sửa đổi: căn cứ hiện hành là
+    văn bản mới, trích quy định đã bị thay thế dễ khiến sinh viên hiểu nhầm."""
+    return [p for p in cited
+            if not any(_amends(am, q) for am in p.amended_by for q in cited if q is not p)]
+
+
 def _parse(text: str) -> dict:
     cleaned = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
     return json.loads(cleaned)
@@ -197,6 +211,7 @@ class QA:
                     valid.append(passages[n - 1])
             else:
                 dropped.append(n)
+        valid = _drop_superseded(valid)
         # Hậu kiểm: mọi "Điều N" nêu trong câu trả lời phải có trong các đoạn đã truy xuất
         # hoặc trong căn cứ do công cụ trả về (căn cứ công cụ lấy từ file quy tắc đã kiểm thử).
         retrieved_dieu = {u.dieu for p in passages for u in p.units} | {u.dieu for u in tool_units}

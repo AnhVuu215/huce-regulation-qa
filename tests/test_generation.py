@@ -207,3 +207,20 @@ def test_quota_error_reports_server_retry_delay():
     err = urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
     detail, delay = _quota_detail(err)
     assert "PerMinute" in detail and delay == 32.0
+
+
+def test_superseded_passage_is_dropped_when_amending_one_is_cited():
+    from retrieval.corpus import Amendment
+
+    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
+                                     so_hieu="2026", file="x", sha256="x",
+                                     hieu_luc_tu="2026-03-12")}
+    amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
+    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
+                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
+                                                      (Unit("rule", 6, 4),)),))
+    retriever = StubRetriever([amended])
+    retriever.passages = [amended, amending]
+    llm = FakeLLM(reply("Cuối kỳ 50%.", [1, 2]))
+    a = QA(retriever, llm, docs, QAConfig()).answer("Thi cuối kỳ chiếm bao nhiêu?", 68)
+    assert a.cited_passages == ["r-d6-k4"]
