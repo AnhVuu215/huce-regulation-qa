@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-from ingestion.chunker import chunk_document
+from ingestion.chunker import amendment_matches, chunk_document
 from ingestion.parser import Dieu
-from ingestion.registry import Document
+from ingestion.registry import Document, SuaDoi
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,15 @@ class Unit:
 
 
 @dataclass(frozen=True)
+class Amendment:
+    """Đoạn này bị văn bản `by_doc_id` sửa đổi; `units` là các Điều/Khoản thay thế."""
+
+    by_doc_id: str
+    noi_dung: str
+    units: tuple[Unit, ...]
+
+
+@dataclass(frozen=True)
 class Passage:
     passage_id: str
     doc_id: str
@@ -23,6 +32,7 @@ class Passage:
     units: tuple[Unit, ...]
     khoa_tu: int | None
     khoa_den: int | None
+    amended_by: tuple[Amendment, ...] = ()
 
     def ap_dung_cho(self, khoa: int) -> bool:
         return (self.khoa_tu is None or khoa >= self.khoa_tu) and (
@@ -30,18 +40,26 @@ class Passage:
         )
 
 
-def structural_passages(doc: Document, dieus: list[Dieu]) -> list[Passage]:
-    return [
-        Passage(
+def structural_passages(doc: Document, dieus: list[Dieu],
+                        amendments: list[tuple[str, SuaDoi]] = ()) -> list[Passage]:
+    """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
+    passages = []
+    for c in chunk_document(doc, dieus, amendments=amendments):
+        amended_by = tuple(
+            Amendment(by, sd.noi_dung, tuple(Unit(by, v.dieu, v.khoan) for v in sd.can_cu))
+            for by, sd in amendments
+            if amendment_matches(sd, c.dieu, c.khoan)
+        )
+        passages.append(Passage(
             passage_id=c.chunk_id,
             doc_id=doc.doc_id,
             text=c.text,
             units=(Unit(doc.doc_id, c.dieu, c.khoan),),
             khoa_tu=doc.khoa_tu,
             khoa_den=doc.khoa_den,
-        )
-        for c in chunk_document(doc, dieus)
-    ]
+            amended_by=amended_by,
+        ))
+    return passages
 
 
 def _labelled_words(doc: Document, dieus: list[Dieu]) -> list[tuple[str, Unit]]:

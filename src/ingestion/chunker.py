@@ -5,7 +5,7 @@ from datetime import date
 from pydantic import BaseModel
 
 from ingestion.parser import DIEM, Dieu, Khoan, _join
-from ingestion.registry import Document
+from ingestion.registry import Document, SuaDoi
 
 # Đếm theo từ để không phụ thuộc tokenizer; 300 từ tiếng Việt nằm dưới giới hạn
 # 512 token thường gặp của reranker.
@@ -94,5 +94,17 @@ def _split_khoan(khoan: Khoan, max_words: int) -> list[str]:
     return [intro_text + "\n" + _join(p) if intro_text else _join(p) for p in parts]
 
 
-def chunk_document(doc: Document, dieus: list[Dieu], max_words: int = MAX_WORDS) -> list[Chunk]:
-    return [chunk for dieu in dieus for chunk in chunk_dieu(doc, dieu, max_words)]
+def amendment_matches(sd: SuaDoi, dieu: int, khoan: int | None) -> bool:
+    """Chunk (Điều, Khoản) chứa phần bị sửa. Chunk trọn Điều (khoan None) chứa mọi Khoản."""
+    return sd.dieu == dieu and (sd.khoan is None or khoan is None or sd.khoan == khoan)
+
+
+def chunk_document(doc: Document, dieus: list[Dieu], max_words: int = MAX_WORDS,
+                   amendments: list[tuple[str, SuaDoi]] = ()) -> list[Chunk]:
+    """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
+    chunks = [chunk for dieu in dieus for chunk in chunk_dieu(doc, dieu, max_words)]
+    for chunk in chunks:
+        hits = [f"{by}: {sd.noi_dung}" for by, sd in amendments
+                if amendment_matches(sd, chunk.dieu, chunk.khoan)]
+        chunk.sua_doi_boi = "; ".join(hits) or None
+    return chunks
