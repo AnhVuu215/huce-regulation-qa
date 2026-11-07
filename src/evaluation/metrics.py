@@ -1,8 +1,9 @@
 """Chỉ số truy xuất, đo bằng code so với căn cứ chuẩn."""
 
+import unicodedata
 from dataclasses import dataclass
 
-from evaluation.testset import CanCu
+from evaluation.testset import CanCu, DapAnNgan
 from retrieval.corpus import Passage, Unit
 
 
@@ -40,3 +41,9 @@ def score(ranked: list[Passage], gold: list[CanCu], khoa: int | None, k: int = 5
         reciprocal_rank=1 / first if first else 0.0,
         wrong_version_at_k=wrong / len(top) if top else 0.0,
     )
+
+
+def short_answer_correct(text: str, spec: DapAnNgan) -> bool:
+    norm = unicodedata.normalize("NFC", text).lower()
+    has_all = all(any(alt.lower() in norm for alt in group) for group in spec.phai_co)
+    return has_all and not any(bad.lower() in norm for bad in spec.khong_duoc_co)

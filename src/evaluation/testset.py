@@ -18,6 +18,14 @@ class CanCu(BaseModel):
     khoan: int | None = None
 
 
+class DapAnNgan(BaseModel):
+    """Kiểm tra câu trả lời bằng code: mỗi nhóm trong phai_co phải có ít nhất một cụm xuất hiện,
+    và không cụm nào trong khong_duoc_co được xuất hiện (không phân biệt hoa thường)."""
+
+    phai_co: list[list[str]]
+    khong_duoc_co: list[str] = []
+
+
 class Question(BaseModel):
     id: str
     loai: Loai
@@ -27,6 +35,7 @@ class Question(BaseModel):
     can_cu: list[CanCu]
     nen_tu_choi: bool
     nguon: Literal["tu_viet", "thuc_te"]
+    dap_an_ngan: DapAnNgan | None = None
 
 
 def load_testset(path: Path) -> list[Question]:
