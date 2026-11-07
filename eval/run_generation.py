@@ -137,8 +137,10 @@ def main() -> None:
 
     summary = {
         "model": args.model, "retrieval": RETRIEVAL, "tools": args.tools, "n": len(rows),
-        "tinh_toan_dung": mean([r for r in rows if "short_answer_correct" in r],
-                               "short_answer_correct"),
+        "tinh_toan_dung": mean([r for r in rows if "short_answer_correct" in r
+                                and r["loai"] == "tinh_toan"], "short_answer_correct"),
+        "dap_an_ngan_phien_ban": mean([r for r in rows if "short_answer_correct" in r
+                                       and r["loai"] == "phien_ban"], "short_answer_correct"),
         "cau_goi_cong_cu": sum(bool(r["tool_calls"]) for r in rows),
         "trich_dan_dung": mean(answerable, "citation_correct"),
         "citation_precision": mean(answerable, "citation_precision"),
