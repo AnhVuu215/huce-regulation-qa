@@ -1,0 +1,131 @@
+{
+ "summary": {
+  "model": "gemini-3.6-flash",
+  "retrieval": "khong_rerank+loc_khoa",
+  "n": 5,
+  "trich_dan_dung": 1.0,
+  "citation_precision": 1.0,
+  "citation_recall": 1.0,
+  "tu_choi_dung": "2/2",
+  "tu_choi_nham": "0/3",
+  "khong_chac_chan": "0/3",
+  "fallback_used": 0,
+  "latency_s_p50": 13.79,
+  "latency_s_p95": 21.54,
+  "tokens_per_question": 2342.6,
+  "by_type": {
+   "tra_cuu": {
+    "n": 3,
+    "trich_dan_dung": 1.0,
+    "tu_choi_nham": 0
+   }
+  }
+ },
+ "questions": [
+  {
+   "id": "q001",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.737,
+   "answer": "Theo Điều 3 Khoản 2, một tín chỉ được tính tương đương 50 giờ học tập định mức của người học (bao gồm cả thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra đánh giá). Đối với hoạt động dạy học trên lớp, một tín chỉ yêu cầu thực hiện tối thiểu 15 giờ giảng hoặc 30 giờ thực hành, thí nghiệm, thảo luận (với một giờ trên lớp được tính bằng 50 phút).",
+   "cited": [
+    "qc2022-d3-k2-p1"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.6-flash",
+   "latency_s": 13.79,
+   "cached": false,
+   "tokens": 2534,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0
+  },
+  {
+   "id": "q002",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.602,
+   "answer": "Theo Điều 9 Khoản 4, điểm chữ B+ ứng với khoảng điểm học phần từ 8,0 đến 8,4.",
+   "cited": [
+    "qc2022-d9-k4"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.6-flash",
+   "latency_s": 13.55,
+   "cached": false,
+   "tokens": 2436,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0
+  },
+  {
+   "id": "q003",
+   "loai": "tra_cuu",
+   "nen_tu_choi": false,
+   "status": "tra_loi",
+   "refused": false,
+   "uncertain": false,
+   "relevance": 0.677,
+   "answer": "Đối với đào tạo theo hình thức chính quy và vừa làm vừa học, tối đa 30% tổng khối lượng của chương trình đào tạo được thực hiện bằng lớp học trực tuyến. Trong trường hợp thiên tai, dịch bệnh phức tạp và các trường hợp bất khả kháng, Trường sẽ thực hiện theo hướng dẫn của Bộ Giáo dục và Đào tạo (Điều 8 Khoản 2b).",
+   "cited": [
+    "qc2022-d8-k2"
+   ],
+   "warnings": [
+    "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng (xét tốt nghiệp, buộc thôi học, chuyển ngành...), hãy xác nhận với Phòng Quản lý đào tạo."
+   ],
+   "model": "gemini-3.6-flash",
+   "latency_s": 21.54,
+   "cached": false,
+   "tokens": 2165,
+   "citation_precision": 1.0,
+   "citation_recall": 1.0,
+   "citation_correct": 1.0
+  },
+  {
+   "id": "q046",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.535,
+   "answer": "Quy chế được cung cấp không quy định về mức học phí cho mỗi tín chỉ trong năm học 2026-2027.",
+   "cited": [],
+   "warnings": [],
+   "model": "gemini-3.6-flash",
+   "latency_s": 5.66,
+   "cached": false,
+   "tokens": 2377
+  },
+  {
+   "id": "q047",
+   "loai": "ngoai_pham_vi",
+   "nen_tu_choi": true,
+   "status": "tu_choi",
+   "refused": true,
+   "uncertain": false,
+   "relevance": 0.61,
+   "answer": "Quy chế được cung cấp không quy định cụ thể ngày bắt đầu lịch thi cuối kỳ của học kỳ này.",
+   "cited": [],
+   "warnings": [],
+   "model": "gemini-3.6-flash",
+   "latency_s": 21.05,
+   "cached": false,
+   "tokens": 2201
+  }
+ ],
+ "qa_config": {
+  "top_k": 6,
+  "relevance_threshold": 0.5
+ }
+}
