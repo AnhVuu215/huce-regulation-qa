@@ -1,12 +1,15 @@
 """API với QA giả lập: không cần mô hình, không cần mạng."""
 
 import json
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-from api.app import create_app
+from api.app import RateLimiter, create_app
 from generation.answer import Answer
 from generation.llm import LLMError
 from ingestion.registry import load_registry
@@ -101,3 +104,36 @@ def test_documents_list_cohorts_and_amendments(client):
 def test_index_serves_demo_page(client):
     r = client.get("/")
     assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+
+
+def test_rate_limit_per_client(tmp_path):
+    with TestClient(create_app(FakeQA, data_dir=tmp_path, rate_limit_per_min=2)) as c:
+        codes = [c.post("/ask", json={"question": "GPA bao nhiêu?"}).status_code
+                 for _ in range(3)]
+        r = c.post("/ask", json={"question": "GPA bao nhiêu?"})
+    assert codes == [200, 200, 429]
+    assert int(r.headers["Retry-After"]) >= 1
+
+
+def test_rate_limiter_window_expires():
+    limiter = RateLimiter(1, window_s=0.05)
+    assert limiter.retry_after("a") == 0
+    assert limiter.retry_after("a") > 0
+    assert limiter.retry_after("b") == 0
+    time.sleep(0.06)
+    assert limiter.retry_after("a") == 0
+
+
+def test_answers_are_not_serialized(tmp_path):
+    started = threading.Barrier(2, timeout=5)
+
+    class SlowQA(FakeQA):
+        def answer(self, question, khoa):
+            started.wait()  # chỉ qua được khi hai request chạy cùng lúc
+            return super().answer(question, khoa)
+
+    with TestClient(create_app(SlowQA, data_dir=tmp_path, rate_limit_per_min=0)) as c, \
+            ThreadPoolExecutor(2) as pool:
+        codes = list(pool.map(lambda _: c.post("/ask", json={"question": "GPA?"}).status_code,
+                              range(2)))
+    assert codes == [200, 200]

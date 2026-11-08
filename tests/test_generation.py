@@ -224,3 +224,29 @@ def test_superseded_passage_is_dropped_when_amending_one_is_cited():
     llm = FakeLLM(reply("Cuối kỳ 50%.", [1, 2]))
     a = QA(retriever, llm, docs, QAConfig()).answer("Thi cuối kỳ chiếm bao nhiêu?", 68)
     assert a.cited_passages == ["r-d6-k4"]
+
+
+def test_concurrent_calls_keep_min_interval(monkeypatch):
+    import io  # noqa: PLC0415
+    import threading  # noqa: PLC0415
+    import time  # noqa: PLC0415
+    import urllib.request  # noqa: PLC0415
+
+    from generation.llm import GeminiClient  # noqa: PLC0415
+
+    times = []
+
+    def fake_urlopen(req, timeout):
+        times.append(time.monotonic())
+        return io.BytesIO(b"{}")
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    client = GeminiClient(["mo-hinh-thu-khoang-cach"], api_key="x", min_interval_s=0.1)
+    threads = [threading.Thread(target=client._post, args=("mo-hinh-thu-khoang-cach", {}))
+               for _ in range(3)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    times.sort()
+    assert all(b - a >= 0.09 for a, b in zip(times, times[1:], strict=False))

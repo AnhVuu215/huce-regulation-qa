@@ -1,6 +1,7 @@
 """Tìm kiếm vector. Embedding được cache theo nội dung để chạy eval lại không phải tính lại."""
 
 import hashlib
+import threading
 from collections import OrderedDict
 from pathlib import Path
 
@@ -28,6 +29,8 @@ class Embedder:
         # Câu hỏi chỉ giữ trong bộ nhớ: ghi vào file cache thì mỗi câu hỏi mới phải ghi lại cả
         # file (hàng MB), và file phình theo số câu người dùng hỏi.
         self._queries: OrderedDict[str, np.ndarray] = OrderedDict()
+        # API trả lời nhiều request song song; mô hình chạy trên CPU nên mã hóa lần lượt.
+        self._lock = threading.Lock()
         for path in [seed_dir / filename if seed_dir else None, self._cache_path]:
             if path and path.exists():
                 with np.load(path) as data:
@@ -73,14 +76,15 @@ class Embedder:
     def encode_queries(self, texts: list[str]) -> np.ndarray:
         """Vector của các câu hỏi, mã hóa chung một lượt (rẻ hơn nhiều lượt riêng trên CPU).
         Chỉ giữ trong bộ nhớ: ghi ra file cache thì mỗi câu mới phải ghi lại cả file."""
-        missing = list(dict.fromkeys(t for t in texts if self._lookup(t) is None))
-        if missing:
-            vectors = self._load().encode(missing, normalize_embeddings=True)
-            for text, vec in zip(missing, vectors, strict=True):
-                self._queries[self._key(text)] = vec.astype(np.float32)
-            while len(self._queries) > QUERY_CACHE_SIZE:
-                self._queries.popitem(last=False)
-        return np.stack([self._lookup(t) for t in texts])
+        with self._lock:
+            missing = list(dict.fromkeys(t for t in texts if self._lookup(t) is None))
+            if missing:
+                vectors = self._load().encode(missing, normalize_embeddings=True)
+                for text, vec in zip(missing, vectors, strict=True):
+                    self._queries[self._key(text)] = vec.astype(np.float32)
+                while len(self._queries) > QUERY_CACHE_SIZE:
+                    self._queries.popitem(last=False)
+            return np.stack([self._lookup(t) for t in texts])
 
     def _lookup(self, text: str) -> np.ndarray | None:
         key = self._key(text)

@@ -6,6 +6,7 @@ Logic trả lời chỉ phụ thuộc giao diện `LLM`: đổi nhà cung cấp 
 import hashlib
 import json
 import os
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -68,10 +69,14 @@ class GeminiClient:
     def _post(self, model: str, body: dict) -> dict:
         # Hạn mức tính theo mô hình cho cả project, nên mọi client trong tiến trình (bên trả lời
         # và giám khảo) dùng chung một mốc thời gian theo mô hình.
-        wait = self.min_interval_s - (time.monotonic() - _LAST_CALL.get(model, 0.0))
+        # Giữ chỗ dưới khóa rồi mới ngủ ngoài khóa: các request song song xếp lần lượt từng lượt
+        # cách nhau min_interval_s thay vì cùng thấy "đã đủ lâu" và gọi dồn một lúc.
+        with _LAST_CALL_LOCK:
+            slot = max(time.monotonic(), _LAST_CALL.get(model, -1e9) + self.min_interval_s)
+            _LAST_CALL[model] = slot
+        wait = slot - time.monotonic()
         if wait > 0:
             time.sleep(wait)
-        _LAST_CALL[model] = time.monotonic()
         req = urllib.request.Request(
             f"{self.BASE}/{model}:generateContent",
             data=json.dumps(body).encode("utf-8"),
@@ -155,6 +160,7 @@ class GeminiClient:
 MAX_TOOL_ROUNDS = 4
 MAX_RETRY_DELAY_S = 90
 _LAST_CALL: dict[str, float] = {}
+_LAST_CALL_LOCK = threading.Lock()
 
 
 class _SwitchModel(Exception):
@@ -205,7 +211,10 @@ class CachedLLM:
             return LLMResponse(**{**data, "cached": True})
         response = self.inner.generate(system, prompt, json_schema, tools, tool_handler)
         if response.model == self.namespace:
-            path.write_text(json.dumps(asdict(response), ensure_ascii=False), encoding="utf-8")
+            # Ghi file tạm rồi đổi tên: request song song không bao giờ đọc phải file ghi dở.
+            tmp = path.with_suffix(f".{threading.get_ident()}.tmp")
+            tmp.write_text(json.dumps(asdict(response), ensure_ascii=False), encoding="utf-8")
+            tmp.replace(path)
         return response
 
 
