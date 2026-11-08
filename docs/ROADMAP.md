@@ -159,7 +159,23 @@ Bài học (đưa vào "Những gì không hiệu quả"):
     lại kết quả công cụ cũ.
   - Câu sai còn lại ở nhóm tính toán (q038): mô hình tự gọi thêm công cụ quy đổi điểm, kéo theo
     một căn cứ ngoài bộ test.
-- [!] 6.2 Mở rộng bộ test lên 150–200 câu, ưu tiên câu thật của sinh viên
+- [!] 6.2 Mở rộng bộ test lên 150–200 câu, ưu tiên câu thật của sinh viên (đang làm: 72 câu)
+
+  Đợt 1 (2026-11-08): 19 câu thật từ group công khai "Sinh viên Đại học Xây Dựng Hà Nội (HUCE)",
+  tìm theo 13 từ khóa học vụ, viết lại ẩn danh (không lưu tên, hồ sơ, bài gốc), `nguon: thuc_te`.
+  Bài gốc không nêu khóa nên giả định K68 (ghi trong `ghi_chu`).
+
+  | gemini-3.5-flash-lite, công cụ auto | câu tự viết (53) | câu thật (19) |
+  |---|---|---|
+  | độ đúng nội dung (giám khảo) | 0,917 | **0,500** |
+  | trích dẫn đúng | 0,938 | **0,286** |
+  | từ chối nhầm câu có căn cứ | 1/48 | **7/14** |
+  | từ chối đúng câu ngoài phạm vi | 5/5 | 4/5 |
+
+  Câu tự viết đánh giá quá cao hệ thống. Trong 7 câu thật bị từ chối nhầm: 4 câu căn cứ đã nằm
+  trong 6 đoạn đưa cho LLM (q056, q060, q069, q071; q060 ở hạng 1) nhưng LLM nói "không quy định"
+  vì sinh viên hỏi một tình huống cụ thể còn quy chế chỉ có quy định chung; 3 câu là lỗi truy xuất
+  (q062, q063, q064; căn cứ của q063 không có trong top-20).
 - [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
 
   Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
