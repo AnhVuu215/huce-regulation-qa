@@ -2,6 +2,7 @@
 
 import json
 import re
+import time
 from dataclasses import dataclass, field
 
 from generation.llm import LLM, LLMResponse
@@ -61,10 +62,16 @@ class Answer:
     unverified_mentions: list[int] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     llm: LLMResponse | None = None
+    # Thời gian từng bước (ms): retrieval_ms, llm_ms.
+    timings: dict[str, int] = field(default_factory=dict)
 
     @property
     def uncertain(self) -> bool:
         return bool(self.unverified_mentions) or (self.status == "tra_loi" and not self.citations)
+
+
+def _ms_since(start: float) -> int:
+    return round(1000 * (time.perf_counter() - start))
 
 
 def citation_label(unit: Unit, doc: Document) -> str:
@@ -152,6 +159,8 @@ class QA:
 
     def answer(self, question: str, khoa: int | None) -> Answer:
         cfg = self.config
+        timings: dict[str, int] = {}
+        start = time.perf_counter()
         passages = self.retriever.search(question, khoa, k=cfg.top_k)
         retrieved = [p.passage_id for p in passages]
         if khoa is None and self._needs_khoa(passages):
@@ -160,9 +169,11 @@ class QA:
                 text="Quy định này khác nhau giữa các khóa (K66 trở về trước và K67 trở đi). "
                 "Bạn là sinh viên khóa nào?",
                 retrieved=retrieved,
+                timings={"retrieval_ms": _ms_since(start)},
             )
 
         relevance = self.retriever.max_similarity(question, khoa)
+        timings["retrieval_ms"] = _ms_since(start)
         if relevance < cfg.relevance_threshold:
             return Answer(
                 status="tu_choi",
@@ -171,6 +182,7 @@ class QA:
                 "hãy liên hệ Phòng Quản lý đào tạo.",
                 retrieved=retrieved,
                 relevance=relevance,
+                timings=timings,
             )
 
         passages = self._with_amendments(passages)
@@ -189,11 +201,13 @@ class QA:
             cfg.tools_mode == "always"
             or (cfg.tools_mode == "auto" and needs_calculation(question))
         )
+        start = time.perf_counter()
         if use_tools:
             response = self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
                                          FUNCTION_DECLARATIONS, self._tool_handler(khoa))
         else:
             response = self.llm.generate(SYSTEM, prompt, SCHEMA)
+        timings["llm_ms"] = _ms_since(start)
         tool_units = [
             Unit(c["doc_id"], c["dieu"], c.get("khoan"))
             for call in response.tool_calls
@@ -204,7 +218,7 @@ class QA:
             data = _parse(response.text)
         except (json.JSONDecodeError, ValueError):
             return Answer(status="tra_loi", text=response.text, retrieved=retrieved,
-                          relevance=relevance, llm=response,
+                          relevance=relevance, llm=response, timings=timings,
                           warnings=["Không đọc được định dạng trả lời, chưa kiểm chứng trích dẫn."])
 
         status = "tu_choi" if data.get("tu_choi") else "tra_loi"
@@ -234,6 +248,7 @@ class QA:
             dropped_citations=dropped,
             unverified_mentions=unverified,
             llm=response,
+            timings=timings,
         )
         if dropped:
             result.warnings.append(f"Đã loại trích dẫn không hợp lệ: {dropped}")
