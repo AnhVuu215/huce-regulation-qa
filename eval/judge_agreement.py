@@ -19,11 +19,14 @@ from evaluation.judge import VERDICTS  # noqa: E402
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
-    parser.add_argument("results", type=Path)
+    parser.add_argument("results", type=Path, nargs="+", help="các lần chạy đã tạo bảng chấm")
     parser.add_argument("--sheet", type=Path, default=ROOT / "eval" / "human" / "cham-tay.csv")
     args = parser.parse_args()
 
-    judged = {r["id"]: r for r in json.loads(args.results.read_text(encoding="utf-8"))["questions"]}
+    judged = {}
+    for path in args.results:
+        run = json.loads(path.read_text(encoding="utf-8"))
+        judged.update({r["id"]: r for r in run["questions"]})
     with args.sheet.open(encoding="utf-8-sig", newline="") as f:
         rows = [r for r in csv.DictReader(f) if r["nguoi_cham"].strip()]
     invalid = [r["id"] for r in rows if r["nguoi_cham"].strip() not in VERDICTS]

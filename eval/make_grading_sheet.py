@@ -42,14 +42,31 @@ def stratified_sample(rows: list[dict], fraction: float, seed: int) -> list[dict
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("results", type=Path)
+    parser.add_argument("results", type=Path, nargs="+", help="một hoặc nhiều lần chạy có --judge")
     parser.add_argument("--out", type=Path, default=ROOT / "eval" / "human" / "cham-tay.csv")
+    parser.add_argument("--fraction", type=float, default=FRACTION)
+    parser.add_argument("--source", choices=["tu_viet", "thuc_te"],
+                        help="chỉ lấy câu của một nguồn")
+    parser.add_argument("--answered-only", action="store_true",
+                        help="chỉ lấy câu hệ thống đã trả lời: câu bị từ chối do code chấm, "
+                             "không qua giám khảo")
     args = parser.parse_args()
 
-    run = json.loads(args.results.read_text(encoding="utf-8"))
-    questions = {q.id: q for q in load_testset(ROOT / "eval" / "testset.jsonl")}
-    answered = [r for r in run["questions"] if not r["nen_tu_choi"]]
-    sample = stratified_sample(answered, FRACTION, SEED)
+    questions = {}
+    for name in ("testset.jsonl", "testset_holdout.jsonl"):
+        if (ROOT / "eval" / name).exists():
+            questions.update({q.id: q for q in load_testset(ROOT / "eval" / name)})
+    candidates = []
+    for path in args.results:
+        run = json.loads(path.read_text(encoding="utf-8"))
+        candidates += [
+            r for r in run["questions"]
+            if not r["nen_tu_choi"]
+            and (args.source is None or r.get("nguon") == args.source)
+            and (not args.answered_only or r["status"] == "tra_loi")
+        ]
+    sample = stratified_sample(candidates, args.fraction, SEED)
+    answered = candidates
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # utf-8-sig để Excel hiển thị đúng tiếng Việt.
@@ -63,7 +80,7 @@ def main() -> None:
                 "dap_an_chuan": q.answer, "cau_tra_loi_he_thong": r["answer"],
                 "trich_dan": "; ".join(r.get("citations", [])), "nguoi_cham": "", "ghi_chu": "",
             })
-    print(f"{len(sample)}/{len(answered)} câu -> {args.out.relative_to(ROOT)}")
+    print(f"{len(sample)}/{len(answered)} câu -> {args.out}")
 
 
 if __name__ == "__main__":
