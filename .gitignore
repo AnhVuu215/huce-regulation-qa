@@ -1,6 +1,7 @@
 *.egg-info/
 *.pyc
 .cache/
+.data/
 .env
 .pytest_cache/
 .ruff_cache/
