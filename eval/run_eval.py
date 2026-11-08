@@ -107,13 +107,13 @@ def main() -> None:
     reranker = Reranker(cache_dir=CACHE / "rerank")
 
     configs = list(CONFIGS.values()) if args.ablation else [(CONFIGS | EXTRA)[args.config]]
-    stamp = f"{datetime.now():%Y%m%d-%H%M%S}"
+    stamp = f"{datetime.now().astimezone():%Y%m%d-%H%M%S}"
     out_dir = ROOT / "eval" / "results"
     out_dir.mkdir(exist_ok=True)
     overall = {}
     for config in configs:
         result = run(config, questions, docs, parsed, embedder, reranker)
-        result["time"] = datetime.now().isoformat(timespec="seconds")
+        result["time"] = datetime.now().astimezone().isoformat(timespec="seconds")
         (out_dir / f"{stamp}-{config.name}.json").write_text(
             json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8"
         )
