@@ -79,3 +79,13 @@ def test_queries_encoded_in_one_batch_and_warm_up_bypasses_cache(tmp_path):
     embedder._cache[embedder._key("khởi động")] = None  # có sẵn trong cache cũ
     embedder.warm_up()
     assert model.calls == 2
+
+
+def test_sub_queries_split_compound_questions_only():
+    from retrieval.pipeline import sub_queries
+
+    q = "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không? Với dưới bao nhiêu điểm là nợ môn ạ?"
+    assert sub_queries(q) == [q, "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
+                              "Với dưới bao nhiêu điểm là nợ môn ạ"]
+    assert sub_queries("Học lại và cải thiện điểm thì sao?") == [
+        "Học lại và cải thiện điểm thì sao?"]

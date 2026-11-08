@@ -43,6 +43,7 @@ def summarize(rows: list[dict]) -> dict[str, dict[str, float]]:
     groups: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
         groups[r["loai"]].append(r)
+        groups["nguồn: " + r["nguon"]].append(r)
         groups["TẤT CẢ"].append(r)
     return {
         loai: {
@@ -75,7 +76,7 @@ def run(config: RetrievalConfig, questions, docs, parsed, embedder, reranker) ->
         ranked = retriever.search(q.question, q.khoa, k=10)
         latencies.append(time.perf_counter() - t)
         s = score(ranked, q.can_cu, q.khoa, k=K)
-        rows.append({"id": q.id, "loai": q.loai, "khoa": q.khoa, **asdict(s),
+        rows.append({"id": q.id, "loai": q.loai, "nguon": q.nguon, "khoa": q.khoa, **asdict(s),
                      "top": [p.passage_id for p in ranked[:K]]})
     latencies.sort()
     return {
