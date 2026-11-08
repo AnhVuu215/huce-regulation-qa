@@ -10,7 +10,9 @@ from retrieval import build, presets
 from retrieval.dense import Embedder
 from tools.hoc_vu import HocVu
 
-MODEL = os.environ.get("LLM_MODEL", "gemini-3.5-flash-lite")
+# Danh sách cách nhau bởi dấu phẩy: mô hình đầu hết hạn mức ngày thì chuyển sang mô hình sau.
+MODELS = [m.strip() for m in os.environ.get("LLM_MODEL", "gemini-3.5-flash-lite").split(",")
+          if m.strip()]
 log = logging.getLogger("huce_qa")
 
 
@@ -27,6 +29,7 @@ def build_qa(root: Path) -> QA:
     # Mô hình vẫn cần để mã hóa câu hỏi; nạp sẵn lúc khởi động (khoảng 20 giây) để người hỏi đầu
     # tiên không phải chờ.
     embedder.warm_up()
-    llm = CachedLLM(GeminiClient([MODEL]), cache / "llm", namespace=MODEL)
+    # Chỉ cache câu trả lời của mô hình chính, để số liệu đánh giá không lẫn mô hình dự phòng.
+    llm = CachedLLM(GeminiClient(MODELS), cache / "llm", namespace=MODELS[0])
     tools = HocVu(root / "data" / "rules" / "hoc-vu.yaml", docs)
     return QA(retriever, llm, docs, QAConfig(), tools=tools)
