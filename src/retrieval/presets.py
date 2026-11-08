@@ -16,4 +16,6 @@ ABLATION = [BASELINE, STRUCTURE, HYBRID, SYNONYMS, RERANK, KHOA]
 
 # Cấu hình chạy thật: bỏ reranker vì tốn 20-30 giây mỗi câu trên CPU mà không tăng Recall@5.
 PRODUCTION = replace(SYNONYMS, name="khong_rerank+loc_khoa", khoa_filter=True)
-EXTRA = [PRODUCTION]
+# Tách câu hỏi ghép: không hiệu quả (docs/EVALUATION.md), giữ để tái lập số liệu.
+DECOMPOSE = replace(PRODUCTION, name="khong_rerank+loc_khoa+tach_cau", decompose=True)
+EXTRA = [PRODUCTION, DECOMPOSE]
