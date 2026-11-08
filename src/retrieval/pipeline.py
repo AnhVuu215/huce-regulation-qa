@@ -66,7 +66,7 @@ class Retriever:
             i for i, p in enumerate(self.passages)
             if not (self.config.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
         ]
-        return float((self.matrix[allowed] @ self.embedder.encode([question])[0]).max())
+        return float((self.matrix[allowed] @ self.embedder.encode_query(question)).max())
 
     def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]:
         cfg = self.config
@@ -75,7 +75,8 @@ class Retriever:
             i for i, p in enumerate(self.passages)
             if not (cfg.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
         ]
-        dense = self.matrix[allowed] @ self.embedder.encode([query])[0]
+        # Câu gốc (cổng liên quan, max_similarity) mã hóa chung lượt với câu đã mở rộng.
+        dense = self.matrix[allowed] @ self.embedder.encode_queries([query, question])[0]
         rankings = [[allowed[i] for i in dense.argsort()[::-1]]]
         if self.bm25 is not None:
             lexical = self.bm25.scores(query)

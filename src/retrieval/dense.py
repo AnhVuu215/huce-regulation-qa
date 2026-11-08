@@ -1,6 +1,7 @@
 """Tìm kiếm vector. Embedding được cache theo nội dung để chạy eval lại không phải tính lại."""
 
 import hashlib
+from collections import OrderedDict
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +9,7 @@ import numpy as np
 from retrieval.corpus import Passage
 
 DEFAULT_MODEL = "BAAI/bge-m3"
+QUERY_CACHE_SIZE = 512
 
 
 class Embedder:
@@ -23,6 +25,9 @@ class Embedder:
         filename = f"{model_name.replace('/', '__')}.npz"
         self._cache_path = cache_dir / filename if cache_dir else None
         self._cache: dict[str, np.ndarray] = {}
+        # Câu hỏi chỉ giữ trong bộ nhớ: ghi vào file cache thì mỗi câu hỏi mới phải ghi lại cả
+        # file (hàng MB), và file phình theo số câu người dùng hỏi.
+        self._queries: OrderedDict[str, np.ndarray] = OrderedDict()
         for path in [seed_dir / filename if seed_dir else None, self._cache_path]:
             if path and path.exists():
                 with np.load(path) as data:
@@ -61,6 +66,33 @@ class Embedder:
             self._save()
         return np.stack([self._cache[self._key(t)] for t in texts])
 
+    def encode_query(self, text: str) -> np.ndarray:
+        """Vector của một câu hỏi; không ghi cache ra đĩa."""
+        return self.encode_queries([text])[0]
+
+    def encode_queries(self, texts: list[str]) -> np.ndarray:
+        """Vector của các câu hỏi, mã hóa chung một lượt (rẻ hơn nhiều lượt riêng trên CPU).
+        Chỉ giữ trong bộ nhớ: ghi ra file cache thì mỗi câu mới phải ghi lại cả file."""
+        missing = list(dict.fromkeys(t for t in texts if self._lookup(t) is None))
+        if missing:
+            vectors = self._load().encode(missing, normalize_embeddings=True)
+            for text, vec in zip(missing, vectors, strict=True):
+                self._queries[self._key(text)] = vec.astype(np.float32)
+            while len(self._queries) > QUERY_CACHE_SIZE:
+                self._queries.popitem(last=False)
+        return np.stack([self._lookup(t) for t in texts])
+
+    def _lookup(self, text: str) -> np.ndarray | None:
+        key = self._key(text)
+        if key in self._queries:
+            self._queries.move_to_end(key)
+            return self._queries[key]
+        return self._cache.get(key)
+
+    def warm_up(self) -> None:
+        """Nạp mô hình và chạy thử một lượt, bỏ qua cache: người hỏi đầu tiên không phải chờ."""
+        self._load().encode(["khởi động"], normalize_embeddings=True)
+
     def _save(self) -> None:
         if self._cache_path:
             self._cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -74,6 +106,6 @@ class DenseIndex:
         self.matrix = embedder.encode([p.text for p in passages])
 
     def search(self, query: str, k: int = 10) -> list[tuple[Passage, float]]:
-        scores = self.matrix @ self.embedder.encode([query])[0]
+        scores = self.matrix @ self.embedder.encode_query(query)
         order = np.argsort(-scores)[:k]
         return [(self.passages[i], float(scores[i])) for i in order]

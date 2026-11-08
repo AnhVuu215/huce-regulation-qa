@@ -88,12 +88,17 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         start = time.perf_counter()
         try:
             with answer_lock:
+                wait_ms = round(1000 * (time.perf_counter() - start))
                 answer = qa.answer(req.question.strip(), req.khoa)
         except LLMError as e:
             log.warning("LLM lỗi: %s", e)
             requests_log.write({"request_id": request_id, "status": "loi_llm", "error": str(e)})
-            raise HTTPException(503, "Mô hình ngôn ngữ tạm thời không phản hồi, hãy thử lại sau "
-                                     "ít phút.") from e
+            if "PerDay" in str(e):
+                detail = ("Đã hết lượt gọi mô hình ngôn ngữ trong ngày (gói miễn phí); hạn mức "
+                          "được cấp lại sau nửa đêm giờ Thái Bình Dương, khoảng 15 giờ Việt Nam.")
+            else:
+                detail = "Mô hình ngôn ngữ tạm thời không phản hồi, hãy thử lại sau ít phút."
+            raise HTTPException(503, detail) from e
         latency_ms = round(1000 * (time.perf_counter() - start))
         citations = [
             Citation(doc_id=u.doc_id, doc_title=qa.docs[u.doc_id].doc_title,
@@ -107,7 +112,8 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         llm = answer.llm
         requests_log.write({
             "request_id": request_id, "status": answer.status, "khoa": req.khoa,
-            "latency_ms": latency_ms, "model": llm.model if llm else None,
+            "latency_ms": latency_ms, "wait_ms": wait_ms, **answer.timings,
+            "model": llm.model if llm else None,
             "cached": llm.cached if llm else None,
             "tokens": (llm.input_tokens + llm.output_tokens + llm.thinking_tokens) if llm else 0,
             "tool_calls": [c["name"] for c in llm.tool_calls] if llm else [],
