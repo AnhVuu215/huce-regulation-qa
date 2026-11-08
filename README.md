@@ -64,8 +64,13 @@ cp .env.example .env            # điền GEMINI_API_KEY
 docker compose up --build       # mở http://127.0.0.1:8000
 ```
 
-Lần đầu khởi động tải mô hình bge-m3 và tính embedding cho 521 đoạn văn bản (vài phút); các lần sau
-dùng cache trong volume.
+Lần đầu build tải mô hình bge-m3 (khoảng 2,3 GB); embedding của 521 đoạn văn bản có sẵn trong
+`data/embeddings` nên khởi động mất khoảng 20 giây.
+
+Mô hình cần khoảng 2,5 GB RAM. Nếu máy ảo Docker có ít bộ nhớ hơn (ví dụ `memory=3GB` trong
+`.wslconfig` khi còn chạy container khác), trọng số mô hình bị đẩy ra swap, và bước mã hóa câu hỏi
+mất từ 0,2 giây lên 2-40 giây. Khi đó, tăng bộ nhớ cho máy ảo hoặc chạy không dùng Docker như dưới
+đây. Mỗi request ghi `retrieval_ms`, `llm_ms` và `wait_ms` để biết thời gian nằm ở bước nào.
 
 Chạy không dùng Docker (Python 3.11, [uv](https://docs.astral.sh/uv/)):
 
