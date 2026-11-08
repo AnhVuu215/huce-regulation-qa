@@ -124,7 +124,7 @@ class HocVu:
         """Trung bình có trọng số tín chỉ của điểm số hệ 4. Mỗi học phần cho điểm hệ 10
         (diem_10) hoặc điểm chữ (diem_chu). Điểm chữ ngoài thang (P, I, X, R) không tính."""
         doc_id, points = self._rule(khoa, "diem_so")
-        detail, skipped, weighted, credits = [], [], 0.0, 0
+        detail, skipped, weighted, tong_tc = [], [], 0.0, 0
         for hp in hoc_phan:
             tin_chi = int(hp["tin_chi"])
             if hp.get("diem_10") is not None:
@@ -137,12 +137,12 @@ class HocVu:
             value = points["quy_doi"][letter]
             detail.append({"diem_chu": letter, "diem_so": value, "tin_chi": tin_chi})
             weighted += value * tin_chi
-            credits += tin_chi
-        if credits == 0:
+            tong_tc += tin_chi
+        if tong_tc == 0:
             raise ToolError("Không có học phần nào được tính vào điểm trung bình.")
         return {
-            "diem_trung_binh": lam_tron(weighted / credits, points["lam_tron_diem_trung_binh"]),
-            "tong_tin_chi": credits,
+            "diem_trung_binh": lam_tron(weighted / tong_tc, points["lam_tron_diem_trung_binh"]),
+            "tong_tin_chi": tong_tc,
             "chi_tiet": detail,
             "khong_tinh": skipped,
             "can_cu": [self._cite(doc_id, points["can_cu"])],

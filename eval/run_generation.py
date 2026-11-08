@@ -190,7 +190,7 @@ def main() -> None:
             summary["by_type"][k]["do_dung_noi_dung"] = mean(v, "judge_score")
     suffix = ("-tools" if args.tools else "") + (
         "" if args.testset == "testset.jsonl" else "-" + Path(args.testset).stem)
-    stamp = f"{datetime.now():%Y%m%d-%H%M%S}"
+    stamp = f"{datetime.now().astimezone():%Y%m%d-%H%M%S}"
     out = ROOT / "eval" / "results" / f"{stamp}-generation-{args.model}{suffix}.json"
     payload = {"summary": summary, "questions": rows, "qa_config": asdict(QAConfig())}
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")

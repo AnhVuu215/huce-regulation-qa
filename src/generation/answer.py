@@ -186,6 +186,21 @@ class QA:
             )
 
         passages = self._with_amendments(passages)
+        start = time.perf_counter()
+        response = self._generate(question, khoa, passages)
+        timings["llm_ms"] = _ms_since(start)
+        try:
+            data = _parse(response.text)
+        except (json.JSONDecodeError, ValueError):
+            return Answer(status="tra_loi", text=response.text, retrieved=retrieved,
+                          relevance=relevance, llm=response, timings=timings,
+                          warnings=["Không đọc được định dạng trả lời, chưa kiểm chứng trích dẫn."])
+        result, cited = self._verified(data, passages, response)
+        result.retrieved, result.relevance, result.timings = retrieved, relevance, timings
+        self._add_warnings(result, cited)
+        return result
+
+    def _prompt(self, question: str, khoa: int | None, passages: list[Passage]) -> str:
         blocks = []
         for n, p in enumerate(passages, start=1):
             label = citation_label(p.units[0], self.docs[p.doc_id])
@@ -196,31 +211,29 @@ class QA:
             blocks.append(f"[{n}] {label}\n{p.text}")
         who = f"Người hỏi là sinh viên khóa K{khoa}." if khoa else "Người hỏi không nêu khóa."
         context = "\n\n".join(blocks)
-        prompt = f"{who}\n\nCác đoạn văn bản:\n\n{context}\n\nCâu hỏi: {question}"
+        return f"{who}\n\nCác đoạn văn bản:\n\n{context}\n\nCâu hỏi: {question}"
+
+    def _generate(self, question: str, khoa: int | None, passages: list[Passage]) -> LLMResponse:
+        cfg = self.config
+        prompt = self._prompt(question, khoa, passages)
         use_tools = self.tools is not None and (
             cfg.tools_mode == "always"
             or (cfg.tools_mode == "auto" and needs_calculation(question))
         )
-        start = time.perf_counter()
         if use_tools:
-            response = self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
-                                         FUNCTION_DECLARATIONS, self._tool_handler(khoa))
-        else:
-            response = self.llm.generate(SYSTEM, prompt, SCHEMA)
-        timings["llm_ms"] = _ms_since(start)
+            return self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
+                                     FUNCTION_DECLARATIONS, self._tool_handler(khoa))
+        return self.llm.generate(SYSTEM, prompt, SCHEMA)
+
+    def _verified(self, data: dict, passages: list[Passage],
+                  response: LLMResponse) -> tuple[Answer, list[Passage]]:
+        """Hậu kiểm bằng code: giữ trích dẫn hợp lệ, đánh dấu Điều được nhắc mà không có căn cứ.
+        Trả kèm các đoạn được trích dẫn."""
         tool_units = [
             Unit(c["doc_id"], c["dieu"], c.get("khoan"))
             for call in response.tool_calls
             for c in call["result"].get("can_cu", [])
         ]
-
-        try:
-            data = _parse(response.text)
-        except (json.JSONDecodeError, ValueError):
-            return Answer(status="tra_loi", text=response.text, retrieved=retrieved,
-                          relevance=relevance, llm=response, timings=timings,
-                          warnings=["Không đọc được định dạng trả lời, chưa kiểm chứng trích dẫn."])
-
         status = "tu_choi" if data.get("tu_choi") else "tra_loi"
         valid, dropped = [], []
         for n in data.get("trich_dan", []):
@@ -243,24 +256,24 @@ class QA:
             text=data.get("tra_loi", ""),
             citations=citations,
             cited_passages=[p.passage_id for p in valid],
-            retrieved=retrieved,
-            relevance=relevance,
             dropped_citations=dropped,
             unverified_mentions=unverified,
             llm=response,
-            timings=timings,
         )
-        if dropped:
-            result.warnings.append(f"Đã loại trích dẫn không hợp lệ: {dropped}")
-        if unverified:
+        return result, valid
+
+    def _add_warnings(self, result: Answer, cited: list[Passage]) -> None:
+        if result.dropped_citations:
             result.warnings.append(
-                f"Câu trả lời nhắc tới Điều {unverified} không có trong văn bản đã tra: "
-                "chưa kiểm chứng được, hãy đối chiếu lại."
+                f"Đã loại trích dẫn không hợp lệ: {result.dropped_citations}")
+        if result.unverified_mentions:
+            result.warnings.append(
+                f"Câu trả lời nhắc tới Điều {result.unverified_mentions} không có trong văn bản "
+                "đã tra: chưa kiểm chứng được, hãy đối chiếu lại."
             )
         if result.status == "tra_loi" and not result.citations:
             result.warnings.append("Câu trả lời không có trích dẫn hợp lệ: không chắc chắn.")
         if result.status == "tra_loi":
-            if any(self.docs[p.doc_id].khoa_chua_ro for p in valid):
+            if any(self.docs[p.doc_id].khoa_chua_ro for p in cited):
                 result.warnings.append("Văn bản trích dẫn chưa rõ khóa áp dụng.")
             result.warnings.append(DISCLAIMER)
-        return result
