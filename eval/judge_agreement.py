@@ -19,20 +19,25 @@ from evaluation.judge import VERDICTS  # noqa: E402
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
-    parser.add_argument("results", type=Path)
+    parser.add_argument("results", type=Path, nargs="+", help="các lần chạy đã tạo bảng chấm")
     parser.add_argument("--sheet", type=Path, default=ROOT / "eval" / "human" / "cham-tay.csv")
+    parser.add_argument("--column", default="nguoi_cham",
+                        help="cột điểm người chấm: nguoi_cham (chấm mù) hoặc phan_xu (sau phân xử)")
     args = parser.parse_args()
 
-    judged = {r["id"]: r for r in json.loads(args.results.read_text(encoding="utf-8"))["questions"]}
+    judged = {}
+    for path in args.results:
+        run = json.loads(path.read_text(encoding="utf-8"))
+        judged.update({r["id"]: r for r in run["questions"]})
     with args.sheet.open(encoding="utf-8-sig", newline="") as f:
-        rows = [r for r in csv.DictReader(f) if r["nguoi_cham"].strip()]
-    invalid = [r["id"] for r in rows if r["nguoi_cham"].strip() not in VERDICTS]
+        rows = [r for r in csv.DictReader(f) if r[args.column].strip()]
+    invalid = [r["id"] for r in rows if r[args.column].strip() not in VERDICTS]
     if invalid:
         raise SystemExit(f"Giá trị nguoi_cham không hợp lệ ở {invalid}; dùng {VERDICTS}")
     if not rows:
         raise SystemExit("Bảng chấm chưa có câu nào được chấm.")
 
-    human = [r["nguoi_cham"].strip() for r in rows]
+    human = [r[args.column].strip() for r in rows]
     llm = [judged[r["id"]]["judge"] for r in rows]
     result = {
         "so_cau": len(rows),

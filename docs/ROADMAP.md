@@ -206,7 +206,21 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   Đây là con số đại diện nhất cho câu hỏi thật: từ chối ngoài phạm vi tốt, nhưng mới trả lời đúng
   khoảng 4/10 câu có căn cứ. Lỗi lặp lại hai loại của đợt 1, nên sửa quy tắc từ chối chưa tổng
   quát hóa: vẫn từ chối nhầm (h007-h010, nhất là "nợ môn có đi thực tập, nhận đồ án được không"),
-  và có câu trả lời đúng bị giám khảo chấm sai (h005), nên cần chấm tay lại để kiểm tra giám khảo.
+  và giám khảo chấm h005 là sai; chấm tay vòng 2 bên dưới xác nhận giám khảo đúng ở câu này.
+
+  Chấm tay vòng 2 (2026-11-08): toàn bộ 15 câu thật hệ thống đã trả lời (9 câu đợt 1 sau khi sửa
+  quy tắc từ chối, 6 câu tập độc lập), chấm mù trên trang bấm nút, rồi phân xử các câu lệch.
+
+  | | trùng với giám khảo |
+  |---|---|
+  | chấm mù | 11/15 (73%); kappa 0 vì người chấm cả 15 câu là đúng |
+  | sau phân xử 4 câu lệch | 15/15 (không độc lập: lúc phân xử đã thấy lý do của giám khảo) |
+
+  Cả 4 câu giám khảo bất đồng với lần chấm mù đều được xác nhận là đúng khi xem kỹ: h005 hiểu sai
+  "hết năm nhất" thành "đang năm nhất" và kết luận ngược; h014 né câu trả lời trực tiếp; q062 và
+  q072 thiếu ý sinh viên cần (cách học vượt; miễn học theo quy định riêng). Lần chấm mù chấm cả 15
+  câu trong khoảng 3 phút nên dễ dãi; vòng 1 (8/9 đúng) có thể cũng vậy. Kết luận: trên câu thật,
+  giám khảo không chấm khắt khe quá mức như lo ngại, nên độ đúng 0,40 của tập độc lập là con số thật.
 - [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
 
   Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
