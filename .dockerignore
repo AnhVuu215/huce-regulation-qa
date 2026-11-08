@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+.cache
+.data
+.env
+.pytest_cache
+.ruff_cache
+**/__pycache__
+eval
+tests
+docs
+docker
+scripts
+data/ocr

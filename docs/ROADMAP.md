@@ -176,6 +176,51 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   trong 6 đoạn đưa cho LLM (q056, q060, q069, q071; q060 ở hạng 1) nhưng LLM nói "không quy định"
   vì sinh viên hỏi một tình huống cụ thể còn quy chế chỉ có quy định chung; 3 câu là lỗi truy xuất
   (q062, q063, q064; căn cứ của q063 không có trong top-20).
+
+  Sửa quy tắc từ chối (nhánh `fix/over-refusal`): chỉ từ chối khi không đoạn nào liên quan; tình
+  huống cụ thể thì trả lời theo quy định chung và nói rõ phần quy chế không quy định.
+
+  | | câu thật: trước → sau | câu tự viết: trước → sau |
+  |---|---|---|
+  | từ chối nhầm câu có căn cứ | 7/14 → 5/14 | 1/48 → 1/48 |
+  | độ đúng nội dung | 0,500 → 0,571 | 0,917 → 0,948 |
+  | trích dẫn đúng | 0,286 → 0,429 | 0,938 → 0,896 |
+  | từ chối đúng câu ngoài phạm vi | 4/5 → 5/5 | 5/5 → 5/5 |
+
+  Không đổi lấy việc trả lời bừa câu ngoài phạm vi. Ba câu vẫn bị từ chối dù căn cứ có trong ngữ
+  cảnh (q056, q069, q071); dừng chỉnh prompt vì chênh 1-2 câu trên 14 nằm trong nhiễu của mô hình
+  không cố định được temperature. Sửa này dựa trên chính 19 câu thật nên chúng không còn là tập
+  kiểm tra độc lập: cần một đợt câu thật mới chỉ để kiểm tra.
+
+  Tập kiểm tra độc lập (đợt 2, `eval/testset_holdout.jsonl`, commit trước khi chạy hệ thống):
+  19 câu thật từ group sinh viên và group tuyển sinh HUCE, thu bằng từ khóa khác đợt 1. Không dùng
+  để sửa hệ thống. Kết quả với cấu hình hiện tại (đã sửa quy tắc từ chối):
+
+  | 19 câu (10 có căn cứ, 9 ngoài phạm vi) | kết quả |
+  |---|---|
+  | từ chối đúng câu ngoài phạm vi | **9/9** |
+  | từ chối nhầm câu có căn cứ | 4/10 |
+  | độ đúng nội dung (giám khảo) | **0,40** |
+  | trích dẫn đúng | 0,30 |
+
+  Đây là con số đại diện nhất cho câu hỏi thật: từ chối ngoài phạm vi tốt, nhưng mới trả lời đúng
+  khoảng 4/10 câu có căn cứ. Lỗi lặp lại hai loại của đợt 1, nên sửa quy tắc từ chối chưa tổng
+  quát hóa: vẫn từ chối nhầm (h007-h010, nhất là "nợ môn có đi thực tập, nhận đồ án được không"),
+  và giám khảo chấm h005 là sai; chấm tay vòng 2 bên dưới xác nhận giám khảo đúng ở câu này.
+
+  Chấm tay vòng 2 (2026-11-08): toàn bộ 15 câu thật hệ thống đã trả lời (9 câu đợt 1 sau khi sửa
+  quy tắc từ chối, 6 câu tập độc lập), chấm mù trên trang bấm nút, rồi phân xử các câu lệch.
+
+  | | trùng với giám khảo |
+  |---|---|
+  | chấm mù | 11/15 (73%); kappa 0 vì người chấm cả 15 câu là đúng |
+  | sau phân xử 4 câu lệch | 15/15 (không độc lập: lúc phân xử đã thấy lý do của giám khảo) |
+
+  Cả 4 câu giám khảo bất đồng với lần chấm mù đều được xác nhận là đúng khi xem kỹ: h005 hiểu sai
+  "hết năm nhất" thành "đang năm nhất" và kết luận ngược; h014 né câu trả lời trực tiếp; q062 và
+  q072 thiếu ý sinh viên cần (cách học vượt; miễn học theo quy định riêng). Lần chấm mù chấm cả 15
+  câu trong khoảng 3 phút nên dễ dãi; vòng 1 (8/9 đúng) có thể cũng vậy. Kết luận: trên câu thật,
+  giám khảo không chấm khắt khe quá mức như lo ngại, nên độ đúng 0,40 của tập độc lập là con số thật.
 - [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
 
   Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
@@ -246,16 +291,16 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   Lỗi hạ tầng gặp khi chạy: bên trả lời và giám khảo giãn cách lời gọi riêng nên cùng nhau vượt
   hạn mức theo phút của gói miễn phí; nay giãn cách dùng chung theo mô hình, chờ đúng retryDelay,
   và một câu lỗi không còn dừng cả lần chạy.
-- [ ] 6.5 Báo cáo đánh giá
+- [x] 6.5 Báo cáo đánh giá: `docs/EVALUATION.md` (2026-11-08)
 
 **Cổng:** báo cáo đủ các tầng chỉ số, có độ khớp judge và người.
 
 ## Phase 7 — Sản phẩm và công bố (tuần 7)
 
-- [ ] 7.1 FastAPI: hỏi đáp + feedback
-- [ ] 7.2 Giao diện demo
-- [ ] 7.3 Docker Compose chạy trọn bộ
-- [ ] 7.4 README: sơ đồ, ablation, hạn chế, "Những gì không hiệu quả"
+- [x] 7.1 FastAPI: `/ask`, `/feedback`, `/documents`, `/health`; log độ trễ, token, đoạn đã lấy
+- [x] 7.2 Giao diện demo: một trang HTML do API phục vụ (thay Streamlit), nêu rõ độ chính xác đo được
+- [x] 7.3 Docker Compose: một dịch vụ, khởi động 39 giây nhờ embedding dựng sẵn; bỏ PostgreSQL vì không cần
+- [x] 7.4 README: sơ đồ, kết quả, ablation, thay đổi so với kế hoạch, hạn chế
 - [!] 7.5 Deploy, video demo, công khai repo (cần chủ dự án quyết định)
 
 **Cổng:** `docker compose up` chạy trên máy sạch, số liệu tái lập khớp README.

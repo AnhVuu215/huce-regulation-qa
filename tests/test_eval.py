@@ -82,3 +82,11 @@ def test_reference_answers_pass_their_own_short_checks():
     for q in load_testset(ROOT / "eval" / "testset.jsonl"):
         if q.dap_an_ngan:
             assert short_answer_correct(q.answer, q.dap_an_ngan), q.id
+
+
+def test_holdout_set_is_valid_and_disjoint_from_development_set(corpus):
+    holdout = load_testset(ROOT / "eval" / "testset_holdout.jsonl")
+    dev = load_testset(ROOT / "eval" / "testset.jsonl")
+    assert validate(holdout, *corpus) == []
+    assert not {q.question for q in holdout} & {q.question for q in dev}
+    assert not {q.id for q in holdout} & {q.id for q in dev}

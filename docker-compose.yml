@@ -1,19 +1,15 @@
 services:
-  db:
-    image: pgvector/pgvector:pg17
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-huce}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
-      POSTGRES_DB: ${POSTGRES_DB:-huce_qa}
+  app:
+    build: .
+    env_file: .env
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      # Mô hình, embedding và câu trả lời đã cache; giữ lại giữa các lần chạy.
+      - cache:/app/.cache
+      # Log request và phản hồi của người dùng.
+      - appdata:/app/.data
 
 volumes:
-  pgdata:
+  cache:
+  appdata:
