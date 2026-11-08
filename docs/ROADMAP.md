@@ -99,6 +99,11 @@ Những gì không hiệu quả (giữ để đưa vào README):
 - Từ điển đồng nghĩa tăng mạnh nhóm câu kiểu sinh viên (0,591 → 1,000), nhưng từ điển được viết
   bởi cùng người viết bộ test, nên con số này có rò rỉ và lạc quan. Cần đo lại trên câu hỏi thật.
 - Với 45 câu, chênh lệch dưới khoảng 0,05 tương đương 1–2 câu, chưa đủ để kết luận.
+- Tách câu hỏi ghép thành truy vấn con (2026-11-08, cờ `decompose`, mặc định tắt): Recall@5 câu
+  thật 0,482 → 0,518 (khoảng nửa câu trên 14), câu tự viết 0,901 → 0,890, nhóm kết hợp nhiều Điều
+  không đổi. Không đủ để bật. Lỗi truy xuất thật (q063) đến từ BM25 ưu tiên đoạn lặp nhiều từ
+  "thực tập", "tốt nghiệp" (Điều 5 quy định đồ án: hạng 13 theo vector, 82 theo BM25), và câu then
+  chốt của Điều 7 quy chế 2022 chỉ là một dòng cuối trong đoạn dài nên bị loãng.
 
 ## Phase 5 — Sinh câu trả lời có trích dẫn (tuần 5)
 

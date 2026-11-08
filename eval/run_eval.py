@@ -38,8 +38,9 @@ _rerank = replace(_synonyms, name="+rerank", rerank=True)
 _khoa = replace(_rerank, name="+loc_khoa", khoa_filter=True)
 # Đối chứng ngoài chuỗi cộng dồn: bỏ reranker (đắt trên CPU) nhưng vẫn lọc khóa.
 _no_rerank = replace(_synonyms, name="khong_rerank+loc_khoa", khoa_filter=True)
+_decompose = replace(_no_rerank, name="khong_rerank+loc_khoa+tach_cau", decompose=True)
 CONFIGS = {c.name: c for c in [_base, _structure, _hybrid, _synonyms, _rerank, _khoa]}
-EXTRA = {_no_rerank.name: _no_rerank}
+EXTRA = {c.name: c for c in [_no_rerank, _decompose]}
 
 
 def load_corpus():
@@ -66,6 +67,7 @@ def summarize(rows: list[dict]) -> dict[str, dict[str, float]]:
     groups: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
         groups[r["loai"]].append(r)
+        groups["nguồn: " + r["nguon"]].append(r)
         groups["TẤT CẢ"].append(r)
     return {
         loai: {
@@ -98,7 +100,7 @@ def run(config: RetrievalConfig, questions, docs, parsed, embedder, reranker) ->
         ranked = retriever.search(q.question, q.khoa, k=10)
         latencies.append(time.perf_counter() - t)
         s = score(ranked, q.can_cu, q.khoa, k=K)
-        rows.append({"id": q.id, "loai": q.loai, "khoa": q.khoa, **asdict(s),
+        rows.append({"id": q.id, "loai": q.loai, "nguon": q.nguon, "khoa": q.khoa, **asdict(s),
                      "top": [p.passage_id for p in ranked[:K]]})
     latencies.sort()
     return {

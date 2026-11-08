@@ -39,3 +39,13 @@ def test_long_khoan_is_split_on_diem_and_keeps_intro():
     assert len(parts) > 1
     assert all("2. Đào tạo theo tín chỉ:" in c.text for c in parts)
     assert len({c.chunk_id for c in chunks}) == len(chunks)
+
+
+def test_sub_queries_split_compound_questions_only():
+    from retrieval.pipeline import sub_queries
+
+    q = "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không? Với dưới bao nhiêu điểm là nợ môn ạ?"
+    assert sub_queries(q) == [q, "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
+                              "Với dưới bao nhiêu điểm là nợ môn ạ"]
+    assert sub_queries("Học lại và cải thiện điểm thì sao?") == [
+        "Học lại và cải thiện điểm thì sao?"]
