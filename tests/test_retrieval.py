@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from ingestion.chunker import chunk_document
 from ingestion.cli import parse_registered
 from ingestion.registry import load_registry
@@ -39,3 +41,27 @@ def test_long_khoan_is_split_on_diem_and_keeps_intro():
     assert len(parts) > 1
     assert all("2. Đào tạo theo tín chỉ:" in c.text for c in parts)
     assert len({c.chunk_id for c in chunks}) == len(chunks)
+
+
+class _CountingModel:
+    def __init__(self):
+        self.calls = 0
+
+    def encode(self, texts, **kwargs):
+        import numpy as np  # noqa: PLC0415
+
+        self.calls += 1
+        return np.ones((len(texts), 4), dtype=np.float32)
+
+
+def test_query_embedding_stays_in_memory(tmp_path):
+    pytest.importorskip("numpy")  # CI không cài nhóm ml
+    from retrieval.dense import Embedder  # noqa: PLC0415
+
+    embedder = Embedder(cache_dir=tmp_path)
+    embedder._model = model = _CountingModel()
+    embedder.encode_query("học lại môn")
+    embedder.encode_query("học lại môn")
+    assert model.calls == 1
+    # Câu hỏi không được ghi file cache: mỗi câu mới sẽ phải ghi lại cả file.
+    assert not list(tmp_path.iterdir())
