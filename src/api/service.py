@@ -18,6 +18,9 @@ def build_qa(root: Path) -> QA:
     docs, parsed = build.load_corpus(root)
     retriever = build.build_retriever(presets.PRODUCTION, docs, parsed,
                                       Embedder(cache_dir=cache / "embeddings"), None, root)
+    # Embedding các đoạn đã có trong cache nên mô hình chỉ được nạp ở câu hỏi đầu tiên (khoảng 20
+    # giây); nạp sẵn lúc khởi động để người hỏi đầu tiên không phải chờ.
+    retriever.embedder.encode(["khởi động"])
     llm = CachedLLM(GeminiClient([MODEL]), cache / "llm", namespace=MODEL)
     tools = HocVu(root / "data" / "rules" / "hoc-vu.yaml", docs)
     return QA(retriever, llm, docs, QAConfig(), tools=tools)
