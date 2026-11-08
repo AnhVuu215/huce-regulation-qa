@@ -36,6 +36,8 @@ class Question(BaseModel):
     nen_tu_choi: bool
     nguon: Literal["tu_viet", "thuc_te"]
     dap_an_ngan: DapAnNgan | None = None
+    # Giả định khi dựng câu (ví dụ bài gốc không nêu khóa); không chứa thông tin người hỏi.
+    ghi_chu: str | None = None
 
 
 def load_testset(path: Path) -> list[Question]:
