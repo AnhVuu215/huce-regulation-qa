@@ -70,7 +70,7 @@ Lần đầu build tải mô hình bge-m3 (khoảng 2,3 GB); embedding của 521
 Mô hình cần khoảng 2,5 GB RAM. Nếu máy ảo Docker có ít bộ nhớ hơn (ví dụ `memory=3GB` trong
 `.wslconfig` khi còn chạy container khác), trọng số mô hình bị đẩy ra swap, và bước mã hóa câu hỏi
 mất từ 0,2 giây lên 2-40 giây. Khi đó, tăng bộ nhớ cho máy ảo hoặc chạy không dùng Docker như dưới
-đây. Mỗi request ghi `retrieval_ms`, `llm_ms` và `wait_ms` để biết thời gian nằm ở bước nào.
+đây. Mỗi request ghi `retrieval_ms` và `llm_ms` để biết thời gian nằm ở bước nào.
 
 Chạy không dùng Docker (Python 3.11, [uv](https://docs.astral.sh/uv/)):
 
@@ -89,7 +89,9 @@ uv run pytest                   # 128 test, không cần mạng hay mô hình
 | GET | `/documents` | văn bản đang dùng, khóa áp dụng, quan hệ sửa đổi |
 | GET | `/health` | trạng thái |
 
-Tài liệu tương tác ở `/docs`. Mỗi request ghi độ trễ, mô hình, token và các đoạn đã lấy vào
+Mỗi IP được hỏi tối đa `ASK_RATE_LIMIT` câu mỗi phút (mặc định 10), quá thì nhận 429 kèm
+`Retry-After`. Sau reverse proxy, chạy uvicorn với `--proxy-headers` để giới hạn theo IP thật của
+người dùng. Các request được trả lời song song. Tài liệu tương tác ở `/docs`. Mỗi request ghi độ trễ, mô hình, token và các đoạn đã lấy vào
 `.data/requests.jsonl`; phản hồi lưu kèm câu hỏi và câu trả lời vào `.data/feedback.jsonl`.
 
 ## Đánh giá

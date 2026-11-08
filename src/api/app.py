@@ -5,16 +5,17 @@
 
 import json
 import logging
+import os
 import threading
 import time
 import uuid
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 
 from api.schemas import AskRequest, AskResponse, Citation, DocumentInfo, FeedbackRequest
@@ -25,6 +26,34 @@ ROOT = Path(__file__).resolve().parents[2]
 STATIC = Path(__file__).parent / "static"
 RECENT_ANSWERS = 1000
 log = logging.getLogger("huce_qa")
+
+
+class RateLimiter:
+    """Tối đa `limit` request mỗi `window_s` giây cho mỗi khóa (địa chỉ IP); limit=0 là tắt.
+    Hạn mức gói miễn phí của LLM dùng chung cho mọi người, một người hỏi dồn là hết cho cả trang."""
+
+    def __init__(self, limit: int, window_s: float = 60.0):
+        self.limit = limit
+        self.window_s = window_s
+        self._hits: dict[str, deque[float]] = {}
+        self._lock = threading.Lock()
+
+    def retry_after(self, key: str) -> int:
+        """0 nếu được phép (và tính lượt này), ngược lại số giây phải chờ."""
+        if self.limit <= 0:
+            return 0
+        now = time.monotonic()
+        with self._lock:
+            hits = self._hits.setdefault(key, deque())
+            while hits and now - hits[0] >= self.window_s:
+                hits.popleft()
+            if len(hits) >= self.limit:
+                return max(1, round(self.window_s - (now - hits[0])))
+            hits.append(now)
+            # Bỏ khóa không còn lượt nào: bảng không phình theo số IP từng ghé.
+            for k in [k for k, v in self._hits.items() if not v]:
+                del self._hits[k]
+            return 0
 
 
 class JsonlLog:
@@ -42,8 +71,10 @@ class JsonlLog:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None = None) -> FastAPI:
-    """`qa_factory` dựng pipeline khi ứng dụng khởi động (test truyền QA giả lập)."""
+def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None = None,
+               rate_limit_per_min: int | None = None) -> FastAPI:
+    """`qa_factory` dựng pipeline khi ứng dụng khởi động (test truyền QA giả lập).
+    `rate_limit_per_min`: số câu hỏi mỗi phút cho một IP; mặc định lấy ASK_RATE_LIMIT, 0 là tắt."""
     if qa_factory is None:
         def qa_factory() -> QA:
             # Import muộn: dựng pipeline cần nhóm ml (mô hình embedding), test và CI thì không.
@@ -55,10 +86,13 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
     requests_log = JsonlLog(data_dir / "requests.jsonl")
     feedback_log = JsonlLog(data_dir / "feedback.jsonl")
     state: dict = {}
-    # Một câu trả lời mỗi lúc: cache và bộ giãn cách lời gọi LLM không được thiết kế cho đa luồng,
-    # và gói miễn phí giới hạn số lượt gọi mỗi phút.
-    answer_lock = threading.Lock()
+    if rate_limit_per_min is None:
+        rate_limit_per_min = int(os.environ.get("ASK_RATE_LIMIT", "10"))
+    limiter = RateLimiter(rate_limit_per_min)
+    # Các request trả lời song song: pipeline an toàn đa luồng (mã hóa câu hỏi lần lượt, giãn cách
+    # lời gọi LLM dùng chung), chỉ bảng câu trả lời gần đây cần khóa riêng.
     recent: OrderedDict[str, dict] = OrderedDict()
+    recent_lock = threading.Lock()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -82,14 +116,18 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         ]
 
     @app.post("/ask", response_model=AskResponse)
-    def ask(req: AskRequest) -> AskResponse:
+    def ask(req: AskRequest, request: Request) -> AskResponse:
         qa: QA = state["qa"]
+        # Sau reverse proxy, chạy uvicorn với --proxy-headers để client.host là IP người dùng.
+        client = request.client.host if request.client else "unknown"
+        wait_s = limiter.retry_after(client)
+        if wait_s:
+            raise HTTPException(429, f"Bạn hỏi nhanh quá, hãy thử lại sau {wait_s} giây.",
+                                headers={"Retry-After": str(wait_s)})
         request_id = uuid.uuid4().hex
         start = time.perf_counter()
         try:
-            with answer_lock:
-                wait_ms = round(1000 * (time.perf_counter() - start))
-                answer = qa.answer(req.question.strip(), req.khoa)
+            answer = qa.answer(req.question.strip(), req.khoa)
         except LLMError as e:
             log.warning("LLM lỗi: %s", e)
             requests_log.write({"request_id": request_id, "status": "loi_llm", "error": str(e)})
@@ -112,27 +150,30 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         llm = answer.llm
         requests_log.write({
             "request_id": request_id, "status": answer.status, "khoa": req.khoa,
-            "latency_ms": latency_ms, "wait_ms": wait_ms, **answer.timings,
+            "latency_ms": latency_ms, **answer.timings,
             "model": llm.model if llm else None,
             "cached": llm.cached if llm else None,
             "tokens": (llm.input_tokens + llm.output_tokens + llm.thinking_tokens) if llm else 0,
             "tool_calls": [c["name"] for c in llm.tool_calls] if llm else [],
             "retrieved": answer.retrieved,
         })
-        recent[request_id] = {"question": req.question, "khoa": req.khoa,
-                              "status": answer.status, "answer": answer.text,
-                              "citations": [c.label for c in citations]}
-        while len(recent) > RECENT_ANSWERS:
-            recent.popitem(last=False)
+        with recent_lock:
+            recent[request_id] = {"question": req.question, "khoa": req.khoa,
+                                  "status": answer.status, "answer": answer.text,
+                                  "citations": [c.label for c in citations]}
+            while len(recent) > RECENT_ANSWERS:
+                recent.popitem(last=False)
         return response
 
     @app.post("/feedback", status_code=204)
     def feedback(req: FeedbackRequest) -> None:
         # Lưu kèm câu hỏi và câu trả lời: phản hồi thật là nguồn câu test mới.
-        if req.request_id not in recent:
+        with recent_lock:
+            entry = recent.get(req.request_id)
+        if entry is None:
             raise HTTPException(404, "Không tìm thấy câu trả lời này (có thể đã quá cũ).")
         feedback_log.write({"request_id": req.request_id, "helpful": req.helpful,
-                            "comment": req.comment, **recent[req.request_id]})
+                            "comment": req.comment, **entry})
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:
