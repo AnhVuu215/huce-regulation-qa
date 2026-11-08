@@ -176,6 +176,21 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   trong 6 đoạn đưa cho LLM (q056, q060, q069, q071; q060 ở hạng 1) nhưng LLM nói "không quy định"
   vì sinh viên hỏi một tình huống cụ thể còn quy chế chỉ có quy định chung; 3 câu là lỗi truy xuất
   (q062, q063, q064; căn cứ của q063 không có trong top-20).
+
+  Sửa quy tắc từ chối (nhánh `fix/over-refusal`): chỉ từ chối khi không đoạn nào liên quan; tình
+  huống cụ thể thì trả lời theo quy định chung và nói rõ phần quy chế không quy định.
+
+  | | câu thật: trước → sau | câu tự viết: trước → sau |
+  |---|---|---|
+  | từ chối nhầm câu có căn cứ | 7/14 → 5/14 | 1/48 → 1/48 |
+  | độ đúng nội dung | 0,500 → 0,571 | 0,917 → 0,948 |
+  | trích dẫn đúng | 0,286 → 0,429 | 0,938 → 0,896 |
+  | từ chối đúng câu ngoài phạm vi | 4/5 → 5/5 | 5/5 → 5/5 |
+
+  Không đổi lấy việc trả lời bừa câu ngoài phạm vi. Ba câu vẫn bị từ chối dù căn cứ có trong ngữ
+  cảnh (q056, q069, q071); dừng chỉnh prompt vì chênh 1-2 câu trên 14 nằm trong nhiễu của mô hình
+  không cố định được temperature. Sửa này dựa trên chính 19 câu thật nên chúng không còn là tập
+  kiểm tra độc lập: cần một đợt câu thật mới chỉ để kiểm tra.
 - [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
 
   Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
