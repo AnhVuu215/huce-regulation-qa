@@ -23,7 +23,25 @@ class RetrievalConfig:
     rerank: bool = False
     rerank_candidates: int = 20
     khoa_filter: bool = False  # lọc phiên bản theo khóa trước khi tìm
+    decompose: bool = False  # tách câu hỏi ghép thành truy vấn con, gộp bằng RRF
     embedding_model: str = "BAAI/bge-m3"
+
+
+MIN_SUBQUERY_WORDS = 4
+
+
+def sub_queries(question: str) -> list[str]:
+    """Câu hỏi ghép ("A? B?", "điều kiện A và B") tìm riêng từng vế; luôn giữ cả câu gốc.
+    Chỉ tách khi mỗi vế đủ dài, để không cắt cụm như "học lại và cải thiện"."""
+    parts = []
+    for sentence in re.split(r"\?\s*", question):
+        pieces = re.split(r"\s+và\s+", sentence.strip())
+        if len(pieces) > 1 and all(len(p.split()) >= MIN_SUBQUERY_WORDS for p in pieces):
+            parts += pieces
+        elif sentence.strip():
+            parts.append(sentence.strip())
+    parts = [p for p in parts if len(p.split()) >= MIN_SUBQUERY_WORDS]
+    return list(dict.fromkeys([question, *parts])) if len(parts) > 1 else [question]
 
 
 def load_synonyms(path: Path) -> list[tuple[list[str], str]]:
@@ -68,18 +86,25 @@ class Retriever:
         ]
         return float((self.matrix[allowed] @ self.embedder.encode([question])[0]).max())
 
-    def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]:
-        cfg = self.config
-        query = expand_query(question, self.synonyms) if cfg.synonyms else question
-        allowed = [
-            i for i, p in enumerate(self.passages)
-            if not (cfg.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
-        ]
+    def _rankings(self, query: str, allowed: list[int]) -> list[list[int]]:
         dense = self.matrix[allowed] @ self.embedder.encode([query])[0]
         rankings = [[allowed[i] for i in dense.argsort()[::-1]]]
         if self.bm25 is not None:
             lexical = self.bm25.scores(query)
             rankings.append(sorted(allowed, key=lambda i: -lexical[i]))
+        return rankings
+
+    def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]:
+        cfg = self.config
+        allowed = [
+            i for i, p in enumerate(self.passages)
+            if not (cfg.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
+        ]
+        queries = sub_queries(question) if cfg.decompose else [question]
+        rankings = []
+        for q in queries:
+            query = expand_query(q, self.synonyms) if cfg.synonyms else q
+            rankings += self._rankings(query, allowed)
         ranked = rrf(rankings) if len(rankings) > 1 else rankings[0]
 
         if cfg.rerank and self.reranker is not None:
