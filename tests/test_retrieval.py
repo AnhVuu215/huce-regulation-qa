@@ -65,3 +65,17 @@ def test_query_embedding_stays_in_memory(tmp_path):
     assert model.calls == 1
     # Câu hỏi không được ghi file cache: mỗi câu mới sẽ phải ghi lại cả file.
     assert not list(tmp_path.iterdir())
+
+
+def test_queries_encoded_in_one_batch_and_warm_up_bypasses_cache(tmp_path):
+    pytest.importorskip("numpy")
+    from retrieval.dense import Embedder  # noqa: PLC0415
+
+    embedder = Embedder(cache_dir=tmp_path)
+    embedder._model = model = _CountingModel()
+    embedder.encode_queries(["câu mở rộng", "câu gốc"])
+    embedder.encode_query("câu gốc")
+    assert model.calls == 1
+    embedder._cache[embedder._key("khởi động")] = None  # có sẵn trong cache cũ
+    embedder.warm_up()
+    assert model.calls == 2

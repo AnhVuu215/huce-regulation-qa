@@ -75,7 +75,8 @@ class Retriever:
             i for i, p in enumerate(self.passages)
             if not (cfg.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
         ]
-        dense = self.matrix[allowed] @ self.embedder.encode_query(query)
+        # Câu gốc (cổng liên quan, max_similarity) mã hóa chung lượt với câu đã mở rộng.
+        dense = self.matrix[allowed] @ self.embedder.encode_queries([query, question])[0]
         rankings = [[allowed[i] for i in dense.argsort()[::-1]]]
         if self.bm25 is not None:
             lexical = self.bm25.scores(query)

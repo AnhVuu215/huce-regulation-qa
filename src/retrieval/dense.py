@@ -68,18 +68,30 @@ class Embedder:
 
     def encode_query(self, text: str) -> np.ndarray:
         """Vector của một câu hỏi; không ghi cache ra đĩa."""
-        key = self._key(text)
-        vec = self._cache.get(key)
-        if vec is None:
-            vec = self._queries.get(key)
-        if vec is None:
-            vec = self._load().encode([text], normalize_embeddings=True)[0].astype(np.float32)
-            self._queries[key] = vec
-            if len(self._queries) > QUERY_CACHE_SIZE:
+        return self.encode_queries([text])[0]
+
+    def encode_queries(self, texts: list[str]) -> np.ndarray:
+        """Vector của các câu hỏi, mã hóa chung một lượt (rẻ hơn nhiều lượt riêng trên CPU).
+        Chỉ giữ trong bộ nhớ: ghi ra file cache thì mỗi câu mới phải ghi lại cả file."""
+        missing = list(dict.fromkeys(t for t in texts if self._lookup(t) is None))
+        if missing:
+            vectors = self._load().encode(missing, normalize_embeddings=True)
+            for text, vec in zip(missing, vectors, strict=True):
+                self._queries[self._key(text)] = vec.astype(np.float32)
+            while len(self._queries) > QUERY_CACHE_SIZE:
                 self._queries.popitem(last=False)
-        elif key in self._queries:
+        return np.stack([self._lookup(t) for t in texts])
+
+    def _lookup(self, text: str) -> np.ndarray | None:
+        key = self._key(text)
+        if key in self._queries:
             self._queries.move_to_end(key)
-        return vec
+            return self._queries[key]
+        return self._cache.get(key)
+
+    def warm_up(self) -> None:
+        """Nạp mô hình và chạy thử một lượt, bỏ qua cache: người hỏi đầu tiên không phải chờ."""
+        self._load().encode(["khởi động"], normalize_embeddings=True)
 
     def _save(self) -> None:
         if self._cache_path:
