@@ -18,7 +18,7 @@ SIGNATURE = re.compile(
 
 # Tiêu đề Phụ lục thật ("Phụ lục 1. ...", "PHỤ LỤC 2: ..."), không phải câu tham chiếu
 # bị xuống dòng như "Phụ lục 3 và tuân thủ ...".
-APPENDIX = re.compile(r"^\s*(?:PHỤ LỤC|Phụ lục\s+[\dIVX]+(?:-[A-Z])?\s*[.:]\s)")
+APPENDIX = re.compile(r"^\s*(?:PHỤ LỤC\b|Phụ lục\s+[\dIVX]+(?:-[A-Z])?\s*[.:]\s)")
 
 DIEM_ORDER = "abcdđefghiklmnopqrstuvxy"
 PARAGRAPH_END = (".", ";", ":")
