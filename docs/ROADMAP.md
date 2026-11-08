@@ -274,7 +274,7 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   Lỗi hạ tầng gặp khi chạy: bên trả lời và giám khảo giãn cách lời gọi riêng nên cùng nhau vượt
   hạn mức theo phút của gói miễn phí; nay giãn cách dùng chung theo mô hình, chờ đúng retryDelay,
   và một câu lỗi không còn dừng cả lần chạy.
-- [ ] 6.5 Báo cáo đánh giá
+- [x] 6.5 Báo cáo đánh giá: `docs/EVALUATION.md` (2026-11-08)
 
 **Cổng:** báo cáo đủ các tầng chỉ số, có độ khớp judge và người.
 
