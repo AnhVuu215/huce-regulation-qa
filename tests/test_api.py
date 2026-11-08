@@ -17,7 +17,7 @@ DOCS = {d.doc_id: d for d in load_registry(ROOT / "data" / "registry.yaml").docu
 
 
 class FakeQA:
-    def __init__(self, fail: bool = False):
+    def __init__(self, fail: str | None = None):
         self.docs = DOCS
         self.fail = fail
         self.calls = []
@@ -25,7 +25,7 @@ class FakeQA:
     def answer(self, question, khoa):
         self.calls.append((question, khoa))
         if self.fail:
-            raise LLMError("hết hạn mức")
+            raise LLMError(self.fail)
         return Answer(status="tra_loi", text="Từ 2,0 trở lên.",
                       citations=[Unit("qc-dhxd-2022", 13, 1), Unit("qc-dhxd-2022", 13, 1)],
                       warnings=["Thông tin chỉ mang tính tham khảo."])
@@ -66,10 +66,18 @@ def test_ask_validates_input(client, payload):
 
 
 def test_llm_failure_returns_503(tmp_path):
-    with TestClient(create_app(lambda: FakeQA(fail=True), data_dir=tmp_path)) as c:
+    with TestClient(create_app(lambda: FakeQA(fail="HTTP 503"), data_dir=tmp_path)) as c:
         r = c.post("/ask", json={"question": "GPA bao nhiêu?"})
     assert r.status_code == 503
     assert "thử lại" in r.json()["detail"]
+
+
+def test_daily_quota_failure_says_when_quota_resets(tmp_path):
+    error = "gemini-3.5-flash-lite: HTTP 429 GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+    with TestClient(create_app(lambda: FakeQA(fail=error), data_dir=tmp_path)) as c:
+        r = c.post("/ask", json={"question": "GPA bao nhiêu?"})
+    assert r.status_code == 503
+    assert "trong ngày" in r.json()["detail"]
 
 
 def test_feedback_is_stored_with_question_and_answer(client):

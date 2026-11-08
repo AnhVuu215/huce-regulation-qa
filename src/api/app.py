@@ -93,8 +93,12 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         except LLMError as e:
             log.warning("LLM lỗi: %s", e)
             requests_log.write({"request_id": request_id, "status": "loi_llm", "error": str(e)})
-            raise HTTPException(503, "Mô hình ngôn ngữ tạm thời không phản hồi, hãy thử lại sau "
-                                     "ít phút.") from e
+            if "PerDay" in str(e):
+                detail = ("Đã hết lượt gọi mô hình ngôn ngữ trong ngày (gói miễn phí); hạn mức "
+                          "được cấp lại sau nửa đêm giờ Thái Bình Dương, khoảng 15 giờ Việt Nam.")
+            else:
+                detail = "Mô hình ngôn ngữ tạm thời không phản hồi, hãy thử lại sau ít phút."
+            raise HTTPException(503, detail) from e
         latency_ms = round(1000 * (time.perf_counter() - start))
         citations = [
             Citation(doc_id=u.doc_id, doc_title=qa.docs[u.doc_id].doc_title,
