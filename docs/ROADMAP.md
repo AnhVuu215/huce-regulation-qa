@@ -191,6 +191,22 @@ Bài học (đưa vào "Những gì không hiệu quả"):
   cảnh (q056, q069, q071); dừng chỉnh prompt vì chênh 1-2 câu trên 14 nằm trong nhiễu của mô hình
   không cố định được temperature. Sửa này dựa trên chính 19 câu thật nên chúng không còn là tập
   kiểm tra độc lập: cần một đợt câu thật mới chỉ để kiểm tra.
+
+  Tập kiểm tra độc lập (đợt 2, `eval/testset_holdout.jsonl`, commit trước khi chạy hệ thống):
+  19 câu thật từ group sinh viên và group tuyển sinh HUCE, thu bằng từ khóa khác đợt 1. Không dùng
+  để sửa hệ thống. Kết quả với cấu hình hiện tại (đã sửa quy tắc từ chối):
+
+  | 19 câu (10 có căn cứ, 9 ngoài phạm vi) | kết quả |
+  |---|---|
+  | từ chối đúng câu ngoài phạm vi | **9/9** |
+  | từ chối nhầm câu có căn cứ | 4/10 |
+  | độ đúng nội dung (giám khảo) | **0,40** |
+  | trích dẫn đúng | 0,30 |
+
+  Đây là con số đại diện nhất cho câu hỏi thật: từ chối ngoài phạm vi tốt, nhưng mới trả lời đúng
+  khoảng 4/10 câu có căn cứ. Lỗi lặp lại hai loại của đợt 1, nên sửa quy tắc từ chối chưa tổng
+  quát hóa: vẫn từ chối nhầm (h007-h010, nhất là "nợ môn có đi thực tập, nhận đồ án được không"),
+  và có câu trả lời đúng bị giám khảo chấm sai (h005), nên cần chấm tay lại để kiểm tra giám khảo.
 - [x] 6.3 LLM-as-judge (2026-11-07, nhánh `feat/phase-6-llm-judge`)
 
   Giám khảo `gemini-3.5-flash-lite` so câu trả lời với đáp án chuẩn, chỉ chấm nội dung, viết lý
