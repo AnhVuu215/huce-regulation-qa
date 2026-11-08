@@ -280,10 +280,10 @@ Bài học (đưa vào "Những gì không hiệu quả"):
 
 ## Phase 7 — Sản phẩm và công bố (tuần 7)
 
-- [ ] 7.1 FastAPI: hỏi đáp + feedback
-- [ ] 7.2 Giao diện demo
-- [ ] 7.3 Docker Compose chạy trọn bộ
-- [ ] 7.4 README: sơ đồ, ablation, hạn chế, "Những gì không hiệu quả"
+- [x] 7.1 FastAPI: `/ask`, `/feedback`, `/documents`, `/health`; log độ trễ, token, đoạn đã lấy
+- [x] 7.2 Giao diện demo: một trang HTML do API phục vụ (thay Streamlit), nêu rõ độ chính xác đo được
+- [x] 7.3 Docker Compose: một dịch vụ, khởi động 39 giây nhờ embedding dựng sẵn; bỏ PostgreSQL vì không cần
+- [x] 7.4 README: sơ đồ, kết quả, ablation, thay đổi so với kế hoạch, hạn chế
 - [!] 7.5 Deploy, video demo, công khai repo (cần chủ dự án quyết định)
 
 **Cổng:** `docker compose up` chạy trên máy sạch, số liệu tái lập khớp README.

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hỏi đáp quy chế HUCE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Bố cục: một cột; khung hỏi ở trên, câu trả lời và trích dẫn bên dưới, danh mục văn bản cuối trang. */
+:root {
+  --bg: #f4f6f9;
+  --grid: rgba(29, 78, 137, 0.06);
+  --surface: #ffffff;
+  --ink: #142235;
+  --muted: #586678;
+  --line: #d7dee7;
+  --accent: #1d4e89;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4edf7;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1dc;
+  --bad: #a3322a;
+  --bad-soft: #f8e3e1;
+  --good: #1f6f47;
+  --good-soft: #e1f1e8;
+  --font: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151c; --grid: rgba(122, 170, 224, 0.06); --surface: #18212b; --ink: #e5ebf1;
+    --muted: #9aa8b6; --line: #2a3644; --accent: #7aaae0; --accent-ink: #0f151c;
+    --accent-soft: #1b2e44; --warn: #e3b55a; --warn-soft: #3a2e14; --bad: #ee8a81;
+    --bad-soft: #3f211f; --good: #6cc995; --good-soft: #17352a; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.6; color: var(--ink);
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  padding: 32px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-size: 1.7rem; line-height: 1.25; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+label { font-weight: 600; font-size: .9rem; }
+textarea, select {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; width: 100%;
+}
+textarea { min-height: 84px; resize: vertical; }
+textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.row .khoa { flex: 0 1 220px; display: grid; gap: 6px; }
+.row .khoa.need { animation: pulse 1.2s ease-in-out 2; }
+.row .khoa.need select { border-color: var(--warn); background: var(--warn-soft); }
+@keyframes pulse { 50% { transform: translateY(-2px); } }
+button {
+  font: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; padding: 10px 18px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+}
+button:disabled { opacity: .6; cursor: progress; }
+button.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); font-weight: 500; }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; }
+.examples button { font-size: .85rem; padding: 5px 12px; border-radius: 999px; }
+.status { display: inline-block; font-size: .78rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
+.status.tra_loi { background: var(--good-soft); color: var(--good); }
+.status.tu_choi { background: var(--bad-soft); color: var(--bad); }
+.status.hoi_lai_khoa { background: var(--warn-soft); color: var(--warn); }
+.answer { margin: 0; white-space: pre-wrap; }
+.cites { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.cites li { font-size: .88rem; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; overflow-wrap: anywhere; }
+.cites b { font-family: var(--mono); font-weight: 500; }
+.warnings { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: .86rem; color: var(--muted); }
+.warnings li.flag { color: var(--warn); font-weight: 600; }
+.meta { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+.feedback { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 12px; }
+.feedback input { flex: 1 1 220px; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.error { color: var(--bad); }
+.honest { font-size: .85rem; color: var(--muted); border-left: 3px solid var(--warn); padding-left: 12px; }
+details { font-size: .88rem; }
+summary { cursor: pointer; font-weight: 600; }
+.docs { margin: 10px 0 0; padding-left: 18px; color: var(--muted); }
+h2 { font-size: 1rem; margin: 0; }
+@media (max-width: 520px) { h1 { font-size: 1.4rem; } .row .khoa { flex-basis: 100%; } button.primary { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .row .khoa.need { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Trường Đại học Xây dựng Hà Nội · thử nghiệm</div>
+    <h1>Hỏi đáp quy chế đào tạo</h1>
+    <p class="lede">Hỏi về tín chỉ, cảnh báo học tập, học lại, tốt nghiệp, chuyển ngành. Mỗi câu trả lời
+      dẫn Điều, Khoản của văn bản đúng với khóa của bạn.</p>
+  </header>
+
+  <form class="card" id="ask-form">
+    <label for="question">Câu hỏi</label>
+    <textarea id="question" maxlength="500" placeholder="Ví dụ: Bị cảnh báo học tập mấy lần thì bị buộc thôi học?" required></textarea>
+    <div class="examples" id="examples" aria-label="Câu hỏi mẫu"></div>
+    <div class="row">
+      <div class="khoa" id="khoa-box">
+        <label for="khoa">Khóa của bạn</label>
+        <select id="khoa"></select>
+      </div>
+      <button type="submit" class="primary" id="submit">Hỏi</button>
+    </div>
+    <p class="honest">Hệ thống đang thử nghiệm: trên câu hỏi thật của sinh viên, khoảng 4/10 câu có căn cứ
+      được trả lời đúng. Luôn đối chiếu Điều, Khoản được trích và hỏi Phòng Quản lý đào tạo với việc quan trọng.</p>
+  </form>
+
+  <section class="card" id="result" hidden aria-live="polite">
+    <div><span class="status" id="status"></span></div>
+    <p class="answer" id="answer"></p>
+    <div id="cites-box" hidden>
+      <h2>Căn cứ</h2>
+      <ul class="cites" id="cites"></ul>
+    </div>
+    <ul class="warnings" id="warnings"></ul>
+    <div class="meta" id="meta"></div>
+    <div class="feedback" id="feedback">
+      <span>Câu trả lời này:</span>
+      <button type="button" class="ghost" data-helpful="true">Hữu ích</button>
+      <button type="button" class="ghost" data-helpful="false">Chưa đúng</button>
+      <input id="comment" maxlength="1000" placeholder="Góp ý (không bắt buộc)">
+      <span class="meta" id="fb-msg" role="status"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Văn bản hệ thống đang dùng</summary>
+      <ul class="docs" id="docs"><li>Đang tải…</li></ul>
+    </details>
+  </section>
+</div>
+
+<script>
+const STATUS = { tra_loi: "Trả lời", tu_choi: "Ngoài phạm vi quy chế", hoi_lai_khoa: "Cần biết khóa" };
+const EXAMPLES = [
+  "Bị cảnh báo học tập mấy lần thì bị buộc thôi học?",
+  "Điểm thường xuyên 6,0, giữa kỳ 5,0, thi cuối kỳ 2,0 thì có qua môn không?",
+  "Muốn bảo lưu để ôn thi lại thì cần điều kiện gì?",
+  "Năm nhất có được chuyển ngành không?",
+];
+const $ = (id) => document.getElementById(id);
+let lastId = null;
+
+function fillKhoa() {
+  const sel = $("khoa");
+  sel.append(new Option("Không nêu", ""));
+  for (let k = 72; k >= 60; k--) sel.append(new Option("K" + k, String(k)));
+  try { const saved = localStorage.getItem("khoa"); if (saved !== null) sel.value = saved; } catch (e) {}
+}
+
+function fillExamples() {
+  for (const q of EXAMPLES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "ghost"; b.textContent = q;
+    b.addEventListener("click", () => { $("question").value = q; $("question").focus(); });
+    $("examples").append(b);
+  }
+}
+
+function li(text, cls) {
+  const el = document.createElement("li");
+  el.textContent = text;
+  if (cls) el.className = cls;
+  return el;
+}
+
+function render(data) {
+  lastId = data.request_id;
+  $("result").hidden = false;
+  const st = $("status");
+  st.textContent = STATUS[data.status] || data.status;
+  st.className = "status " + data.status;
+  $("answer").textContent = data.answer;
+  $("cites").replaceChildren(...data.citations.map((c) => {
+    const el = document.createElement("li");
+    const b = document.createElement("b");
+    b.textContent = "Điều " + c.dieu + (c.khoan ? " Khoản " + c.khoan : "");
+    el.append(b, document.createTextNode(" · " + c.doc_title + " (" + c.so_hieu + ")"));
+    return el;
+  }));
+  $("cites-box").hidden = data.citations.length === 0;
+  const warnings = data.warnings.map((w) => li(w));
+  if (data.uncertain) warnings.unshift(li("Không chắc chắn: trích dẫn chưa kiểm chứng được, hãy đối chiếu văn bản.", "flag"));
+  $("warnings").replaceChildren(...warnings);
+  $("meta").textContent = "Thời gian trả lời " + (data.latency_ms / 1000).toFixed(1) + " giây";
+  $("feedback").hidden = false;
+  $("comment").value = "";
+  $("fb-msg").textContent = "";
+  for (const b of document.querySelectorAll("#feedback button")) b.disabled = false;
+  $("khoa-box").classList.toggle("need", data.status === "hoi_lai_khoa");
+  if (data.status === "hoi_lai_khoa") $("khoa").focus();
+}
+
+async function ask(event) {
+  event.preventDefault();
+  const question = $("question").value.trim();
+  if (question.length < 3) return;
+  const khoa = $("khoa").value;
+  try { localStorage.setItem("khoa", khoa); } catch (e) {}
+  const btn = $("submit");
+  btn.disabled = true; btn.textContent = "Đang tra cứu…";
+  try {
+    const res = await fetch("/ask", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, khoa: khoa ? Number(khoa) : null }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Câu hỏi chưa hợp lệ.");
+    render(data);
+  } catch (e) {
+    $("result").hidden = false;
+    $("status").textContent = "Lỗi"; $("status").className = "status tu_choi";
+    $("answer").textContent = e.message || "Không kết nối được máy chủ.";
+    $("cites-box").hidden = true; $("warnings").replaceChildren(); $("meta").textContent = "";
+    $("feedback").hidden = true;
+  } finally {
+    btn.disabled = false; btn.textContent = "Hỏi";
+  }
+}
+
+async function sendFeedback(helpful) {
+  if (!lastId) return;
+  const res = await fetch("/feedback", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ request_id: lastId, helpful, comment: $("comment").value || null }),
+  });
+  $("fb-msg").textContent = res.ok ? "Cảm ơn bạn, phản hồi đã được ghi lại." : "Chưa gửi được phản hồi.";
+  if (res.ok) for (const b of document.querySelectorAll("#feedback button")) b.disabled = true;
+}
+
+async function loadDocs() {
+  try {
+    const docs = await (await fetch("/documents")).json();
+    $("docs").replaceChildren(...docs.map((d) => {
+      const khoa = d.khoa_tu && d.khoa_den ? "K" + d.khoa_tu + "–K" + d.khoa_den
+        : d.khoa_tu ? "K" + d.khoa_tu + " trở đi" : d.khoa_den ? "K" + d.khoa_den + " trở về trước" : "mọi khóa";
+      const sua = d.sua_doi.length ? " · sửa đổi một phần văn bản khác" : "";
+      return li(d.doc_title + " (" + d.so_hieu + ") · " + khoa + sua);
+    }));
+  } catch (e) {
+    $("docs").replaceChildren(li("Không tải được danh mục văn bản."));
+  }
+}
+
+fillKhoa();
+fillExamples();
+loadDocs();
+$("ask-form").addEventListener("submit", ask);
+for (const b of document.querySelectorAll("#feedback button")) {
+  b.addEventListener("click", () => sendFeedback(b.dataset.helpful === "true"));
+}
+</script>
+</body>
+</html>

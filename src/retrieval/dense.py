@@ -12,17 +12,27 @@ DEFAULT_MODEL = "BAAI/bge-m3"
 
 class Embedder:
     def __init__(self, model_name: str = DEFAULT_MODEL, cache_dir: Path | None = None,
-                 max_seq_length: int = 1024):
+                 max_seq_length: int = 1024, seed_dir: Path | None = None):
+        """`seed_dir`: embedding dựng sẵn, chỉ đọc (data/embeddings trong repo), để máy mới không
+        phải tính lại các đoạn văn bản; `cache_dir` là cache ghi được cho phần còn lại."""
         self.model_name = model_name
         self.max_seq_length = max_seq_length
         self._model = None
-        self._cache_path = (
-            cache_dir / f"{model_name.replace('/', '__')}.npz" if cache_dir else None
-        )
+        # Số văn bản đã phải tính bằng mô hình (không có trong hạt giống hay cache).
+        self.computed = 0
+        filename = f"{model_name.replace('/', '__')}.npz"
+        self._cache_path = cache_dir / filename if cache_dir else None
         self._cache: dict[str, np.ndarray] = {}
-        if self._cache_path and self._cache_path.exists():
-            with np.load(self._cache_path) as data:
-                self._cache = {key: data[key] for key in data.files}
+        for path in [seed_dir / filename if seed_dir else None, self._cache_path]:
+            if path and path.exists():
+                with np.load(path) as data:
+                    self._cache.update({key: data[key] for key in data.files})
+
+    def export(self, texts: list[str], path: Path) -> None:
+        """Ghi embedding của đúng các đoạn này ra file hạt giống."""
+        vectors = self.encode(texts)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(path, **{self._key(t): v for t, v in zip(texts, vectors, strict=True)})
 
     def _load(self):
         if self._model is None:
@@ -47,6 +57,7 @@ class Embedder:
             )
             for text, vec in zip(missing, vectors, strict=True):
                 self._cache[self._key(text)] = vec.astype(np.float32)
+            self.computed += len(missing)
             self._save()
         return np.stack([self._cache[self._key(t)] for t in texts])
 

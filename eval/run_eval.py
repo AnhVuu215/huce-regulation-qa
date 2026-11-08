@@ -10,7 +10,7 @@ import statistics
 import sys
 import time
 from collections import defaultdict
-from dataclasses import asdict, replace
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
@@ -19,47 +19,24 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from evaluation.metrics import score  # noqa: E402
 from evaluation.testset import load_testset, validate  # noqa: E402
-from ingestion.cli import parse_registered  # noqa: E402
-from ingestion.registry import amendments_to, load_registry  # noqa: E402
-from retrieval.corpus import structural_passages, window_passages  # noqa: E402
+from retrieval import build, presets  # noqa: E402
 from retrieval.dense import Embedder  # noqa: E402
-from retrieval.pipeline import RetrievalConfig, Retriever, load_synonyms  # noqa: E402
+from retrieval.pipeline import RetrievalConfig, Retriever  # noqa: E402
 from retrieval.rerank import Reranker  # noqa: E402
 
 K = 5
 CACHE = ROOT / ".cache"
 
-# Thứ tự cộng dồn của bảng ablation: mỗi dòng bật thêm một bước so với dòng trên.
-_base = RetrievalConfig("baseline", chunking="window")
-_structure = replace(_base, name="+chunk_cau_truc", chunking="structure")
-_hybrid = replace(_structure, name="+hybrid_bm25", hybrid=True)
-_synonyms = replace(_hybrid, name="+tu_dong_nghia", synonyms=True)
-_rerank = replace(_synonyms, name="+rerank", rerank=True)
-_khoa = replace(_rerank, name="+loc_khoa", khoa_filter=True)
-# Đối chứng ngoài chuỗi cộng dồn: bỏ reranker (đắt trên CPU) nhưng vẫn lọc khóa.
-_no_rerank = replace(_synonyms, name="khong_rerank+loc_khoa", khoa_filter=True)
-CONFIGS = {c.name: c for c in [_base, _structure, _hybrid, _synonyms, _rerank, _khoa]}
-EXTRA = {_no_rerank.name: _no_rerank}
+CONFIGS = {c.name: c for c in presets.ABLATION}
+EXTRA = {c.name: c for c in presets.EXTRA}
 
 
 def load_corpus():
-    docs = {d.doc_id: d for d in load_registry(ROOT / "data" / "registry.yaml").documents}
-    parsed = {doc_id: parse_registered(doc, ROOT) for doc_id, doc in docs.items()}
-    return docs, parsed
+    return build.load_corpus(ROOT)
 
 
 def build_retriever(config: RetrievalConfig, docs, parsed, embedder, reranker) -> Retriever:
-    passages = []
-    for doc in docs.values():
-        if config.chunking == "window":
-            passages += window_passages(
-                doc, parsed[doc.doc_id], config.window_words, config.window_overlap
-            )
-        else:
-            passages += structural_passages(doc, parsed[doc.doc_id],
-                                            amendments_to(list(docs.values()), doc.doc_id))
-    return Retriever(config, passages, embedder, reranker,
-                     load_synonyms(ROOT / "data" / "synonyms.yaml"))
+    return build.build_retriever(config, docs, parsed, embedder, reranker, ROOT)
 
 
 def summarize(rows: list[dict]) -> dict[str, dict[str, float]]:

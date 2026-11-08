@@ -5,13 +5,16 @@ description = "Hỏi đáp quy chế đào tạo HUCE có trích dẫn Điều/K
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [
+    "fastapi>=0.110",
     "pydantic>=2.7",
     "pymupdf>=1.24",
     "pyyaml>=6.0",
+    "uvicorn>=0.29",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.27",
     "pytest>=8.0",
     "ruff>=0.6",
 ]
@@ -19,7 +22,17 @@ dev = [
 ml = [
     "numpy>=1.26",
     "sentence-transformers>=3.0",
+    "torch>=2.2",
 ]
+
+# PyTorch bản CPU: hệ thống không dùng GPU, còn bản mặc định trên Linux kéo theo CUDA nặng vài GB.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [build-system]
 requires = ["setuptools>=68"]
