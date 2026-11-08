@@ -74,6 +74,8 @@ def main() -> None:
                         help="cho LLM gọi công cụ tính toán học vụ")
     parser.add_argument("--only", default="", help="chỉ chạy các loại câu, ví dụ tinh_toan")
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--testset", default="testset.jsonl",
+                        help="file trong eval/, ví dụ testset_holdout.jsonl (tập kiểm tra độc lập)")
     parser.add_argument("--judge", action="store_true",
                         help="chấm độ đúng nội dung bằng giám khảo LLM")
     args = parser.parse_args()
@@ -90,7 +92,7 @@ def main() -> None:
     # Giám khảo không dùng mô hình dự phòng: mọi câu phải được chấm bởi cùng một mô hình.
     judge = (Judge(CachedLLM(GeminiClient([JUDGE_MODEL]), CACHE / "judge", JUDGE_MODEL))
              if args.judge else None)
-    questions = load_testset(ROOT / "eval" / "testset.jsonl")
+    questions = load_testset(ROOT / "eval" / args.testset)
     if args.only:
         questions = [q for q in questions if q.loai in args.only.split(",")]
     if args.limit:
@@ -148,7 +150,8 @@ def main() -> None:
         return round(statistics.mean(r[key] for r in items), 3) if items else None
 
     summary = {
-        "model": args.model, "retrieval": RETRIEVAL, "tools": args.tools, "n": len(rows),
+        "model": args.model, "retrieval": RETRIEVAL, "tools": args.tools,
+        "testset": args.testset, "n": len(rows),
         "tinh_toan_dung": mean([r for r in rows if "short_answer_correct" in r
                                 and r["loai"] == "tinh_toan"], "short_answer_correct"),
         "dap_an_ngan_phien_ban": mean([r for r in rows if "short_answer_correct" in r
@@ -185,7 +188,8 @@ def main() -> None:
         summary["phan_bo_cham"] = dict(Counter(r["judge"] for r in answerable))
         for k, v in by_type.items():
             summary["by_type"][k]["do_dung_noi_dung"] = mean(v, "judge_score")
-    suffix = "-tools" if args.tools else ""
+    suffix = ("-tools" if args.tools else "") + (
+        "" if args.testset == "testset.jsonl" else "-" + Path(args.testset).stem)
     stamp = f"{datetime.now():%Y%m%d-%H%M%S}"
     out = ROOT / "eval" / "results" / f"{stamp}-generation-{args.model}{suffix}.json"
     payload = {"summary": summary, "questions": rows, "qa_config": asdict(QAConfig())}
