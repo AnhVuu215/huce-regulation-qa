@@ -26,7 +26,7 @@ def build_qa(root: Path) -> QA:
                     "scripts/export_embeddings.py để cập nhật.", embedder.computed)
     # Mô hình vẫn cần để mã hóa câu hỏi; nạp sẵn lúc khởi động (khoảng 20 giây) để người hỏi đầu
     # tiên không phải chờ.
-    embedder.encode_query("khởi động")
+    embedder.warm_up()
     llm = CachedLLM(GeminiClient([MODEL]), cache / "llm", namespace=MODEL)
     tools = HocVu(root / "data" / "rules" / "hoc-vu.yaml", docs)
     return QA(retriever, llm, docs, QAConfig(), tools=tools)
