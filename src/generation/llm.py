@@ -10,9 +10,13 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Protocol
+
+# Thực thi một lời gọi công cụ của mô hình: (tên hàm, tham số) -> kết quả gửi lại cho mô hình.
+ToolHandler = Callable[[str, dict], dict]
 
 
 @dataclass
@@ -37,7 +41,7 @@ class LLM(Protocol):
         prompt: str,
         json_schema: dict | None = None,
         tools: list[dict] | None = None,
-        tool_handler=None,
+        tool_handler: ToolHandler | None = None,
     ) -> LLMResponse: ...
 
 
@@ -135,7 +139,7 @@ class GeminiClient:
         prompt: str,
         json_schema: dict | None = None,
         tools: list[dict] | None = None,
-        tool_handler=None,
+        tool_handler: ToolHandler | None = None,
     ) -> LLMResponse:
         """Sinh câu trả lời. Có `tools` thì chạy vòng gọi công cụ: mô hình yêu cầu, `tool_handler`
         thực thi, kết quả gửi lại cho tới khi mô hình trả lời (tối đa MAX_TOOL_ROUNDS vòng)."""
@@ -249,7 +253,7 @@ class CachedLLM:
         prompt: str,
         json_schema: dict | None = None,
         tools: list[dict] | None = None,
-        tool_handler=None,
+        tool_handler: ToolHandler | None = None,
     ) -> LLMResponse:
         # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được. Có công cụ thì
         # khóa gồm cả dấu vân tay của công cụ: đổi quy tắc hay code công cụ là cache tự hết hạn.
@@ -285,7 +289,7 @@ class FakeLLM:
         prompt: str,
         json_schema: dict | None = None,
         tools: list[dict] | None = None,
-        tool_handler=None,
+        tool_handler: ToolHandler | None = None,
     ) -> LLMResponse:
         self.calls.append((system, prompt))
         tool_calls = []

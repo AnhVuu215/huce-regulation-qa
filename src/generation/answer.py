@@ -4,11 +4,34 @@ import json
 import re
 import time
 from dataclasses import dataclass, field
+from typing import Literal, Protocol
 
-from generation.llm import LLM, LLMResponse
+from generation.llm import LLM, LLMResponse, ToolHandler
 from ingestion.registry import Document
 from retrieval.corpus import Amendment, Passage, Unit
 from tools.hoc_vu import FUNCTION_DECLARATIONS
+
+Status = Literal["tra_loi", "tu_choi", "hoi_lai_khoa"]
+ToolsMode = Literal["always", "never", "auto"]
+
+
+class PassageRetriever(Protocol):
+    """Phần của retrieval.pipeline.Retriever mà QA dùng (test truyền bản giả lập)."""
+
+    passages: list[Passage]
+
+    def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]: ...
+
+    def max_similarity(self, question: str, khoa: int | None = None) -> float: ...
+
+
+class Tools(Protocol):
+    """Công cụ tính toán cho LLM gọi (tools.hoc_vu.HocVu)."""
+
+    fingerprint: str
+
+    def call(self, name: str, args: dict) -> dict: ...
+
 
 DISCLAIMER = (
     "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng "
@@ -52,7 +75,7 @@ DIEU_MENTION = re.compile(r"Điều\s+(\d+)")
 
 @dataclass
 class Answer:
-    status: str  # "tra_loi" | "tu_choi" | "hoi_lai_khoa"
+    status: Status
     text: str
     citations: list[Unit] = field(default_factory=list)
     cited_passages: list[str] = field(default_factory=list)
@@ -113,7 +136,7 @@ class QAConfig:
     relevance_threshold: float = 0.50
     # Khi nào cho LLM gọi công cụ tính toán: "always" | "never" | "auto" (câu hỏi có con số).
     # Bật cho mọi câu làm gấp đôi token và khiến mô hình gọi công cụ cả khi không cần tính.
-    tools_mode: str = "auto"
+    tools_mode: ToolsMode = "auto"
 
 
 NUMBER = re.compile(r"\d")
@@ -126,7 +149,12 @@ def needs_calculation(question: str) -> bool:
 
 class QA:
     def __init__(
-        self, retriever, llm: LLM, docs: dict[str, Document], config: QAConfig, tools=None
+        self,
+        retriever: PassageRetriever,
+        llm: LLM,
+        docs: dict[str, Document],
+        config: QAConfig,
+        tools: Tools | None = None,
     ):
         """`tools`: đối tượng công cụ học vụ (tools.hoc_vu.HocVu); None thì LLM tự trình bày."""
         self.retriever = retriever
@@ -135,14 +163,15 @@ class QA:
         self.config = config
         self.tools = tools
 
-    def _tool_handler(self, khoa: int | None):
+    def _tool_handler(self, khoa: int | None, tools: Tools) -> ToolHandler:
         def handle(name: str, args: dict) -> dict:
             # Khóa đã biết thì ghi đè tham số của LLM: không thể tính nhầm theo quy chế khóa khác.
             if khoa is not None:
                 args["khoa"] = khoa
-            return self.tools.call(name, args)
+            return tools.call(name, args)
 
-        handle.fingerprint = getattr(self.tools, "fingerprint", None)
+        # CachedLLM đưa dấu vân tay vào khóa cache: đổi file quy tắc thì câu trả lời cũ hết hạn.
+        handle.fingerprint = getattr(tools, "fingerprint", None)  # type: ignore[attr-defined]
         return handle
 
     def _needs_khoa(self, passages: list[Passage]) -> bool:
@@ -228,12 +257,13 @@ class QA:
     def _generate(self, question: str, khoa: int | None, passages: list[Passage]) -> LLMResponse:
         cfg = self.config
         prompt = self._prompt(question, khoa, passages)
-        use_tools = self.tools is not None and (
-            cfg.tools_mode == "always" or (cfg.tools_mode == "auto" and needs_calculation(question))
+        use_tools = cfg.tools_mode == "always" or (
+            cfg.tools_mode == "auto" and needs_calculation(question)
         )
-        if use_tools:
+        if self.tools is not None and use_tools:
+            handler = self._tool_handler(khoa, self.tools)
             return self.llm.generate(
-                SYSTEM + TOOLS_RULE, prompt, SCHEMA, FUNCTION_DECLARATIONS, self._tool_handler(khoa)
+                SYSTEM + TOOLS_RULE, prompt, SCHEMA, FUNCTION_DECLARATIONS, handler
             )
         return self.llm.generate(SYSTEM, prompt, SCHEMA)
 
@@ -247,7 +277,7 @@ class QA:
             for call in response.tool_calls
             for c in call["result"].get("can_cu", [])
         ]
-        status = "tu_choi" if data.get("tu_choi") else "tra_loi"
+        status: Status = "tu_choi" if data.get("tu_choi") else "tra_loi"
         valid, dropped = [], []
         for n in data.get("trich_dan", []):
             if isinstance(n, int) and 1 <= n <= len(passages):
