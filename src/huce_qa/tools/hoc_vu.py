@@ -73,7 +73,12 @@ class HocVu:
         current = rule.get("trong_so_hien_hanh")
         named = (diem_thuong_xuyen, diem_giua_ky, diem_cuoi_ky)
         warning = None
-        if all(v is not None for v in named) and current:
+        if (
+            diem_thuong_xuyen is not None
+            and diem_giua_ky is not None
+            and diem_cuoi_ky is not None
+            and current
+        ):
             parts = [
                 {"diem": float(diem_thuong_xuyen), "trong_so": current["thuong_xuyen"]},
                 {"diem": float(diem_giua_ky), "trong_so": current["giua_ky"]},
@@ -86,12 +91,9 @@ class HocVu:
                 for c in diem_thanh_phan
             ]
             weight_cites = [self._cite(doc_id, rule["can_cu"])]
-            official = (
-                sorted([current["thuong_xuyen"], current["giua_ky"], current["cuoi_ky"]])
-                if current
-                else None
-            )
-            if official and sorted(p["trong_so"] for p in parts) != official:
+            if current and sorted(p["trong_so"] for p in parts) != sorted(
+                [current["thuong_xuyen"], current["giua_ky"], current["cuoi_ky"]]
+            ):
                 warning = (
                     f"Trọng số đưa vào khác quy định hiện hành: thường xuyên "
                     f"{current['thuong_xuyen']:.0%}, giữa kỳ {current['giua_ky']:.0%}, "

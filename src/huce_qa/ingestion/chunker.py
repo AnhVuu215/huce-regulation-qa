@@ -1,5 +1,6 @@
 """Chunk theo cấu trúc: một Điều một chunk, Điều dài tách theo Khoản."""
 
+from collections.abc import Sequence
 from datetime import date
 
 from pydantic import BaseModel
@@ -103,7 +104,7 @@ def chunk_document(
     doc: Document,
     dieus: list[Dieu],
     max_words: int = MAX_WORDS,
-    amendments: list[tuple[str, SuaDoi]] = (),
+    amendments: Sequence[tuple[str, SuaDoi]] = (),
 ) -> list[Chunk]:
     """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
     chunks = [chunk for dieu in dieus for chunk in chunk_dieu(doc, dieu, max_words)]
