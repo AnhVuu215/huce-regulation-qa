@@ -5,7 +5,14 @@ import json
 import pytest
 
 from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, FakeLLM, load_env, models_from_env
+from generation.llm import (
+    CachedLLM,
+    DailyQuotaError,
+    FakeLLM,
+    LLMError,
+    load_env,
+    models_from_env,
+)
 from ingestion.registry import Document
 from retrieval.corpus import Passage, Unit
 
@@ -328,3 +335,36 @@ def test_models_are_read_from_env_file_loaded_after_import(tmp_path, monkeypatch
 def test_models_fall_back_to_default_when_unset(monkeypatch):
     monkeypatch.setenv("LLM_MODEL", " , ")
     assert models_from_env() == ["gemini-3.5-flash-lite"]
+
+
+def _quota_429(quota_id: str):
+    import io
+    import urllib.error
+
+    body = json.dumps({"error": {"details": [{"violations": [{"quotaId": quota_id}]}]}}).encode()
+    return urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
+
+
+@pytest.mark.parametrize(
+    ("errors", "expected"),
+    [
+        # Mô hình chính hết lượt ngày, mô hình dự phòng quá tải: vẫn báo hết hạn mức ngày.
+        ({"a": "GenerateRequestsPerDayPerProjectPerModel-FreeTier", "b": None}, DailyQuotaError),
+        ({"a": None, "b": None}, LLMError),
+    ],
+)
+def test_client_reports_daily_quota_as_its_own_error(monkeypatch, errors, expected):
+    import urllib.error
+
+    from generation.llm import GeminiClient
+
+    def post(self, model, body):
+        if errors[model]:
+            raise _quota_429(errors[model])
+        raise urllib.error.HTTPError("u", 400, "Bad Request", {}, None)
+
+    monkeypatch.setattr(GeminiClient, "_post", post)
+    client = GeminiClient(["a", "b"], api_key="k", retries=0)
+    with pytest.raises(LLMError) as info:
+        client.generate("s", "p")
+    assert type(info.value) is expected

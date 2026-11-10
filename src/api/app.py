@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse
 
 from api.schemas import AskRequest, AskResponse, Citation, DocumentInfo, FeedbackRequest
 from generation.answer import QA, citation_label
-from generation.llm import LLMError, load_env
+from generation.llm import DailyQuotaError, LLMError, load_env
 
 ROOT = Path(__file__).resolve().parents[2]
 STATIC = Path(__file__).parent / "static"
@@ -147,7 +147,7 @@ def create_app(
         except LLMError as e:
             log.warning("LLM lỗi: %s", e)
             requests_log.write({"request_id": request_id, "status": "loi_llm", "error": str(e)})
-            if "PerDay" in str(e):
+            if isinstance(e, DailyQuotaError):
                 detail = (
                     "Đã hết lượt gọi mô hình ngôn ngữ trong ngày (gói miễn phí); hạn mức "
                     "được cấp lại sau nửa đêm giờ Thái Bình Dương, khoảng 15 giờ Việt Nam."

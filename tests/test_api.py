@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 from api.app import RateLimiter, create_app
 from generation.answer import Answer
-from generation.llm import LLMError
+from generation.llm import DailyQuotaError, LLMError
 from ingestion.registry import load_registry
 from retrieval.corpus import Unit
 
@@ -20,7 +20,7 @@ DOCS = {d.doc_id: d for d in load_registry(ROOT / "data" / "registry.yaml").docu
 
 
 class FakeQA:
-    def __init__(self, fail: str | None = None):
+    def __init__(self, fail: str | LLMError | None = None):
         self.docs = DOCS
         self.fail = fail
         self.calls = []
@@ -28,7 +28,7 @@ class FakeQA:
     def answer(self, question, khoa):
         self.calls.append((question, khoa))
         if self.fail:
-            raise LLMError(self.fail)
+            raise self.fail if isinstance(self.fail, LLMError) else LLMError(self.fail)
         return Answer(
             status="tra_loi",
             text="Từ 2,0 trở lên.",
@@ -80,7 +80,7 @@ def test_llm_failure_returns_503(tmp_path):
 
 
 def test_daily_quota_failure_says_when_quota_resets(tmp_path):
-    error = "gemini-3.5-flash-lite: HTTP 429 GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+    error = DailyQuotaError("gemini-3.5-flash-lite: HTTP 429")
     with TestClient(create_app(lambda: FakeQA(fail=error), data_dir=tmp_path)) as c:
         r = c.post("/ask", json={"question": "GPA bao nhiêu?"})
     assert r.status_code == 503

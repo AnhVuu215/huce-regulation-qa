@@ -45,6 +45,11 @@ class LLMError(RuntimeError):
     pass
 
 
+class DailyQuotaError(LLMError):
+    """Không mô hình nào trả lời được và ít nhất một mô hình đã hết hạn mức trong ngày: thử lại
+    trước khi hạn mức được cấp lại cũng vô ích."""
+
+
 def load_env(path: Path) -> None:
     """Nạp biến từ .env vào môi trường nếu chưa có (không cần thư viện dotenv)."""
     if not path.exists():
@@ -116,7 +121,7 @@ class GeminiClient:
                 errors.append(f"{model}: HTTP {e.code}{' ' + detail if detail else ''}")
                 if e.code in (400, 401, 403, 404) or "PerDay" in detail:
                     # Lỗi cấu hình hoặc hết hạn mức theo ngày: thử lại vô ích.
-                    raise _SwitchModel from e
+                    raise _SwitchModel(daily_quota="PerDay" in detail) from e
                 # Hạn mức theo phút: chờ đúng thời gian máy chủ yêu cầu, không đoán.
                 time.sleep(retry_after if retry_after else 2**attempt * 5)
             except (TimeoutError, urllib.error.URLError, OSError) as e:
@@ -143,6 +148,7 @@ class GeminiClient:
         if tools:
             base["tools"] = [{"functionDeclarations": tools}]
         errors: list[str] = []
+        daily_quota = False
         for model in self.models:
             contents = [{"role": "user", "parts": [{"text": prompt}]}]
             usage_total = {
@@ -186,9 +192,11 @@ class GeminiClient:
                         responses.append({"functionResponse": reply})
                     contents.append({"role": "user", "parts": responses})
                 errors.append(f"{model}: quá {MAX_TOOL_ROUNDS} vòng gọi công cụ")
-            except _SwitchModel:
+            except _SwitchModel as e:
+                daily_quota = daily_quota or e.daily_quota
                 continue
-        raise LLMError("Mọi mô hình đều lỗi: " + "; ".join(errors))
+        error = DailyQuotaError if daily_quota else LLMError
+        raise error("Mọi mô hình đều lỗi: " + "; ".join(errors))
 
 
 MAX_TOOL_ROUNDS = 4
@@ -199,6 +207,10 @@ _LAST_CALL_LOCK = threading.Lock()
 
 class _SwitchModel(Exception):
     """Mô hình hiện tại không dùng được cho lời gọi này; chuyển sang mô hình kế tiếp."""
+
+    def __init__(self, daily_quota: bool = False):
+        super().__init__()
+        self.daily_quota = daily_quota
 
 
 def _quota_detail(error: urllib.error.HTTPError) -> tuple[str, float | None]:
