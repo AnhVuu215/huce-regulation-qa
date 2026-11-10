@@ -89,9 +89,10 @@ class GeminiClient:
         min_interval_s: float = 4.0,
     ):
         self.models = models
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
-        if not self.api_key:
+        key = api_key or os.environ.get("GEMINI_API_KEY")
+        if not key:
             raise LLMError("Thiếu GEMINI_API_KEY (đặt trong .env)")
+        self.api_key: str = key
         self.timeout_s = timeout_s
         self.retries = retries
         self.min_interval_s = min_interval_s
@@ -257,7 +258,7 @@ class CachedLLM:
     ) -> LLMResponse:
         # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được. Có công cụ thì
         # khóa gồm cả dấu vân tay của công cụ: đổi quy tắc hay code công cụ là cache tự hết hạn.
-        parts = [system, prompt, json_schema]
+        parts: list = [system, prompt, json_schema]
         if tools:
             parts += [tools, getattr(tool_handler, "fingerprint", None)]
         key = hashlib.sha1(json.dumps(parts, ensure_ascii=False).encode("utf-8")).hexdigest()

@@ -1,5 +1,6 @@
 """Đơn vị truy xuất (passage) và hai cách chia: theo cấu trúc, theo cửa sổ từ (baseline)."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from huce_qa.ingestion.chunker import amendment_matches, chunk_document
@@ -41,7 +42,7 @@ class Passage:
 
 
 def structural_passages(
-    doc: Document, dieus: list[Dieu], amendments: list[tuple[str, SuaDoi]] = ()
+    doc: Document, dieus: list[Dieu], amendments: Sequence[tuple[str, SuaDoi]] = ()
 ) -> list[Passage]:
     """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
     passages = []

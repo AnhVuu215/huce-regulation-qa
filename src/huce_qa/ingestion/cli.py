@@ -1,5 +1,6 @@
 """Nạp toàn bộ văn bản trong registry thành data/processed/<doc_id>.json."""
 
+import io
 import json
 import sys
 from pathlib import Path
@@ -46,7 +47,9 @@ def ingest(doc: Document, root: Path = ROOT, amendments=()) -> list[Chunk]:
 
 
 def main() -> None:
-    sys.stdout.reconfigure(encoding="utf-8")
+    # Console Windows mặc định cp1252, không in được tiếng Việt.
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(encoding="utf-8")
     out_dir = ROOT / "data" / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
     docs = load_registry(ROOT / "data" / "registry.yaml").documents

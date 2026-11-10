@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 
 DEFAULT_RERANKER = "BAAI/bge-reranker-v2-m3"
 
@@ -16,7 +17,8 @@ class Reranker:
     ):
         self.model_name = model_name
         self.max_length = max_length
-        self._model = None
+        # CrossEncoder, nạp muộn: sentence-transformers thuộc nhóm ml, CI không cài.
+        self._model: Any = None
         self._cache_path = (
             cache_dir / f"rerank__{model_name.replace('/', '__')}.json" if cache_dir else None
         )
