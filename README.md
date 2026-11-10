@@ -33,26 +33,34 @@ tập độc lập, được commit trước khi chạy hệ thống. Chi tiết
 ## Kiến trúc
 
 ```mermaid
-flowchart LR
-  subgraph nap[Nạp dữ liệu]
+flowchart TB
+  subgraph nap[1. Nạp dữ liệu]
+    direction LR
     PDF[PDF quy chế] --> OCR[OCR + soát tay<br/>nếu là bản scan]
-    PDF --> P[Parser Điều/Khoản/Điểm]
+    PDF --> P[Parser<br/>Điều/Khoản/Điểm]
     OCR --> P
     R[registry.yaml<br/>khóa, hiệu lực, sửa đổi] --> P
-    P --> C[Đoạn văn bản]
+    P --> C[(Đoạn văn bản<br/>+ vector bge-m3)]
   end
-  subgraph traloi[Trả lời]
-    Q[Câu hỏi + khóa] --> F[Lọc phiên bản theo khóa]
-    C --> F
-    F --> H[Vector bge-m3 + BM25, gộp RRF]
-    H --> A[Kéo kèm đoạn sửa đổi]
-    A --> L[LLM trả lời, trích dẫn theo đoạn]
+  subgraph traloi[2. Trả lời]
+    direction LR
+    Q[Câu hỏi + khóa] --> S[Mở rộng<br/>từ đồng nghĩa]
+    S --> F[Lọc phiên bản<br/>theo khóa]
+    F --> H[Vector + BM25<br/>gộp RRF]
+    H --> K{Quy định khác<br/>nhau theo khóa?}
+    K -- chưa biết khóa --> HK[Hỏi lại khóa]
+    K --> G{Cổng liên quan}
+    G -- ngoài phạm vi --> TC[Từ chối]
+    G --> A[Kéo kèm<br/>đoạn sửa đổi]
+    A --> L[LLM trả lời<br/>trích dẫn theo đoạn]
     T[Công cụ học vụ] <--> L
-    L --> V[Hậu kiểm trích dẫn bằng code]
+    L --> V[Hậu kiểm trích dẫn<br/>bằng code]
   end
-  subgraph danhgia[Đánh giá]
+  subgraph danhgia[3. Đánh giá]
+    direction LR
     TS[Bộ test + tập độc lập] --> M[Recall@5, trích dẫn, từ chối,<br/>giám khảo LLM, chấm tay]
   end
+  nap --> traloi --> danhgia
 ```
 
 ## Chạy thử
