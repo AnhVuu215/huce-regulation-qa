@@ -5,7 +5,7 @@ import json
 import pytest
 
 from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, FakeLLM
+from generation.llm import CachedLLM, FakeLLM, load_env, models_from_env
 from ingestion.registry import Document
 from retrieval.corpus import Passage, Unit
 
@@ -250,3 +250,18 @@ def test_concurrent_calls_keep_min_interval(monkeypatch):
         t.join()
     times.sort()
     assert all(b - a >= 0.09 for a, b in zip(times, times[1:], strict=False))
+
+
+def test_models_are_read_from_env_file_loaded_after_import(tmp_path, monkeypatch):
+    # setenv trước để monkeypatch ghi nhận trạng thái ban đầu và khôi phục sau khi load_env ghi đè.
+    monkeypatch.setenv("LLM_MODEL", "")
+    monkeypatch.delenv("LLM_MODEL")
+    env = tmp_path / ".env"
+    env.write_text("LLM_MODEL=model-a, model-b,\n", encoding="utf-8")
+    load_env(env)
+    assert models_from_env() == ["model-a", "model-b"]
+
+
+def test_models_fall_back_to_default_when_unset(monkeypatch):
+    monkeypatch.setenv("LLM_MODEL", " , ")
+    assert models_from_env() == ["gemini-3.5-flash-lite"]

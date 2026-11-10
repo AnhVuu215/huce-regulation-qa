@@ -50,6 +50,16 @@ def load_env(path: Path) -> None:
             os.environ.setdefault(name.strip(), value.strip().strip('"').strip("'"))
 
 
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
+
+
+def models_from_env() -> list[str]:
+    """Danh sách mô hình trong LLM_MODEL, cách nhau bởi dấu phẩy: mô hình đầu hết hạn mức ngày thì
+    chuyển sang mô hình sau. Đọc lúc gọi, sau `load_env`, để giá trị trong .env có hiệu lực."""
+    models = [m.strip() for m in os.environ.get("LLM_MODEL", "").split(",") if m.strip()]
+    return models or [DEFAULT_MODEL]
+
+
 class GeminiClient:
     """Gọi Gemini qua REST. Có thời gian chờ, thử lại với độ trễ tăng dần, mô hình dự phòng,
     và giãn cách tối thiểu giữa các lời gọi để không vượt hạn mức gói miễn phí."""
