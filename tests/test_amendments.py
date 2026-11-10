@@ -5,10 +5,17 @@ from pathlib import Path
 import pytest
 import yaml
 
-from ingestion.chunker import chunk_document
-from ingestion.cli import parse_registered
-from ingestion.registry import Document, Registry, SuaDoi, ViTri, amendments_to, load_registry
-from retrieval.corpus import Unit, structural_passages
+from huce_qa.ingestion.chunker import chunk_document
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import (
+    Document,
+    Registry,
+    SuaDoi,
+    ViTri,
+    amendments_to,
+    load_registry,
+)
+from huce_qa.retrieval.corpus import Unit, structural_passages
 
 ROOT = Path(__file__).resolve().parents[1]
 

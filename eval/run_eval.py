@@ -14,15 +14,14 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from huce_qa.evaluation.metrics import score
+from huce_qa.evaluation.testset import load_testset, validate
+from huce_qa.retrieval import build, presets
+from huce_qa.retrieval.dense import Embedder
+from huce_qa.retrieval.pipeline import RetrievalConfig, Retriever
+from huce_qa.retrieval.rerank import Reranker
 
-from evaluation.metrics import score  # noqa: E402
-from evaluation.testset import load_testset, validate  # noqa: E402
-from retrieval import build, presets  # noqa: E402
-from retrieval.dense import Embedder  # noqa: E402
-from retrieval.pipeline import RetrievalConfig, Retriever  # noqa: E402
-from retrieval.rerank import Reranker  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 K = 5
 CACHE = ROOT / ".cache"

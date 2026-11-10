@@ -1,6 +1,6 @@
 """API hỏi đáp quy chế: /ask, /feedback, /documents, /health và trang demo ở /.
 
-uv run --group ml uvicorn api.app:app --app-dir src --port 8000
+uv run --group ml uvicorn huce_qa.api.app:app --app-dir src --port 8000
 """
 
 import json
@@ -18,11 +18,11 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 
-from api.schemas import AskRequest, AskResponse, Citation, DocumentInfo, FeedbackRequest
-from generation.answer import QA, citation_label
-from generation.llm import DailyQuotaError, LLMError, load_env
+from huce_qa.api.schemas import AskRequest, AskResponse, Citation, DocumentInfo, FeedbackRequest
+from huce_qa.generation.answer import QA, citation_label
+from huce_qa.generation.llm import DailyQuotaError, LLMError, load_env
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 STATIC = Path(__file__).parent / "static"
 RECENT_ANSWERS = 1000
 log = logging.getLogger("huce_qa")
@@ -85,7 +85,7 @@ def create_app(
 
         def qa_factory() -> QA:
             # Import muộn: dựng pipeline cần nhóm ml (mô hình embedding), test và CI thì không.
-            from api.service import build_qa
+            from huce_qa.api.service import build_qa
 
             return build_qa(ROOT)
 

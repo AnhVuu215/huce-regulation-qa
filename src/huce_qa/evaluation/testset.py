@@ -6,8 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from ingestion.parser import Dieu
-from ingestion.registry import Document
+from huce_qa.ingestion.parser import Dieu
+from huce_qa.ingestion.registry import Document
 
 Loai = Literal["tra_cuu", "dien_dat_sv", "ket_hop", "tinh_toan", "phien_ban", "ngoai_pham_vi"]
 

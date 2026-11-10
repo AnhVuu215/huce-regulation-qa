@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from evaluation.agreement import agreement, cohen_kappa, confusion
-from evaluation.judge import VERDICTS, Judge
-from generation.llm import FakeLLM
+from huce_qa.evaluation.agreement import agreement, cohen_kappa, confusion
+from huce_qa.evaluation.judge import VERDICTS, Judge
+from huce_qa.generation.llm import FakeLLM
 
 
 def test_judge_parses_verdict_and_reason():

@@ -11,14 +11,12 @@ import csv
 import json
 import math
 import random
-import sys
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from huce_qa.evaluation.testset import load_testset
 
-from evaluation.testset import load_testset  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 FRACTION = 0.2
 SEED = 2026

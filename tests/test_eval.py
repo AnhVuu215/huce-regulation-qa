@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from evaluation.metrics import score, short_answer_correct, unit_matches
-from evaluation.testset import CanCu, DapAnNgan, load_testset, validate
-from ingestion.cli import parse_registered
-from ingestion.registry import load_registry
-from retrieval.corpus import Passage, Unit, window_passages
+from huce_qa.evaluation.metrics import score, short_answer_correct, unit_matches
+from huce_qa.evaluation.testset import CanCu, DapAnNgan, load_testset, validate
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import load_registry
+from huce_qa.retrieval.corpus import Passage, Unit, window_passages
 
 ROOT = Path(__file__).resolve().parents[1]
 

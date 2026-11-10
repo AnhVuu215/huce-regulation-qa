@@ -17,18 +17,17 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
+from run_eval import CACHE, EXTRA, build_retriever, load_corpus
+
+from huce_qa.evaluation.judge import SCORE, Judge
+from huce_qa.evaluation.metrics import short_answer_correct, unit_matches
+from huce_qa.evaluation.testset import load_testset
+from huce_qa.generation.answer import QA, QAConfig
+from huce_qa.generation.llm import CachedLLM, GeminiClient, LLMError, load_env
+from huce_qa.retrieval.dense import Embedder
+from huce_qa.tools.hoc_vu import HocVu
+
 ROOT = Path(__file__).resolve().parents[1]
-sys.path[:0] = [str(ROOT / "src"), str(ROOT / "eval")]
-
-from run_eval import CACHE, EXTRA, build_retriever, load_corpus  # noqa: E402
-
-from evaluation.judge import SCORE, Judge  # noqa: E402
-from evaluation.metrics import short_answer_correct, unit_matches  # noqa: E402
-from evaluation.testset import load_testset  # noqa: E402
-from generation.answer import QA, QAConfig  # noqa: E402
-from generation.llm import CachedLLM, GeminiClient, LLMError, load_env  # noqa: E402
-from retrieval.dense import Embedder  # noqa: E402
-from tools.hoc_vu import HocVu  # noqa: E402
 
 RETRIEVAL = "khong_rerank+loc_khoa"
 DEFAULT_MODEL = "gemini-3.5-flash-lite"

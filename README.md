@@ -84,7 +84,7 @@ Chạy không dùng Docker (Python 3.11, [uv](https://docs.astral.sh/uv/)):
 
 ```bash
 uv sync --group ml
-uv run --group ml uvicorn api.app:app --app-dir src --port 8000
+uv run --group ml uvicorn huce_qa.api.app:app --app-dir src --port 8000
 uv run pytest                   # 128 test, không cần mạng hay mô hình
 ```
 
@@ -156,9 +156,9 @@ Danh mục và lý do loại một số văn bản: [data/SOURCES.md](data/SOURC
 ## Cấu trúc
 
 ```text
-data/       registry.yaml, PDF gốc, bản text soát tay, quy tắc học vụ, từ điển, chunk đã xử lý
-src/        ingestion, retrieval, generation, tools, evaluation, api
-eval/       bộ test, tập độc lập, script đánh giá, kết quả, bảng chấm tay
-docs/       ROADMAP.md (lộ trình và quyết định), EVALUATION.md (báo cáo)
-tests/      128 test
+data/          registry.yaml, PDF gốc, bản text soát tay, quy tắc học vụ, từ điển, chunk đã xử lý
+src/huce_qa/   ingestion, retrieval, generation, tools, evaluation, api
+eval/          bộ test, tập độc lập, script đánh giá, kết quả, bảng chấm tay
+docs/          ROADMAP.md (lộ trình và quyết định), EVALUATION.md (báo cáo), PROJECT_PLAN.md
+tests/         test đơn vị và tích hợp (pytest)
 ```

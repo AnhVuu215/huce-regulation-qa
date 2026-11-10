@@ -6,8 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from retrieval.bm25 import BM25
-from retrieval.corpus import Passage
+from huce_qa.retrieval.bm25 import BM25
+from huce_qa.retrieval.corpus import Passage
 
 RRF_K = 60
 

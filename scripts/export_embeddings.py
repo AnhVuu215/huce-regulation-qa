@@ -8,11 +8,10 @@ Chạy lại sau khi văn bản, cách chia đoạn hoặc mô hình embedding t
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from huce_qa.retrieval import build, presets
+from huce_qa.retrieval.dense import Embedder
 
-from retrieval import build, presets  # noqa: E402
-from retrieval.dense import Embedder  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:

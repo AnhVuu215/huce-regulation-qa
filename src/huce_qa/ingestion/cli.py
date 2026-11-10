@@ -4,12 +4,12 @@ import json
 import sys
 from pathlib import Path
 
-from ingestion.chunker import Chunk, chunk_document
-from ingestion.parser import Dieu, check_structure, coverage, parse_document, stopped_early
-from ingestion.pdf_text import clean_lines, extract_pages
-from ingestion.registry import Document, amendments_to, load_registry, verify_file
+from huce_qa.ingestion.chunker import Chunk, chunk_document
+from huce_qa.ingestion.parser import Dieu, check_structure, coverage, parse_document, stopped_early
+from huce_qa.ingestion.pdf_text import clean_lines, extract_pages
+from huce_qa.ingestion.registry import Document, amendments_to, load_registry, verify_file
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 # Phần bị loại hợp lệ chỉ là tên Chương và khối chữ ký, nên tụt dưới ngưỡng là bị cắt cụt.
 MIN_COVERAGE = 0.97
 

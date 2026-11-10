@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from ingestion.registry import Document
+from huce_qa.ingestion.registry import Document
 
 
 class ToolError(ValueError):

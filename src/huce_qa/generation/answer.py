@@ -6,10 +6,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
-from generation.llm import LLM, LLMResponse, ToolHandler
-from ingestion.registry import Document
-from retrieval.corpus import Amendment, Passage, Unit
-from tools.hoc_vu import FUNCTION_DECLARATIONS
+from huce_qa.generation.llm import LLM, LLMResponse, ToolHandler
+from huce_qa.ingestion.registry import Document
+from huce_qa.retrieval.corpus import Amendment, Passage, Unit
+from huce_qa.tools.hoc_vu import FUNCTION_DECLARATIONS
 
 Status = Literal["tra_loi", "tu_choi", "hoi_lai_khoa"]
 ToolsMode = Literal["always", "never", "auto"]

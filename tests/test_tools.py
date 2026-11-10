@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from ingestion.cli import parse_registered
-from ingestion.registry import load_registry
-from tools.hoc_vu import FUNCTION_DECLARATIONS, TOOL_NAMES, HocVu, ToolError, lam_tron
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import load_registry
+from huce_qa.tools.hoc_vu import FUNCTION_DECLARATIONS, TOOL_NAMES, HocVu, ToolError, lam_tron
 
 ROOT = Path(__file__).resolve().parents[1]
 

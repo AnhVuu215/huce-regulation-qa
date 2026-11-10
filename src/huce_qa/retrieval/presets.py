@@ -3,7 +3,7 @@ cấu hình đang chạy."""
 
 from dataclasses import replace
 
-from retrieval.pipeline import RetrievalConfig
+from huce_qa.retrieval.pipeline import RetrievalConfig
 
 # Thứ tự cộng dồn của bảng ablation: mỗi dòng bật thêm một bước so với dòng trên.
 BASELINE = RetrievalConfig("baseline", chunking="window")

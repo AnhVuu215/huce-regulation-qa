@@ -3,11 +3,11 @@
 import logging
 from pathlib import Path
 
-from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, GeminiClient, load_env, models_from_env
-from retrieval import build, presets
-from retrieval.dense import Embedder
-from tools.hoc_vu import HocVu
+from huce_qa.generation.answer import QA, QAConfig
+from huce_qa.generation.llm import CachedLLM, GeminiClient, load_env, models_from_env
+from huce_qa.retrieval import build, presets
+from huce_qa.retrieval.dense import Embedder
+from huce_qa.tools.hoc_vu import HocVu
 
 log = logging.getLogger("huce_qa")
 

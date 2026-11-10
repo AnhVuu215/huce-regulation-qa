@@ -4,7 +4,7 @@ import json
 import re
 from dataclasses import dataclass
 
-from generation.llm import LLM, LLMResponse
+from huce_qa.generation.llm import LLM, LLMResponse
 
 VERDICTS = ("dung", "dung_mot_phan", "sai")
 SCORE = {"dung": 1.0, "dung_mot_phan": 0.5, "sai": 0.0}

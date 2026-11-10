@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from generation.answer import QA, QAConfig
-from generation.llm import (
+from huce_qa.generation.answer import QA, QAConfig
+from huce_qa.generation.llm import (
     CachedLLM,
     DailyQuotaError,
     FakeLLM,
@@ -13,8 +13,8 @@ from generation.llm import (
     load_env,
     models_from_env,
 )
-from ingestion.registry import Document
-from retrieval.corpus import Passage, Unit
+from huce_qa.ingestion.registry import Document
+from huce_qa.retrieval.corpus import Passage, Unit
 
 DOCS = {
     "new": Document(
@@ -202,7 +202,7 @@ def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected
 
 
 def test_amended_passage_brings_in_amending_provision():
-    from retrieval.corpus import Amendment
+    from huce_qa.retrieval.corpus import Amendment
 
     docs = {
         **DOCS,
@@ -241,7 +241,7 @@ def test_quota_error_reports_server_retry_delay():
     import io
     import urllib.error
 
-    from generation.llm import _quota_detail
+    from huce_qa.generation.llm import _quota_detail
 
     body = json.dumps(
         {
@@ -263,7 +263,7 @@ def test_quota_error_reports_server_retry_delay():
 
 
 def test_superseded_passage_is_dropped_when_amending_one_is_cited():
-    from retrieval.corpus import Amendment
+    from huce_qa.retrieval.corpus import Amendment
 
     docs = {
         **DOCS,
@@ -300,7 +300,7 @@ def test_concurrent_calls_keep_min_interval(monkeypatch):
     import time  # noqa: PLC0415
     import urllib.request  # noqa: PLC0415
 
-    from generation.llm import GeminiClient  # noqa: PLC0415
+    from huce_qa.generation.llm import GeminiClient  # noqa: PLC0415
 
     times = []
 
@@ -356,7 +356,7 @@ def _quota_429(quota_id: str):
 def test_client_reports_daily_quota_as_its_own_error(monkeypatch, errors, expected):
     import urllib.error
 
-    from generation.llm import GeminiClient
+    from huce_qa.generation.llm import GeminiClient
 
     def post(self, model, body):
         if errors[model]:

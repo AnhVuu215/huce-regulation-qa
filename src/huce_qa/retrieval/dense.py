@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from retrieval.corpus import Passage
+from huce_qa.retrieval.corpus import Passage
 
 DEFAULT_MODEL = "BAAI/bge-m3"
 QUERY_CACHE_SIZE = 512

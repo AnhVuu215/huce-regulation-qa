@@ -9,11 +9,10 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from huce_qa.evaluation.agreement import agreement, cohen_kappa, confusion
+from huce_qa.evaluation.judge import VERDICTS
 
-from evaluation.agreement import agreement, cohen_kappa, confusion  # noqa: E402
-from evaluation.judge import VERDICTS  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:

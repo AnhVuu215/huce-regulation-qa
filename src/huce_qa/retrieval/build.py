@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from ingestion.cli import parse_registered
-from ingestion.parser import Dieu
-from ingestion.registry import Document, amendments_to, load_registry
-from retrieval.corpus import structural_passages, window_passages
-from retrieval.pipeline import RetrievalConfig, Retriever, load_synonyms
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.parser import Dieu
+from huce_qa.ingestion.registry import Document, amendments_to, load_registry
+from huce_qa.retrieval.corpus import structural_passages, window_passages
+from huce_qa.retrieval.pipeline import RetrievalConfig, Retriever, load_synonyms
 
 
 def load_corpus(root: Path) -> tuple[dict[str, Document], dict[str, list[Dieu]]]:

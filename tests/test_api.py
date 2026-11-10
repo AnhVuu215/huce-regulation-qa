@@ -9,11 +9,11 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from api.app import RateLimiter, create_app
-from generation.answer import Answer
-from generation.llm import DailyQuotaError, LLMError
-from ingestion.registry import load_registry
-from retrieval.corpus import Unit
+from huce_qa.api.app import RateLimiter, create_app
+from huce_qa.generation.answer import Answer
+from huce_qa.generation.llm import DailyQuotaError, LLMError
+from huce_qa.ingestion.registry import load_registry
+from huce_qa.retrieval.corpus import Unit
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = {d.doc_id: d for d in load_registry(ROOT / "data" / "registry.yaml").documents}

@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-from ingestion.chunker import amendment_matches, chunk_document
-from ingestion.parser import Dieu
-from ingestion.registry import Document, SuaDoi
+from huce_qa.ingestion.chunker import amendment_matches, chunk_document
+from huce_qa.ingestion.parser import Dieu
+from huce_qa.ingestion.registry import Document, SuaDoi
 
 
 @dataclass(frozen=True)

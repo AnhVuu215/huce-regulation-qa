@@ -4,8 +4,8 @@ from datetime import date
 
 from pydantic import BaseModel
 
-from ingestion.parser import DIEM, Dieu, Khoan, _join
-from ingestion.registry import Document, SuaDoi
+from huce_qa.ingestion.parser import DIEM, Dieu, Khoan, _join
+from huce_qa.ingestion.registry import Document, SuaDoi
 
 # Đếm theo từ để không phụ thuộc tokenizer; 300 từ tiếng Việt nằm dưới giới hạn
 # 512 token thường gặp của reranker.
