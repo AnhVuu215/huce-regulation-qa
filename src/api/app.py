@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse
 
 from api.schemas import AskRequest, AskResponse, Citation, DocumentInfo, FeedbackRequest
 from generation.answer import QA, citation_label
-from generation.llm import LLMError
+from generation.llm import LLMError, load_env
 
 ROOT = Path(__file__).resolve().parents[2]
 STATIC = Path(__file__).parent / "static"
@@ -76,6 +76,10 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
     """`qa_factory` dựng pipeline khi ứng dụng khởi động (test truyền QA giả lập).
     `rate_limit_per_min`: số câu hỏi mỗi phút cho một IP; mặc định lấy ASK_RATE_LIMIT, 0 là tắt."""
     if qa_factory is None:
+        # Nạp .env trước khi đọc cấu hình (ASK_RATE_LIMIT, LLM_MODEL), kể cả khi chạy uvicorn
+        # trực tiếp không qua docker compose. Test luôn truyền qa_factory nên không đọc .env thật.
+        load_env(ROOT / ".env")
+
         def qa_factory() -> QA:
             # Import muộn: dựng pipeline cần nhóm ml (mô hình embedding), test và CI thì không.
             from api.service import build_qa

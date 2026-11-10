@@ -1,18 +1,14 @@
 """Dựng pipeline trả lời cho API, đúng cấu hình mà báo cáo đánh giá đo."""
 
 import logging
-import os
 from pathlib import Path
 
 from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, GeminiClient, load_env
+from generation.llm import CachedLLM, GeminiClient, load_env, models_from_env
 from retrieval import build, presets
 from retrieval.dense import Embedder
 from tools.hoc_vu import HocVu
 
-# Danh sách cách nhau bởi dấu phẩy: mô hình đầu hết hạn mức ngày thì chuyển sang mô hình sau.
-MODELS = [m.strip() for m in os.environ.get("LLM_MODEL", "gemini-3.5-flash-lite").split(",")
-          if m.strip()]
 log = logging.getLogger("huce_qa")
 
 
@@ -30,6 +26,7 @@ def build_qa(root: Path) -> QA:
     # tiên không phải chờ.
     embedder.warm_up()
     # Chỉ cache câu trả lời của mô hình chính, để số liệu đánh giá không lẫn mô hình dự phòng.
-    llm = CachedLLM(GeminiClient(MODELS), cache / "llm", namespace=MODELS[0])
+    models = models_from_env()
+    llm = CachedLLM(GeminiClient(models), cache / "llm", namespace=models[0])
     tools = HocVu(root / "data" / "rules" / "hoc-vu.yaml", docs)
     return QA(retriever, llm, docs, QAConfig(), tools=tools)
