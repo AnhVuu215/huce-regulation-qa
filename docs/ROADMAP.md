@@ -306,8 +306,97 @@ Bài học (đưa vào "Những gì không hiệu quả"):
 - [x] 7.2 Giao diện demo: một trang HTML do API phục vụ (thay Streamlit), nêu rõ độ chính xác đo được
 - [x] 7.3 Docker Compose: một dịch vụ, khởi động 39 giây nhờ embedding dựng sẵn; bỏ PostgreSQL vì không cần
 - [x] 7.4 README: sơ đồ, kết quả, ablation, thay đổi so với kế hoạch, hạn chế
-- [!] 7.5 Deploy, video demo, công khai repo (cần chủ dự án quyết định)
+- [!] 7.5 Deploy, video demo, công khai repo (cần chủ dự án quyết định; chi tiết ở 8.4)
 
 **Cổng:** `docker compose up` chạy trên máy sạch, số liệu tái lập khớp README.
 
 Nếu trễ: cắt giao diện và công cụ tính toán trước; không cắt bộ test và báo cáo đánh giá.
+
+## Phase 8 — Chất lượng trên câu hỏi thật (lập 2026-11-10)
+
+Điểm yếu lớn nhất hiện nay không nằm ở code mà ở câu hỏi thật: trên tập độc lập, độ đúng nội
+dung 0,40 (câu tự viết 0,95), Recall@5 0,48 (câu tự viết 0,90), từ chối nhầm 4/10. Mục tiêu của
+phase: nâng các con số này mà không đổi lấy việc trả lời bừa câu ngoài phạm vi (đang 14/14), và
+đo trên tập đủ lớn để kết luận được.
+
+Thứ tự: 8.1 và 8.2 làm song song; 8.3 chỉ bắt đầu khi 8.1 xong (cần thước đo trước khi sửa);
+8.4 làm lúc nào cũng được, nhưng cập nhật số liệu sau 8.3.
+
+Bắt đầu từ: chủ dự án làm 8.1.1, Claude làm 8.2.
+
+### 8.1 Mở rộng tập câu hỏi thật (chủ dự án thu thập, Claude gắn căn cứ)
+
+Tập độc lập hiện chỉ có 10 câu có căn cứ: lệch một câu là 0,10, nên chưa cải tiến nào đo được.
+
+- [ ] 8.1.1 Thu 60–100 câu thật mới, mục tiêu ít nhất 50 câu có căn cứ và khoảng 15 câu ngoài
+  phạm vi. Nguồn: group sinh viên và group tuyển sinh HUCE (dùng từ khóa khác đợt 1 và 2), hỏi
+  trực tiếp bạn bè các khóa (ghi khóa thật thay vì giả định K68), `.data/feedback.jsonl` nếu đã có
+  người dùng thử. Viết lại ẩn danh như các đợt trước: không lưu tên, hồ sơ, bài gốc.
+- [ ] 8.1.2 Gắn căn cứ Điều/Khoản và đáp án chuẩn: Claude soạn, chủ dự án duyệt từng câu;
+  `validate` của `evaluation.testset` phải pass.
+- [ ] 8.1.3 Chia khoảng 60% vào tập phát triển (`eval/testset.jsonl`, `nguon: thuc_te`) và 40%
+  vào tập độc lập mới `eval/testset_holdout_2.jsonl`. Commit tập độc lập **trước** khi chạy hệ
+  thống trên nó và ghi hash commit vào đây.
+- [ ] 8.1.4 Chạy cấu hình hiện tại trên tập phát triển mới để có số liệu gốc của phase
+  (`make eval`, `make answer-eval`).
+
+**Cổng:** ít nhất 30 câu thật có căn cứ trong tập phát triển và 20 trong tập độc lập mới; số liệu
+gốc lưu trong `eval/results/`. Tập độc lập mới không dùng để chỉnh hệ thống, chỉ chạy một lần ở
+8.3.6.
+
+### 8.2 Chẩn đoán vì sao truy xuất trượt (Claude, làm được ngay trên 14 câu thật hiện có)
+
+Hai cách sửa khác hẳn nhau tùy lỗi nằm ở xếp hạng hay ở cách cắt đoạn, nên phải đo trước.
+
+- [ ] 8.2.1 `eval/diagnose_retrieval.py`: với mỗi câu thật, hạng của từng căn cứ theo vector,
+  theo BM25 và sau khi kết hợp (đến top-50); xuất bảng Markdown vào `eval/results/`.
+- [ ] 8.2.2 Gán nhãn nguyên nhân cho mỗi câu trượt:
+  (a) xếp hạng: căn cứ ở hạng 6–20;
+  (b) biểu diễn: ngoài top-20 vì câu then chốt bị loãng trong đoạn dài (như q063);
+  (c) từ vựng: sinh viên dùng từ không có trong văn bản ("bảo lưu" so với "nghỉ học tạm thời");
+  (d) kho thiếu văn bản (chuẩn ngoại ngữ, Phụ lục, Thông tư 08/2021).
+- [ ] 8.2.3 Đường cong Recall@k (k = 5, 6, 10, 20) của câu thật so với câu tự viết.
+
+**Cổng:** mọi câu trượt có nhãn nguyên nhân; nhóm lớn nhất quyết định thử nghiệm nào làm trước ở
+8.3.
+
+### 8.3 Thử nghiệm cải tiến (Claude, đo trên tập phát triển của 8.1)
+
+Mỗi thử nghiệm là một cờ cấu hình, mặc định tắt, có một dòng trong bảng ablation. Chỉ bật mặc
+định khi: tăng trên câu thật, câu tự viết không giảm quá 1 câu, từ chối đúng câu ngoài phạm vi
+không giảm. Ghi cả thử nghiệm không hiệu quả vào `docs/EVALUATION.md`.
+
+- [ ] 8.3.1 Nếu nhóm (a) lớn: tăng số đoạn đưa cho LLM (6 lên 8 và 10), cân trọng số kết hợp
+  BM25 và vector. Đo kèm token và độ trễ.
+- [ ] 8.3.2 Nếu nhóm (b) lớn: đánh chỉ mục từng Khoản/Điểm, khớp thì trả về cả Điều chứa nó
+  (parent retrieval). Phải dựng lại embedding và chạy `scripts/export_embeddings.py`.
+- [ ] 8.3.3 Nếu nhóm (c) lớn: dùng LLM viết lại câu hỏi sang ngôn ngữ quy chế (thêm một lời gọi,
+  có cache), so với từ điển đồng nghĩa viết tay. Theo dõi hạn mức gói miễn phí.
+- [ ] 8.3.4 Từ chối nhầm: thêm 3–4 ví dụ mẫu "tình huống cụ thể → quy định chung áp dụng" vào
+  prompt, lấy từ câu tự viết chứ không từ câu thật để tránh rò rỉ. Lần trước thêm quy tắc không
+  tổng quát hóa (7/14 → 5/14, tập độc lập vẫn 4/10).
+- [ ] 8.3.5 Hiểu sai và né câu trả lời (h005, h014): yêu cầu mở đầu bằng kết luận trực tiếp
+  (được/không được, có/không) rồi mới dẫn quy định.
+- [ ] 8.3.6 Chạy tập độc lập mới **một lần** với cấu hình cuối; cập nhật `docs/EVALUATION.md` và
+  README.
+- [ ] 8.3.7 Chấm tay mẫu mới khoảng 20 câu để đo lại độ khớp giám khảo với tiêu chí hiện hành
+  (còn nợ từ 6.4b).
+
+**Cổng:** có độ đúng nội dung trên tập độc lập mới, kèm khoảng tin cậy và so sánh với 0,40. Mục
+tiêu tham khảo là 0,6 trở lên, nhưng không chỉnh hệ thống theo tập độc lập để đạt số.
+
+### 8.4 Sản phẩm và công bố (tiếp 7.5; chủ dự án quyết định, Claude làm)
+
+- [ ] 8.4.1 Chọn nơi deploy. Ứng viên: Hugging Face Spaces (Docker, gói CPU miễn phí; kiểm tra
+  lại RAM và chính sách ngủ khi không dùng ở thời điểm deploy) hoặc VPS. Ràng buộc: bge-m3 cần vài
+  GB RAM; `GEMINI_API_KEY` đặt làm secret; giữ `ASK_RATE_LIMIT` vì hạn mức LLM dùng chung.
+- [ ] 8.4.2 Deploy, kiểm tra `/health` báo `ready`, ghi link vào README.
+- [ ] 8.4.3 Rà soát trước khi công khai repo: không có khóa API hay `.env` trong lịch sử git; câu
+  hỏi thật trong `eval/` đã ẩn danh; ghi nguồn và quyền của văn bản quy chế; thêm LICENSE cho code
+  (MIT, đã bàn, để sau).
+- [ ] 8.4.4 Video demo 1–2 phút: một câu tra cứu, một câu tính GPA, một câu bị hỏi lại khóa, một
+  câu ngoài phạm vi bị từ chối; nêu số liệu đo được, kể cả điểm yếu.
+- [ ] 8.4.5 README: link demo và video, số liệu mới từ 8.3.
+
+**Cổng:** người lạ mở link hỏi được và nhận câu trả lời có trích dẫn; repo công khai không lộ khóa
+hay dữ liệu cá nhân.
