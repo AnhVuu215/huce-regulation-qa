@@ -1,6 +1,6 @@
 # Lộ trình triển khai theo phase
 
-Tách từ `Kế hoạch dự án Hỏi đáp quy chế đào tạo HUCE (RAG).md`. Mỗi phase có các plan nhỏ
+Tách từ [kế hoạch dự án](PROJECT_PLAN.md). Mỗi phase có các plan nhỏ
 và một **cổng nghiệm thu**: chỉ sang phase sau khi cổng đã đạt.
 
 Trạng thái: `[ ]` chưa làm · `[x]` xong · `[!]` chờ đầu vào từ chủ dự án
