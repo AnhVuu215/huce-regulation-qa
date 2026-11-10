@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from generation.llm import LLM, LLMResponse
 from ingestion.registry import Document
-from retrieval.corpus import Passage, Unit
+from retrieval.corpus import Amendment, Passage, Unit
 from tools.hoc_vu import FUNCTION_DECLARATIONS
 
 DISCLAIMER = (
@@ -79,7 +79,9 @@ def citation_label(unit: Unit, doc: Document) -> str:
     return f"{where}, {doc.doc_title} ({doc.so_hieu})"
 
 
-def _amends(amendment, passage: Passage) -> bool:
+def _amends(amendment: Amendment, passage: Passage) -> bool:
+    """`passage` thuộc văn bản sửa đổi và chứa một Điều/Khoản mà `amendment` thay thế. Thiếu số
+    Khoản ở một bên thì coi là khớp cả Điều."""
     return passage.doc_id == amendment.by_doc_id and any(
         pu.dieu == u.dieu and (u.khoan is None or pu.khoan is None or pu.khoan == u.khoan)
         for pu in passage.units
@@ -155,14 +157,7 @@ class QA:
         for p in passages:
             for am in p.amended_by:
                 for q in self.retriever.passages:
-                    if q in result or q.doc_id != am.by_doc_id:
-                        continue
-                    if any(
-                        qu.dieu == u.dieu
-                        and (u.khoan is None or qu.khoan is None or qu.khoan == u.khoan)
-                        for qu in q.units
-                        for u in am.units
-                    ):
+                    if q not in result and _amends(am, q):
                         result.append(q)
         return result
 
