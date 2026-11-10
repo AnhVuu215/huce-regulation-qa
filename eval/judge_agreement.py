@@ -1,6 +1,6 @@
 """Độ khớp giữa giám khảo LLM và người chấm trên bảng chấm tay đã điền.
 
-    uv run python eval/judge_agreement.py eval/results/<lần chạy có --judge>.json
+uv run python eval/judge_agreement.py eval/results/<lần chạy có --judge>.json
 """
 
 import argparse
@@ -9,11 +9,10 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from huce_qa.evaluation.agreement import agreement, cohen_kappa, confusion
+from huce_qa.evaluation.judge import VERDICTS
 
-from evaluation.agreement import agreement, cohen_kappa, confusion  # noqa: E402
-from evaluation.judge import VERDICTS  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
@@ -21,8 +20,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("results", type=Path, nargs="+", help="các lần chạy đã tạo bảng chấm")
     parser.add_argument("--sheet", type=Path, default=ROOT / "eval" / "human" / "cham-tay.csv")
-    parser.add_argument("--column", default="nguoi_cham",
-                        help="cột điểm người chấm: nguoi_cham (chấm mù) hoặc phan_xu (sau phân xử)")
+    parser.add_argument(
+        "--column",
+        default="nguoi_cham",
+        help="cột điểm người chấm: nguoi_cham (chấm mù) hoặc phan_xu (sau phân xử)",
+    )
     args = parser.parse_args()
 
     judged = {}
@@ -44,9 +46,16 @@ def main() -> None:
         "ty_le_trung": round(agreement(human, llm), 3),
         "cohen_kappa": round(cohen_kappa(human, llm), 3),
         "ma_tran (hàng: người, cột: giám khảo)": confusion(human, llm, VERDICTS),
-        "lech": [{"id": r["id"], "nguoi": h, "giam_khao": j,
-                  "ly_do_giam_khao": judged[r["id"]].get("judge_reason", "")}
-                 for r, h, j in zip(rows, human, llm, strict=True) if h != j],
+        "lech": [
+            {
+                "id": r["id"],
+                "nguoi": h,
+                "giam_khao": j,
+                "ly_do_giam_khao": judged[r["id"]].get("judge_reason", ""),
+            }
+            for r, h, j in zip(rows, human, llm, strict=True)
+            if h != j
+        ],
     }
     print(json.dumps(result, ensure_ascii=False, indent=1))
 

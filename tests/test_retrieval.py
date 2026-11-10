@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pytest
 
-from ingestion.chunker import chunk_document
-from ingestion.cli import parse_registered
-from ingestion.registry import load_registry
-from retrieval.bm25 import BM25, tokenize
-from retrieval.pipeline import expand_query, load_synonyms, rrf
+from huce_qa.ingestion.chunker import chunk_document
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import load_registry
+from huce_qa.retrieval.bm25 import BM25, tokenize
+from huce_qa.retrieval.pipeline import expand_query, load_synonyms, rrf
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -34,8 +34,11 @@ def test_synonym_expansion_uses_word_boundaries():
 
 
 def test_long_khoan_is_split_on_diem_and_keeps_intro():
-    doc = next(d for d in load_registry(ROOT / "data/registry.yaml").documents
-               if d.doc_id == "qc-dhxd-2022")
+    doc = next(
+        d
+        for d in load_registry(ROOT / "data/registry.yaml").documents
+        if d.doc_id == "qc-dhxd-2022"
+    )
     chunks = chunk_document(doc, parse_registered(doc, ROOT))
     parts = [c for c in chunks if c.dieu == 3 and c.khoan == 2]
     assert len(parts) > 1
@@ -56,7 +59,7 @@ class _CountingModel:
 
 def test_query_embedding_stays_in_memory(tmp_path):
     pytest.importorskip("numpy")  # CI không cài nhóm ml
-    from retrieval.dense import Embedder  # noqa: PLC0415
+    from huce_qa.retrieval.dense import Embedder  # noqa: PLC0415
 
     embedder = Embedder(cache_dir=tmp_path)
     embedder._model = model = _CountingModel()
@@ -69,7 +72,7 @@ def test_query_embedding_stays_in_memory(tmp_path):
 
 def test_queries_encoded_in_one_batch_and_warm_up_bypasses_cache(tmp_path):
     pytest.importorskip("numpy")
-    from retrieval.dense import Embedder  # noqa: PLC0415
+    from huce_qa.retrieval.dense import Embedder  # noqa: PLC0415
 
     embedder = Embedder(cache_dir=tmp_path)
     embedder._model = model = _CountingModel()
@@ -82,10 +85,14 @@ def test_queries_encoded_in_one_batch_and_warm_up_bypasses_cache(tmp_path):
 
 
 def test_sub_queries_split_compound_questions_only():
-    from retrieval.pipeline import sub_queries
+    from huce_qa.retrieval.pipeline import sub_queries
 
     q = "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không? Với dưới bao nhiêu điểm là nợ môn ạ?"
-    assert sub_queries(q) == [q, "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
-                              "Với dưới bao nhiêu điểm là nợ môn ạ"]
+    assert sub_queries(q) == [
+        q,
+        "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
+        "Với dưới bao nhiêu điểm là nợ môn ạ",
+    ]
     assert sub_queries("Học lại và cải thiện điểm thì sao?") == [
-        "Học lại và cải thiện điểm thì sao?"]
+        "Học lại và cải thiện điểm thì sao?"
+    ]

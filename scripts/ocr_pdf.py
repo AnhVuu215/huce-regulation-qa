@@ -25,9 +25,24 @@ def ocr(pdf_path: Path) -> str:
             name = f"p{i:03}"
             page.get_pixmap(dpi=DPI, colorspace=pymupdf.csGRAY).save(Path(tmp) / f"{name}.png")
             subprocess.run(
-                ["docker", "run", "--rm", "-v", f"{tmp}:/w", "huce-ocr",
-                 f"/w/{name}.png", f"/w/{name}", "-l", "vie", "--psm", "4", "--oem", "1"],
-                check=True, capture_output=True,
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-v",
+                    f"{tmp}:/w",
+                    "huce-ocr",
+                    f"/w/{name}.png",
+                    f"/w/{name}",
+                    "-l",
+                    "vie",
+                    "--psm",
+                    "4",
+                    "--oem",
+                    "1",
+                ],
+                check=True,
+                capture_output=True,
             )
             text = (Path(tmp) / f"{name}.txt").read_text(encoding="utf-8")
             pages.append(f"#### PAGE {i}\n{text.strip()}")

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from ingestion.registry import Document
+from huce_qa.ingestion.registry import Document
 
 
 class ToolError(ValueError):
@@ -45,8 +45,11 @@ class HocVu:
     @staticmethod
     def _cite(doc_id: str, can_cu: dict) -> dict:
         # Căn cứ có thể nằm ở văn bản khác phiên bản đang dùng (ví dụ văn bản sửa đổi).
-        return {"doc_id": can_cu.get("doc_id", doc_id), "dieu": can_cu["dieu"],
-                "khoan": can_cu.get("khoan")}
+        return {
+            "doc_id": can_cu.get("doc_id", doc_id),
+            "dieu": can_cu["dieu"],
+            "khoan": can_cu.get("khoan"),
+        }
 
     def _rule(self, khoa: int | None, name: str) -> tuple[str, dict]:
         doc_id = self.phien_ban(khoa)
@@ -70,7 +73,12 @@ class HocVu:
         current = rule.get("trong_so_hien_hanh")
         named = (diem_thuong_xuyen, diem_giua_ky, diem_cuoi_ky)
         warning = None
-        if all(v is not None for v in named) and current:
+        if (
+            diem_thuong_xuyen is not None
+            and diem_giua_ky is not None
+            and diem_cuoi_ky is not None
+            and current
+        ):
             parts = [
                 {"diem": float(diem_thuong_xuyen), "trong_so": current["thuong_xuyen"]},
                 {"diem": float(diem_giua_ky), "trong_so": current["giua_ky"]},
@@ -78,15 +86,19 @@ class HocVu:
             ]
             weight_cites = [self._cite(doc_id, c) for c in current["can_cu"]]
         elif diem_thanh_phan:
-            parts = [{"diem": float(c["diem"]), "trong_so": float(c["trong_so"])}
-                     for c in diem_thanh_phan]
+            parts = [
+                {"diem": float(c["diem"]), "trong_so": float(c["trong_so"])}
+                for c in diem_thanh_phan
+            ]
             weight_cites = [self._cite(doc_id, rule["can_cu"])]
-            official = sorted([current["thuong_xuyen"], current["giua_ky"], current["cuoi_ky"]]
-                              ) if current else None
-            if official and sorted(p["trong_so"] for p in parts) != official:
-                warning = (f"Trọng số đưa vào khác quy định hiện hành: thường xuyên "
-                           f"{current['thuong_xuyen']:.0%}, giữa kỳ {current['giua_ky']:.0%}, "
-                           f"cuối kỳ {current['cuoi_ky']:.0%}.")
+            if current and sorted(p["trong_so"] for p in parts) != sorted(
+                [current["thuong_xuyen"], current["giua_ky"], current["cuoi_ky"]]
+            ):
+                warning = (
+                    f"Trọng số đưa vào khác quy định hiện hành: thường xuyên "
+                    f"{current['thuong_xuyen']:.0%}, giữa kỳ {current['giua_ky']:.0%}, "
+                    f"cuối kỳ {current['cuoi_ky']:.0%}."
+                )
                 weight_cites += [self._cite(doc_id, c) for c in current["can_cu"]]
         elif any(v is not None for v in named):
             raise ToolError("Cần đủ ba điểm: thường xuyên, giữa kỳ và cuối kỳ.")
@@ -166,9 +178,12 @@ class HocVu:
         doc_id, rule = self._rule(khoa, "tot_nghiep")
         gpa = float(diem_trung_binh_tich_luy)
         if gpa < rule["dieu_kien_gpa"]["tu"]:
-            return {"du_dieu_kien_diem": False, "hang": None,
-                    "ghi_chu": f"Điểm trung bình tích lũy dưới {rule['dieu_kien_gpa']['tu']}.",
-                    "can_cu": [self._cite(doc_id, rule["dieu_kien_gpa"]["can_cu"])]}
+            return {
+                "du_dieu_kien_diem": False,
+                "hang": None,
+                "ghi_chu": f"Điểm trung bình tích lũy dưới {rule['dieu_kien_gpa']['tu']}.",
+                "can_cu": [self._cite(doc_id, rule["dieu_kien_gpa"]["can_cu"])],
+            }
         hang_rule = rule["hang"]
         cite = [self._cite(doc_id, hang_rule["can_cu"])]
         if hang_rule.get("theo") == "xep_loai_hoc_luc":
@@ -189,15 +204,23 @@ class HocVu:
                     raise ToolError("Cần tổng số tín chỉ của chương trình để xét tỷ lệ học lại.")
                 ratio = tin_chi_hoc_lai / tong_tin_chi_chuong_trinh
                 if ratio > ha["ty_le_hoc_lai_vuot"]:
-                    reasons.append(f"học lại {tin_chi_hoc_lai}/{tong_tin_chi_chuong_trinh} tín chỉ "
-                                   f"= {ratio:.1%}, vượt {ha['ty_le_hoc_lai_vuot']:.0%}")
+                    reasons.append(
+                        f"học lại {tin_chi_hoc_lai}/{tong_tin_chi_chuong_trinh} tín chỉ "
+                        f"= {ratio:.1%}, vượt {ha['ty_le_hoc_lai_vuot']:.0%}"
+                    )
             if bi_ky_luat_tu_canh_cao:
                 reasons.append("bị kỷ luật từ mức cảnh cáo trở lên")
         final = names[names.index(hang) + 1] if reasons else hang
         if reasons:
             cite.append(self._cite(doc_id, ha["can_cu"]))
-        return {"du_dieu_kien_diem": True, "hang_theo_diem": hang, "hang": final,
-                "bi_ha_hang": bool(reasons), "ly_do_ha_hang": reasons, "can_cu": cite}
+        return {
+            "du_dieu_kien_diem": True,
+            "hang_theo_diem": hang,
+            "hang": final,
+            "bi_ha_hang": bool(reasons),
+            "ly_do_ha_hang": reasons,
+            "can_cu": cite,
+        }
 
     def xep_trinh_do_nam(
         self, khoa: int, tin_chi_tich_luy: int, tin_chi_trung_binh_mot_nam: float | None = None
@@ -206,8 +229,10 @@ class HocVu:
         n = float(tin_chi_tich_luy)
         if "boi_so_M" in rule:
             if not tin_chi_trung_binh_mot_nam:
-                raise ToolError("Quy chế này xếp năm theo số tín chỉ trung bình một năm (M) của "
-                                "chương trình; cần biết M hoặc tổng tín chỉ và số năm thiết kế.")
+                raise ToolError(
+                    "Quy chế này xếp năm theo số tín chỉ trung bình một năm (M) của "
+                    "chương trình; cần biết M hoặc tổng tín chỉ và số năm thiết kế."
+                )
             m = float(tin_chi_trung_binh_mot_nam)
             nam = sum(n >= k * m for k in rule["boi_so_M"]) + 1
             nguong = f"M = {m:g}: năm thứ {nam} khi {(nam - 1) * m:g} ≤ N < {nam * m:g}"
@@ -239,8 +264,10 @@ class HocVu:
             checked.append("tỷ lệ tín chỉ không đạt")
             ratio = tin_chi_khong_dat / tin_chi_dang_ky
             if ratio > rule["ty_le_khong_dat_vuot"]:
-                reasons.append(f"không đạt {tin_chi_khong_dat}/{tin_chi_dang_ky} tín chỉ = "
-                               f"{ratio:.1%}, vượt {rule['ty_le_khong_dat_vuot']:.0%}")
+                reasons.append(
+                    f"không đạt {tin_chi_khong_dat}/{tin_chi_dang_ky} tín chỉ = "
+                    f"{ratio:.1%}, vượt {rule['ty_le_khong_dat_vuot']:.0%}"
+                )
         if "no_dong_vuot" in rule and tin_chi_no_dong is not None:
             checked.append("tín chỉ nợ đọng")
             if tin_chi_no_dong > rule["no_dong_vuot"]:
@@ -255,8 +282,12 @@ class HocVu:
                 reasons.append(f"điểm trung bình tích lũy {diem_trung_binh_tich_luy} dưới {limit}")
         if not checked:
             raise ToolError("Chưa có dữ liệu nào để xét cảnh báo học tập.")
-        return {"bi_canh_bao": bool(reasons), "ly_do": reasons, "da_xet": checked,
-                "can_cu": [self._cite(doc_id, rule["can_cu"])]}
+        return {
+            "bi_canh_bao": bool(reasons),
+            "ly_do": reasons,
+            "da_xet": checked,
+            "can_cu": [self._cite(doc_id, rule["can_cu"])],
+        }
 
     # ---- giao diện cho LLM --------------------------------------------------------------
     def call(self, name: str, args: dict) -> dict:
@@ -279,42 +310,95 @@ _NUM = {"type": "NUMBER"}
 _INT = {"type": "INTEGER"}
 
 FUNCTION_DECLARATIONS = [
-    {"name": "tinh_diem_hoc_phan",
-     "description": ("Tính điểm học phần và điểm chữ. Ưu tiên truyền ba điểm thường xuyên, "
-                     "giữa kỳ, cuối kỳ (dùng trọng số hiện hành); chỉ truyền diem_thanh_phan "
-                     "khi sinh viên nêu trọng số riêng."),
-     "parameters": _obj({"khoa": _KHOA, "diem_thuong_xuyen": _NUM, "diem_giua_ky": _NUM,
-                         "diem_cuoi_ky": _NUM,
-                         "diem_thanh_phan": {"type": "ARRAY", "items": _obj(
-                             {"diem": _NUM, "trong_so": {"type": "NUMBER",
-                                                         "description": "0 đến 1"}},
-                             ["diem", "trong_so"])}}, ["khoa"])},
-    {"name": "quy_doi_diem",
-     "description": "Quy đổi điểm học phần thang 10 sang điểm chữ và điểm số thang 4.",
-     "parameters": _obj({"khoa": _KHOA, "diem_10": _NUM}, ["khoa", "diem_10"])},
-    {"name": "tinh_diem_trung_binh",
-     "description": "Tính điểm trung bình (học kỳ hoặc tích lũy) thang 4 có trọng số tín chỉ.",
-     "parameters": _obj({"khoa": _KHOA, "hoc_phan": {"type": "ARRAY", "items": _obj(
-         {"diem_10": _NUM, "diem_chu": {"type": "STRING"}, "tin_chi": _INT}, ["tin_chi"])}},
-         ["khoa", "hoc_phan"])},
-    {"name": "xep_loai_hoc_luc",
-     "description": "Xếp loại học lực theo điểm trung bình thang 4.",
-     "parameters": _obj({"khoa": _KHOA, "diem_trung_binh": _NUM}, ["khoa", "diem_trung_binh"])},
-    {"name": "xep_hang_tot_nghiep",
-     "description": "Xét điều kiện điểm và hạng tốt nghiệp, kể cả hạ hạng do học lại, kỷ luật.",
-     "parameters": _obj({"khoa": _KHOA, "diem_trung_binh_tich_luy": _NUM,
-                         "tin_chi_hoc_lai": _INT, "tong_tin_chi_chuong_trinh": _INT,
-                         "bi_ky_luat_tu_canh_cao": {"type": "BOOLEAN"}},
-                        ["khoa", "diem_trung_binh_tich_luy"])},
-    {"name": "xep_trinh_do_nam",
-     "description": "Xác định sinh viên năm thứ mấy theo số tín chỉ tích lũy.",
-     "parameters": _obj({"khoa": _KHOA, "tin_chi_tich_luy": _INT,
-                         "tin_chi_trung_binh_mot_nam": _NUM}, ["khoa", "tin_chi_tich_luy"])},
-    {"name": "kiem_tra_canh_bao",
-     "description": "Kiểm tra sinh viên có bị cảnh báo học tập không với dữ liệu đã biết.",
-     "parameters": _obj({"khoa": _KHOA, "diem_trung_binh_hoc_ky": _NUM,
-                         "la_hoc_ky_dau": {"type": "BOOLEAN"}, "tin_chi_dang_ky": _INT,
-                         "tin_chi_khong_dat": _INT, "tin_chi_no_dong": _INT,
-                         "diem_trung_binh_tich_luy": _NUM, "trinh_do_nam": _INT}, ["khoa"])},
+    {
+        "name": "tinh_diem_hoc_phan",
+        "description": (
+            "Tính điểm học phần và điểm chữ. Ưu tiên truyền ba điểm thường xuyên, "
+            "giữa kỳ, cuối kỳ (dùng trọng số hiện hành); chỉ truyền diem_thanh_phan "
+            "khi sinh viên nêu trọng số riêng."
+        ),
+        "parameters": _obj(
+            {
+                "khoa": _KHOA,
+                "diem_thuong_xuyen": _NUM,
+                "diem_giua_ky": _NUM,
+                "diem_cuoi_ky": _NUM,
+                "diem_thanh_phan": {
+                    "type": "ARRAY",
+                    "items": _obj(
+                        {"diem": _NUM, "trong_so": {"type": "NUMBER", "description": "0 đến 1"}},
+                        ["diem", "trong_so"],
+                    ),
+                },
+            },
+            ["khoa"],
+        ),
+    },
+    {
+        "name": "quy_doi_diem",
+        "description": "Quy đổi điểm học phần thang 10 sang điểm chữ và điểm số thang 4.",
+        "parameters": _obj({"khoa": _KHOA, "diem_10": _NUM}, ["khoa", "diem_10"]),
+    },
+    {
+        "name": "tinh_diem_trung_binh",
+        "description": "Tính điểm trung bình (học kỳ hoặc tích lũy) thang 4 có trọng số tín chỉ.",
+        "parameters": _obj(
+            {
+                "khoa": _KHOA,
+                "hoc_phan": {
+                    "type": "ARRAY",
+                    "items": _obj(
+                        {"diem_10": _NUM, "diem_chu": {"type": "STRING"}, "tin_chi": _INT},
+                        ["tin_chi"],
+                    ),
+                },
+            },
+            ["khoa", "hoc_phan"],
+        ),
+    },
+    {
+        "name": "xep_loai_hoc_luc",
+        "description": "Xếp loại học lực theo điểm trung bình thang 4.",
+        "parameters": _obj({"khoa": _KHOA, "diem_trung_binh": _NUM}, ["khoa", "diem_trung_binh"]),
+    },
+    {
+        "name": "xep_hang_tot_nghiep",
+        "description": "Xét điều kiện điểm và hạng tốt nghiệp, kể cả hạ hạng do học lại, kỷ luật.",
+        "parameters": _obj(
+            {
+                "khoa": _KHOA,
+                "diem_trung_binh_tich_luy": _NUM,
+                "tin_chi_hoc_lai": _INT,
+                "tong_tin_chi_chuong_trinh": _INT,
+                "bi_ky_luat_tu_canh_cao": {"type": "BOOLEAN"},
+            },
+            ["khoa", "diem_trung_binh_tich_luy"],
+        ),
+    },
+    {
+        "name": "xep_trinh_do_nam",
+        "description": "Xác định sinh viên năm thứ mấy theo số tín chỉ tích lũy.",
+        "parameters": _obj(
+            {"khoa": _KHOA, "tin_chi_tich_luy": _INT, "tin_chi_trung_binh_mot_nam": _NUM},
+            ["khoa", "tin_chi_tich_luy"],
+        ),
+    },
+    {
+        "name": "kiem_tra_canh_bao",
+        "description": "Kiểm tra sinh viên có bị cảnh báo học tập không với dữ liệu đã biết.",
+        "parameters": _obj(
+            {
+                "khoa": _KHOA,
+                "diem_trung_binh_hoc_ky": _NUM,
+                "la_hoc_ky_dau": {"type": "BOOLEAN"},
+                "tin_chi_dang_ky": _INT,
+                "tin_chi_khong_dat": _INT,
+                "tin_chi_no_dong": _INT,
+                "diem_trung_binh_tich_luy": _NUM,
+                "trinh_do_nam": _INT,
+            },
+            ["khoa"],
+        ),
+    },
 ]
 TOOL_NAMES = {d["name"] for d in FUNCTION_DECLARATIONS}

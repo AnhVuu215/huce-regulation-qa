@@ -4,16 +4,39 @@ import json
 
 import pytest
 
-from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, FakeLLM, load_env, models_from_env
-from ingestion.registry import Document
-from retrieval.corpus import Passage, Unit
+from huce_qa.generation.answer import QA, QAConfig
+from huce_qa.generation.llm import (
+    CachedLLM,
+    DailyQuotaError,
+    FakeLLM,
+    LLMError,
+    load_env,
+    models_from_env,
+)
+from huce_qa.ingestion.registry import Document
+from huce_qa.retrieval.corpus import Passage, Unit
 
 DOCS = {
-    "new": Document(doc_id="new", chunk_prefix="n", doc_title="Quy chế mới", so_hieu="1",
-                    file="x", sha256="x", hieu_luc_tu="2022-09-23", khoa_tu=67),
-    "old": Document(doc_id="old", chunk_prefix="o", doc_title="Quy chế cũ", so_hieu="2",
-                    file="x", sha256="x", hieu_luc_tu="2016-01-07", khoa_den=66),
+    "new": Document(
+        doc_id="new",
+        chunk_prefix="n",
+        doc_title="Quy chế mới",
+        so_hieu="1",
+        file="x",
+        sha256="x",
+        hieu_luc_tu="2022-09-23",
+        khoa_tu=67,
+    ),
+    "old": Document(
+        doc_id="old",
+        chunk_prefix="o",
+        doc_title="Quy chế cũ",
+        so_hieu="2",
+        file="x",
+        sha256="x",
+        hieu_luc_tu="2016-01-07",
+        khoa_den=66,
+    ),
 }
 P_NEW = Passage("n-d11-k2", "new", "Điều 11. Buộc thôi học ...", (Unit("new", 11, 2),), 67, None)
 P_OLD = Passage("o-d16-k2", "old", "Điều 16. Buộc thôi học ...", (Unit("old", 16, 2),), None, 66)
@@ -133,8 +156,10 @@ class RecordingTools:
 
 def test_tool_call_uses_asker_cohort_and_becomes_citation():
     tools = RecordingTools()
-    llm = FakeLLM(reply("Theo Điều 10, học lực loại Khá.", [1]),
-                  tool_requests=[("xep_loai_hoc_luc", {"khoa": 65, "diem_trung_binh": 3.15})])
+    llm = FakeLLM(
+        reply("Theo Điều 10, học lực loại Khá.", [1]),
+        tool_requests=[("xep_loai_hoc_luc", {"khoa": 65, "diem_trung_binh": 3.15})],
+    )
     qa = QA(StubRetriever([P_NEW, P_OLD]), llm, DOCS, QAConfig(), tools=tools)
     a = qa.answer("GPA 3,15 thì học lực loại gì?", 68)
     assert tools.received == [("xep_loai_hoc_luc", {"khoa": 68, "diem_trung_binh": 3.15})]
@@ -162,11 +187,14 @@ def test_cache_expires_when_tool_fingerprint_changes(tmp_path):
     assert len(inner.calls) == 2
 
 
-@pytest.mark.parametrize(("question", "expected"), [
-    ("GPA 3,15 thì học lực loại gì?", True),
-    ("Kỳ này em đăng ký 18 tín và trượt 10 tín", True),
-    ("GPA bao nhiêu thì được ra trường?", False),
-])
+@pytest.mark.parametrize(
+    ("question", "expected"),
+    [
+        ("GPA 3,15 thì học lực loại gì?", True),
+        ("Kỳ này em đăng ký 18 tín và trượt 10 tín", True),
+        ("GPA bao nhiêu thì được ra trường?", False),
+    ],
+)
 def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected):
     llm = FakeLLM(reply("x", [1]))
     QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer(question, 68)
@@ -174,15 +202,30 @@ def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected
 
 
 def test_amended_passage_brings_in_amending_provision():
-    from retrieval.corpus import Amendment
+    from huce_qa.retrieval.corpus import Amendment
 
-    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
-                                     so_hieu="2026", file="x", sha256="x",
-                                     hieu_luc_tu="2026-03-12")}
+    docs = {
+        **DOCS,
+        "rule": Document(
+            doc_id="rule",
+            chunk_prefix="r",
+            doc_title="Quy định mới",
+            so_hieu="2026",
+            file="x",
+            sha256="x",
+            hieu_luc_tu="2026-03-12",
+        ),
+    }
     amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
-    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
-                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
-                                                      (Unit("rule", 6, 4),)),))
+    amended = Passage(
+        "n-d9-k1",
+        "new",
+        "Điều 9. Trọng số do đề cương",
+        (Unit("new", 9, 1),),
+        67,
+        None,
+        amended_by=(Amendment("rule", "trọng số 25/25/50", (Unit("rule", 6, 4),)),),
+    )
     retriever = StubRetriever([amended])
     retriever.passages = [amended, amending]
     llm = FakeLLM(reply("Cuối kỳ 50% theo Điều 6.", [2]))
@@ -198,27 +241,52 @@ def test_quota_error_reports_server_retry_delay():
     import io
     import urllib.error
 
-    from generation.llm import _quota_detail
+    from huce_qa.generation.llm import _quota_detail
 
-    body = json.dumps({"error": {"details": [
-        {"violations": [{"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}]},
-        {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "31s"},
-    ]}}).encode()
+    body = json.dumps(
+        {
+            "error": {
+                "details": [
+                    {
+                        "violations": [
+                            {"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}
+                        ]
+                    },
+                    {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "31s"},
+                ]
+            }
+        }
+    ).encode()
     err = urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
     detail, delay = _quota_detail(err)
     assert "PerMinute" in detail and delay == 32.0
 
 
 def test_superseded_passage_is_dropped_when_amending_one_is_cited():
-    from retrieval.corpus import Amendment
+    from huce_qa.retrieval.corpus import Amendment
 
-    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
-                                     so_hieu="2026", file="x", sha256="x",
-                                     hieu_luc_tu="2026-03-12")}
+    docs = {
+        **DOCS,
+        "rule": Document(
+            doc_id="rule",
+            chunk_prefix="r",
+            doc_title="Quy định mới",
+            so_hieu="2026",
+            file="x",
+            sha256="x",
+            hieu_luc_tu="2026-03-12",
+        ),
+    }
     amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
-    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
-                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
-                                                      (Unit("rule", 6, 4),)),))
+    amended = Passage(
+        "n-d9-k1",
+        "new",
+        "Điều 9. Trọng số do đề cương",
+        (Unit("new", 9, 1),),
+        67,
+        None,
+        amended_by=(Amendment("rule", "trọng số 25/25/50", (Unit("rule", 6, 4),)),),
+    )
     retriever = StubRetriever([amended])
     retriever.passages = [amended, amending]
     llm = FakeLLM(reply("Cuối kỳ 50%.", [1, 2]))
@@ -232,7 +300,7 @@ def test_concurrent_calls_keep_min_interval(monkeypatch):
     import time  # noqa: PLC0415
     import urllib.request  # noqa: PLC0415
 
-    from generation.llm import GeminiClient  # noqa: PLC0415
+    from huce_qa.generation.llm import GeminiClient  # noqa: PLC0415
 
     times = []
 
@@ -242,8 +310,10 @@ def test_concurrent_calls_keep_min_interval(monkeypatch):
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     client = GeminiClient(["mo-hinh-thu-khoang-cach"], api_key="x", min_interval_s=0.1)
-    threads = [threading.Thread(target=client._post, args=("mo-hinh-thu-khoang-cach", {}))
-               for _ in range(3)]
+    threads = [
+        threading.Thread(target=client._post, args=("mo-hinh-thu-khoang-cach", {}))
+        for _ in range(3)
+    ]
     for t in threads:
         t.start()
     for t in threads:
@@ -265,3 +335,36 @@ def test_models_are_read_from_env_file_loaded_after_import(tmp_path, monkeypatch
 def test_models_fall_back_to_default_when_unset(monkeypatch):
     monkeypatch.setenv("LLM_MODEL", " , ")
     assert models_from_env() == ["gemini-3.5-flash-lite"]
+
+
+def _quota_429(quota_id: str):
+    import io
+    import urllib.error
+
+    body = json.dumps({"error": {"details": [{"violations": [{"quotaId": quota_id}]}]}}).encode()
+    return urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
+
+
+@pytest.mark.parametrize(
+    ("errors", "expected"),
+    [
+        # Mô hình chính hết lượt ngày, mô hình dự phòng quá tải: vẫn báo hết hạn mức ngày.
+        ({"a": "GenerateRequestsPerDayPerProjectPerModel-FreeTier", "b": None}, DailyQuotaError),
+        ({"a": None, "b": None}, LLMError),
+    ],
+)
+def test_client_reports_daily_quota_as_its_own_error(monkeypatch, errors, expected):
+    import urllib.error
+
+    from huce_qa.generation.llm import GeminiClient
+
+    def post(self, model, body):
+        if errors[model]:
+            raise _quota_429(errors[model])
+        raise urllib.error.HTTPError("u", 400, "Bad Request", {}, None)
+
+    monkeypatch.setattr(GeminiClient, "_post", post)
+    client = GeminiClient(["a", "b"], api_key="k", retries=0)
+    with pytest.raises(LLMError) as info:
+        client.generate("s", "p")
+    assert type(info.value) is expected

@@ -12,9 +12,7 @@ FORMULA_PLACEHOLDER = "[CÔNG THỨC]"
 MIN_FORMULA_RUN = 5
 
 PAGE_NUMBER = re.compile(r"^\s*\d{1,3}\s*$")
-VIETNAMESE_LETTERS = set(
-    "ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ"
-)
+VIETNAMESE_LETTERS = set("ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ")
 
 
 class ScannedPdfError(ValueError):

@@ -26,4 +26,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=600s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if b'\"ready\":true' in urllib.request.urlopen('http://127.0.0.1:8000/health').read() else 1)"
 
-CMD ["uv", "run", "--no-sync", "uvicorn", "api.app:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "huce_qa.api.app:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]

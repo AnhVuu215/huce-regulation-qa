@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from ingestion import cli
-from ingestion.chunker import chunk_document
-from ingestion.cli import parse_registered
-from ingestion.registry import load_registry
+from huce_qa.ingestion import cli
+from huce_qa.ingestion.chunker import chunk_document
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 

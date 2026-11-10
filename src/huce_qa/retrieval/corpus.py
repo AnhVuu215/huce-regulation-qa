@@ -1,10 +1,11 @@
 """Đơn vị truy xuất (passage) và hai cách chia: theo cấu trúc, theo cửa sổ từ (baseline)."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
-from ingestion.chunker import amendment_matches, chunk_document
-from ingestion.parser import Dieu
-from ingestion.registry import Document, SuaDoi
+from huce_qa.ingestion.chunker import amendment_matches, chunk_document
+from huce_qa.ingestion.parser import Dieu
+from huce_qa.ingestion.registry import Document, SuaDoi
 
 
 @dataclass(frozen=True)
@@ -40,8 +41,9 @@ class Passage:
         )
 
 
-def structural_passages(doc: Document, dieus: list[Dieu],
-                        amendments: list[tuple[str, SuaDoi]] = ()) -> list[Passage]:
+def structural_passages(
+    doc: Document, dieus: list[Dieu], amendments: Sequence[tuple[str, SuaDoi]] = ()
+) -> list[Passage]:
     """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
     passages = []
     for c in chunk_document(doc, dieus, amendments=amendments):
@@ -50,15 +52,17 @@ def structural_passages(doc: Document, dieus: list[Dieu],
             for by, sd in amendments
             if amendment_matches(sd, c.dieu, c.khoan)
         )
-        passages.append(Passage(
-            passage_id=c.chunk_id,
-            doc_id=doc.doc_id,
-            text=c.text,
-            units=(Unit(doc.doc_id, c.dieu, c.khoan),),
-            khoa_tu=doc.khoa_tu,
-            khoa_den=doc.khoa_den,
-            amended_by=amended_by,
-        ))
+        passages.append(
+            Passage(
+                passage_id=c.chunk_id,
+                doc_id=doc.doc_id,
+                text=c.text,
+                units=(Unit(doc.doc_id, c.dieu, c.khoan),),
+                khoa_tu=doc.khoa_tu,
+                khoa_den=doc.khoa_den,
+                amended_by=amended_by,
+            )
+        )
     return passages
 
 

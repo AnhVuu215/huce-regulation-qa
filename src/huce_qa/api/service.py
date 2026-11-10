@@ -3,11 +3,11 @@
 import logging
 from pathlib import Path
 
-from generation.answer import QA, QAConfig
-from generation.llm import CachedLLM, GeminiClient, load_env, models_from_env
-from retrieval import build, presets
-from retrieval.dense import Embedder
-from tools.hoc_vu import HocVu
+from huce_qa.generation.answer import QA, QAConfig
+from huce_qa.generation.llm import CachedLLM, GeminiClient, load_env, models_from_env
+from huce_qa.retrieval import build, presets
+from huce_qa.retrieval.dense import Embedder
+from huce_qa.tools.hoc_vu import HocVu
 
 log = logging.getLogger("huce_qa")
 
@@ -20,8 +20,11 @@ def build_qa(root: Path) -> QA:
     embedder = Embedder(cache_dir=cache / "embeddings", seed_dir=root / "data" / "embeddings")
     retriever = build.build_retriever(presets.PRODUCTION, docs, parsed, embedder, None, root)
     if embedder.computed:
-        log.warning("Đã tính mới %d đoạn không có trong data/embeddings; chạy "
-                    "scripts/export_embeddings.py để cập nhật.", embedder.computed)
+        log.warning(
+            "Đã tính mới %d đoạn không có trong data/embeddings; chạy "
+            "scripts/export_embeddings.py để cập nhật.",
+            embedder.computed,
+        )
     # Mô hình vẫn cần để mã hóa câu hỏi; nạp sẵn lúc khởi động (khoảng 20 giây) để người hỏi đầu
     # tiên không phải chờ.
     embedder.warm_up()

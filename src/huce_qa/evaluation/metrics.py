@@ -3,8 +3,8 @@
 import unicodedata
 from dataclasses import dataclass
 
-from evaluation.testset import CanCu, DapAnNgan
-from retrieval.corpus import Passage, Unit
+from huce_qa.evaluation.testset import CanCu, DapAnNgan
+from huce_qa.retrieval.corpus import Passage, Unit
 
 
 def unit_matches(unit: Unit, gold: CanCu) -> bool:

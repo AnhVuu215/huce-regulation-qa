@@ -7,15 +7,20 @@ from pathlib import Path
 
 import numpy as np
 
-from retrieval.corpus import Passage
+from huce_qa.retrieval.corpus import Passage
 
 DEFAULT_MODEL = "BAAI/bge-m3"
 QUERY_CACHE_SIZE = 512
 
 
 class Embedder:
-    def __init__(self, model_name: str = DEFAULT_MODEL, cache_dir: Path | None = None,
-                 max_seq_length: int = 1024, seed_dir: Path | None = None):
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        cache_dir: Path | None = None,
+        max_seq_length: int = 1024,
+        seed_dir: Path | None = None,
+    ):
         """`seed_dir`: embedding dựng sẵn, chỉ đọc (data/embeddings trong repo), để máy mới không
         phải tính lại các đoạn văn bản; `cache_dir` là cache ghi được cho phần còn lại."""
         self.model_name = model_name
@@ -84,7 +89,7 @@ class Embedder:
                     self._queries[self._key(text)] = vec.astype(np.float32)
                 while len(self._queries) > QUERY_CACHE_SIZE:
                     self._queries.popitem(last=False)
-            return np.stack([self._lookup(t) for t in texts])
+            return np.stack([self._require(t) for t in texts])
 
     def _lookup(self, text: str) -> np.ndarray | None:
         key = self._key(text)
@@ -93,6 +98,12 @@ class Embedder:
             return self._queries[key]
         return self._cache.get(key)
 
+    def _require(self, text: str) -> np.ndarray:
+        vec = self._lookup(text)
+        if vec is None:
+            raise KeyError(f"Chưa có embedding cho: {text[:50]}")
+        return vec
+
     def warm_up(self) -> None:
         """Nạp mô hình và chạy thử một lượt, bỏ qua cache: người hỏi đầu tiên không phải chờ."""
         self._load().encode(["khởi động"], normalize_embeddings=True)
@@ -100,7 +111,8 @@ class Embedder:
     def _save(self) -> None:
         if self._cache_path:
             self._cache_path.parent.mkdir(parents=True, exist_ok=True)
-            np.savez(self._cache_path, **self._cache)
+            # Stub của numpy khai báo **kwds trùng tên với allow_pickle: bool, nên mypy báo nhầm.
+            np.savez(self._cache_path, **self._cache)  # type: ignore[arg-type]
 
 
 class DenseIndex:

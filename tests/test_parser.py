@@ -1,5 +1,5 @@
-from ingestion.parser import check_structure, coverage, parse_document, stopped_early
-from ingestion.pdf_text import FORMULA_PLACEHOLDER, clean_lines
+from huce_qa.ingestion.parser import check_structure, coverage, parse_document, stopped_early
+from huce_qa.ingestion.pdf_text import FORMULA_PLACEHOLDER, clean_lines
 
 
 def test_cross_reference_at_line_start_is_not_a_heading():

@@ -1,15 +1,16 @@
 """Nạp toàn bộ văn bản trong registry thành data/processed/<doc_id>.json."""
 
+import io
 import json
 import sys
 from pathlib import Path
 
-from ingestion.chunker import Chunk, chunk_document
-from ingestion.parser import Dieu, check_structure, coverage, parse_document, stopped_early
-from ingestion.pdf_text import clean_lines, extract_pages
-from ingestion.registry import Document, amendments_to, load_registry, verify_file
+from huce_qa.ingestion.chunker import Chunk, chunk_document
+from huce_qa.ingestion.parser import Dieu, check_structure, coverage, parse_document, stopped_early
+from huce_qa.ingestion.pdf_text import clean_lines, extract_pages
+from huce_qa.ingestion.registry import Document, amendments_to, load_registry, verify_file
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 # Phần bị loại hợp lệ chỉ là tên Chương và khối chữ ký, nên tụt dưới ngưỡng là bị cắt cụt.
 MIN_COVERAGE = 0.97
 
@@ -46,7 +47,9 @@ def ingest(doc: Document, root: Path = ROOT, amendments=()) -> list[Chunk]:
 
 
 def main() -> None:
-    sys.stdout.reconfigure(encoding="utf-8")
+    # Console Windows mặc định cp1252, không in được tiếng Việt.
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(encoding="utf-8")
     out_dir = ROOT / "data" / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
     docs = load_registry(ROOT / "data" / "registry.yaml").documents

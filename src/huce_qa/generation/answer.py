@@ -4,11 +4,34 @@ import json
 import re
 import time
 from dataclasses import dataclass, field
+from typing import Literal, Protocol
 
-from generation.llm import LLM, LLMResponse
-from ingestion.registry import Document
-from retrieval.corpus import Passage, Unit
-from tools.hoc_vu import FUNCTION_DECLARATIONS
+from huce_qa.generation.llm import LLM, LLMResponse, ToolHandler
+from huce_qa.ingestion.registry import Document
+from huce_qa.retrieval.corpus import Amendment, Passage, Unit
+from huce_qa.tools.hoc_vu import FUNCTION_DECLARATIONS
+
+Status = Literal["tra_loi", "tu_choi", "hoi_lai_khoa"]
+ToolsMode = Literal["always", "never", "auto"]
+
+
+class PassageRetriever(Protocol):
+    """Phần của retrieval.pipeline.Retriever mà QA dùng (test truyền bản giả lập)."""
+
+    passages: list[Passage]
+
+    def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]: ...
+
+    def max_similarity(self, question: str, khoa: int | None = None) -> float: ...
+
+
+class Tools(Protocol):
+    """Công cụ tính toán cho LLM gọi (tools.hoc_vu.HocVu)."""
+
+    fingerprint: str
+
+    def call(self, name: str, args: dict) -> dict: ...
+
 
 DISCLAIMER = (
     "Thông tin chỉ mang tính tham khảo theo văn bản quy chế. Với việc quan trọng "
@@ -52,7 +75,7 @@ DIEU_MENTION = re.compile(r"Điều\s+(\d+)")
 
 @dataclass
 class Answer:
-    status: str  # "tra_loi" | "tu_choi" | "hoi_lai_khoa"
+    status: Status
     text: str
     citations: list[Unit] = field(default_factory=list)
     cited_passages: list[str] = field(default_factory=list)
@@ -79,18 +102,24 @@ def citation_label(unit: Unit, doc: Document) -> str:
     return f"{where}, {doc.doc_title} ({doc.so_hieu})"
 
 
-def _amends(amendment, passage: Passage) -> bool:
+def _amends(amendment: Amendment, passage: Passage) -> bool:
+    """`passage` thuộc văn bản sửa đổi và chứa một Điều/Khoản mà `amendment` thay thế. Thiếu số
+    Khoản ở một bên thì coi là khớp cả Điều."""
     return passage.doc_id == amendment.by_doc_id and any(
         pu.dieu == u.dieu and (u.khoan is None or pu.khoan is None or pu.khoan == u.khoan)
-        for pu in passage.units for u in amendment.units
+        for pu in passage.units
+        for u in amendment.units
     )
 
 
 def _drop_superseded(cited: list[Passage]) -> list[Passage]:
     """Trích cả đoạn đã bị sửa lẫn đoạn sửa đổi thì chỉ giữ đoạn sửa đổi: căn cứ hiện hành là
     văn bản mới, trích quy định đã bị thay thế dễ khiến sinh viên hiểu nhầm."""
-    return [p for p in cited
-            if not any(_amends(am, q) for am in p.amended_by for q in cited if q is not p)]
+    return [
+        p
+        for p in cited
+        if not any(_amends(am, q) for am in p.amended_by for q in cited if q is not p)
+    ]
 
 
 def _parse(text: str) -> dict:
@@ -107,7 +136,7 @@ class QAConfig:
     relevance_threshold: float = 0.50
     # Khi nào cho LLM gọi công cụ tính toán: "always" | "never" | "auto" (câu hỏi có con số).
     # Bật cho mọi câu làm gấp đôi token và khiến mô hình gọi công cụ cả khi không cần tính.
-    tools_mode: str = "auto"
+    tools_mode: ToolsMode = "auto"
 
 
 NUMBER = re.compile(r"\d")
@@ -119,8 +148,14 @@ def needs_calculation(question: str) -> bool:
 
 
 class QA:
-    def __init__(self, retriever, llm: LLM, docs: dict[str, Document], config: QAConfig,
-                 tools=None):
+    def __init__(
+        self,
+        retriever: PassageRetriever,
+        llm: LLM,
+        docs: dict[str, Document],
+        config: QAConfig,
+        tools: Tools | None = None,
+    ):
         """`tools`: đối tượng công cụ học vụ (tools.hoc_vu.HocVu); None thì LLM tự trình bày."""
         self.retriever = retriever
         self.llm = llm
@@ -128,13 +163,15 @@ class QA:
         self.config = config
         self.tools = tools
 
-    def _tool_handler(self, khoa: int | None):
+    def _tool_handler(self, khoa: int | None, tools: Tools) -> ToolHandler:
         def handle(name: str, args: dict) -> dict:
             # Khóa đã biết thì ghi đè tham số của LLM: không thể tính nhầm theo quy chế khóa khác.
             if khoa is not None:
                 args["khoa"] = khoa
-            return self.tools.call(name, args)
-        handle.fingerprint = getattr(self.tools, "fingerprint", None)
+            return tools.call(name, args)
+
+        # CachedLLM đưa dấu vân tay vào khóa cache: đổi file quy tắc thì câu trả lời cũ hết hạn.
+        handle.fingerprint = getattr(tools, "fingerprint", None)  # type: ignore[attr-defined]
         return handle
 
     def _needs_khoa(self, passages: list[Passage]) -> bool:
@@ -149,11 +186,7 @@ class QA:
         for p in passages:
             for am in p.amended_by:
                 for q in self.retriever.passages:
-                    if q in result or q.doc_id != am.by_doc_id:
-                        continue
-                    if any(qu.dieu == u.dieu and (u.khoan is None or qu.khoan is None
-                                                  or qu.khoan == u.khoan)
-                           for qu in q.units for u in am.units):
+                    if q not in result and _amends(am, q):
                         result.append(q)
         return result
 
@@ -192,9 +225,15 @@ class QA:
         try:
             data = _parse(response.text)
         except (json.JSONDecodeError, ValueError):
-            return Answer(status="tra_loi", text=response.text, retrieved=retrieved,
-                          relevance=relevance, llm=response, timings=timings,
-                          warnings=["Không đọc được định dạng trả lời, chưa kiểm chứng trích dẫn."])
+            return Answer(
+                status="tra_loi",
+                text=response.text,
+                retrieved=retrieved,
+                relevance=relevance,
+                llm=response,
+                timings=timings,
+                warnings=["Không đọc được định dạng trả lời, chưa kiểm chứng trích dẫn."],
+            )
         result, cited = self._verified(data, passages, response)
         result.retrieved, result.relevance, result.timings = retrieved, relevance, timings
         self._add_warnings(result, cited)
@@ -206,8 +245,10 @@ class QA:
             label = citation_label(p.units[0], self.docs[p.doc_id])
             for am in p.amended_by:
                 by = self.docs[am.by_doc_id]
-                label += (f"\nĐÃ ĐƯỢC SỬA ĐỔI bởi {by.doc_title} ({by.so_hieu}): {am.noi_dung}. "
-                          "Áp dụng quy định của văn bản sửa đổi.")
+                label += (
+                    f"\nĐÃ ĐƯỢC SỬA ĐỔI bởi {by.doc_title} ({by.so_hieu}): {am.noi_dung}. "
+                    "Áp dụng quy định của văn bản sửa đổi."
+                )
             blocks.append(f"[{n}] {label}\n{p.text}")
         who = f"Người hỏi là sinh viên khóa K{khoa}." if khoa else "Người hỏi không nêu khóa."
         context = "\n\n".join(blocks)
@@ -216,17 +257,19 @@ class QA:
     def _generate(self, question: str, khoa: int | None, passages: list[Passage]) -> LLMResponse:
         cfg = self.config
         prompt = self._prompt(question, khoa, passages)
-        use_tools = self.tools is not None and (
-            cfg.tools_mode == "always"
-            or (cfg.tools_mode == "auto" and needs_calculation(question))
+        use_tools = cfg.tools_mode == "always" or (
+            cfg.tools_mode == "auto" and needs_calculation(question)
         )
-        if use_tools:
-            return self.llm.generate(SYSTEM + TOOLS_RULE, prompt, SCHEMA,
-                                     FUNCTION_DECLARATIONS, self._tool_handler(khoa))
+        if self.tools is not None and use_tools:
+            handler = self._tool_handler(khoa, self.tools)
+            return self.llm.generate(
+                SYSTEM + TOOLS_RULE, prompt, SCHEMA, FUNCTION_DECLARATIONS, handler
+            )
         return self.llm.generate(SYSTEM, prompt, SCHEMA)
 
-    def _verified(self, data: dict, passages: list[Passage],
-                  response: LLMResponse) -> tuple[Answer, list[Passage]]:
+    def _verified(
+        self, data: dict, passages: list[Passage], response: LLMResponse
+    ) -> tuple[Answer, list[Passage]]:
         """Hậu kiểm bằng code: giữ trích dẫn hợp lệ, đánh dấu Điều được nhắc mà không có căn cứ.
         Trả kèm các đoạn được trích dẫn."""
         tool_units = [
@@ -234,7 +277,7 @@ class QA:
             for call in response.tool_calls
             for c in call["result"].get("can_cu", [])
         ]
-        status = "tu_choi" if data.get("tu_choi") else "tra_loi"
+        status: Status = "tu_choi" if data.get("tu_choi") else "tra_loi"
         valid, dropped = [], []
         for n in data.get("trich_dan", []):
             if isinstance(n, int) and 1 <= n <= len(passages):
@@ -264,8 +307,7 @@ class QA:
 
     def _add_warnings(self, result: Answer, cited: list[Passage]) -> None:
         if result.dropped_citations:
-            result.warnings.append(
-                f"Đã loại trích dẫn không hợp lệ: {result.dropped_citations}")
+            result.warnings.append(f"Đã loại trích dẫn không hợp lệ: {result.dropped_citations}")
         if result.unverified_mentions:
             result.warnings.append(
                 f"Câu trả lời nhắc tới Điều {result.unverified_mentions} không có trong văn bản "

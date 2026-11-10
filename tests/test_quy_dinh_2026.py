@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from ingestion.cli import parse_registered
-from ingestion.registry import load_registry
+from huce_qa.ingestion.cli import parse_registered
+from huce_qa.ingestion.registry import load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
