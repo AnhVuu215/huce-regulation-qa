@@ -123,7 +123,8 @@ def test_rate_limiter_window_expires():
     assert limiter.retry_after("a") == 0
     assert limiter.retry_after("a") > 0
     assert limiter.retry_after("b") == 0
-    time.sleep(0.06)
+    # Chờ gấp đôi cửa sổ: time.monotonic trên Windows nhảy theo bước ~16 ms, dư 10 ms là chưa đủ.
+    time.sleep(0.1)
     assert limiter.retry_after("a") == 0
 
 
