@@ -68,8 +68,14 @@ def rrf(rankings: list[list[int]], k: int = RRF_K) -> list[int]:
 
 
 class Retriever:
-    def __init__(self, config: RetrievalConfig, passages: list[Passage], embedder,
-                 reranker=None, synonyms=None):
+    def __init__(
+        self,
+        config: RetrievalConfig,
+        passages: list[Passage],
+        embedder,
+        reranker=None,
+        synonyms=None,
+    ):
         self.config = config
         self.passages = passages
         self.embedder = embedder
@@ -81,7 +87,8 @@ class Retriever:
     def max_similarity(self, question: str, khoa: int | None = None) -> float:
         """Cosine cao nhất giữa câu hỏi gốc và các đoạn được phép: dùng làm cổng liên quan."""
         allowed = [
-            i for i, p in enumerate(self.passages)
+            i
+            for i, p in enumerate(self.passages)
             if not (self.config.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
         ]
         return float((self.matrix[allowed] @ self.embedder.encode_query(question)).max())
@@ -97,7 +104,8 @@ class Retriever:
     def search(self, question: str, khoa: int | None = None, k: int = 10) -> list[Passage]:
         cfg = self.config
         allowed = [
-            i for i, p in enumerate(self.passages)
+            i
+            for i, p in enumerate(self.passages)
             if not (cfg.khoa_filter and khoa is not None) or p.ap_dung_cho(khoa)
         ]
         queries = sub_queries(question) if cfg.decompose else [question]

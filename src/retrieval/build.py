@@ -15,8 +15,14 @@ def load_corpus(root: Path) -> tuple[dict[str, Document], dict[str, list[Dieu]]]
     return docs, parsed
 
 
-def build_retriever(config: RetrievalConfig, docs: dict[str, Document],
-                    parsed: dict[str, list[Dieu]], embedder, reranker, root: Path) -> Retriever:
+def build_retriever(
+    config: RetrievalConfig,
+    docs: dict[str, Document],
+    parsed: dict[str, list[Dieu]],
+    embedder,
+    reranker,
+    root: Path,
+) -> Retriever:
     passages = []
     for doc in docs.values():
         if config.chunking == "window":
@@ -24,7 +30,9 @@ def build_retriever(config: RetrievalConfig, docs: dict[str, Document],
                 doc, parsed[doc.doc_id], config.window_words, config.window_overlap
             )
         else:
-            passages += structural_passages(doc, parsed[doc.doc_id],
-                                            amendments_to(list(docs.values()), doc.doc_id))
-    return Retriever(config, passages, embedder, reranker,
-                     load_synonyms(root / "data" / "synonyms.yaml"))
+            passages += structural_passages(
+                doc, parsed[doc.doc_id], amendments_to(list(docs.values()), doc.doc_id)
+            )
+    return Retriever(
+        config, passages, embedder, reranker, load_synonyms(root / "data" / "synonyms.yaml")
+    )

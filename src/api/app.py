@@ -1,6 +1,6 @@
 """API hỏi đáp quy chế: /ask, /feedback, /documents, /health và trang demo ở /.
 
-    uv run --group ml uvicorn api.app:app --app-dir src --port 8000
+uv run --group ml uvicorn api.app:app --app-dir src --port 8000
 """
 
 import json
@@ -71,8 +71,11 @@ class JsonlLog:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None = None,
-               rate_limit_per_min: int | None = None) -> FastAPI:
+def create_app(
+    qa_factory: Callable[[], QA] | None = None,
+    data_dir: Path | None = None,
+    rate_limit_per_min: int | None = None,
+) -> FastAPI:
     """`qa_factory` dựng pipeline khi ứng dụng khởi động (test truyền QA giả lập).
     `rate_limit_per_min`: số câu hỏi mỗi phút cho một IP; mặc định lấy ASK_RATE_LIMIT, 0 là tắt."""
     if qa_factory is None:
@@ -113,9 +116,15 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
     def documents() -> list[DocumentInfo]:
         qa: QA = state["qa"]
         return [
-            DocumentInfo(doc_id=d.doc_id, doc_title=d.doc_title, so_hieu=d.so_hieu,
-                         hieu_luc_tu=d.hieu_luc_tu, khoa_tu=d.khoa_tu, khoa_den=d.khoa_den,
-                         sua_doi=sorted({sd.doc_id for sd in d.sua_doi}))
+            DocumentInfo(
+                doc_id=d.doc_id,
+                doc_title=d.doc_title,
+                so_hieu=d.so_hieu,
+                hieu_luc_tu=d.hieu_luc_tu,
+                khoa_tu=d.khoa_tu,
+                khoa_den=d.khoa_den,
+                sua_doi=sorted({sd.doc_id for sd in d.sua_doi}),
+            )
             for d in qa.docs.values()
         ]
 
@@ -126,8 +135,11 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
         client = request.client.host if request.client else "unknown"
         wait_s = limiter.retry_after(client)
         if wait_s:
-            raise HTTPException(429, f"Bạn hỏi nhanh quá, hãy thử lại sau {wait_s} giây.",
-                                headers={"Retry-After": str(wait_s)})
+            raise HTTPException(
+                429,
+                f"Bạn hỏi nhanh quá, hãy thử lại sau {wait_s} giây.",
+                headers={"Retry-After": str(wait_s)},
+            )
         request_id = uuid.uuid4().hex
         start = time.perf_counter()
         try:
@@ -136,35 +148,59 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
             log.warning("LLM lỗi: %s", e)
             requests_log.write({"request_id": request_id, "status": "loi_llm", "error": str(e)})
             if "PerDay" in str(e):
-                detail = ("Đã hết lượt gọi mô hình ngôn ngữ trong ngày (gói miễn phí); hạn mức "
-                          "được cấp lại sau nửa đêm giờ Thái Bình Dương, khoảng 15 giờ Việt Nam.")
+                detail = (
+                    "Đã hết lượt gọi mô hình ngôn ngữ trong ngày (gói miễn phí); hạn mức "
+                    "được cấp lại sau nửa đêm giờ Thái Bình Dương, khoảng 15 giờ Việt Nam."
+                )
             else:
                 detail = "Mô hình ngôn ngữ tạm thời không phản hồi, hãy thử lại sau ít phút."
             raise HTTPException(503, detail) from e
         latency_ms = round(1000 * (time.perf_counter() - start))
         citations = [
-            Citation(doc_id=u.doc_id, doc_title=qa.docs[u.doc_id].doc_title,
-                     so_hieu=qa.docs[u.doc_id].so_hieu, dieu=u.dieu, khoan=u.khoan or None,
-                     label=citation_label(u, qa.docs[u.doc_id]))
+            Citation(
+                doc_id=u.doc_id,
+                doc_title=qa.docs[u.doc_id].doc_title,
+                so_hieu=qa.docs[u.doc_id].so_hieu,
+                dieu=u.dieu,
+                khoan=u.khoan or None,
+                label=citation_label(u, qa.docs[u.doc_id]),
+            )
             for u in dict.fromkeys(answer.citations)
         ]
-        response = AskResponse(request_id=request_id, status=answer.status, answer=answer.text,
-                               citations=citations, warnings=answer.warnings,
-                               uncertain=answer.uncertain, latency_ms=latency_ms)
+        response = AskResponse(
+            request_id=request_id,
+            status=answer.status,
+            answer=answer.text,
+            citations=citations,
+            warnings=answer.warnings,
+            uncertain=answer.uncertain,
+            latency_ms=latency_ms,
+        )
         llm = answer.llm
-        requests_log.write({
-            "request_id": request_id, "status": answer.status, "khoa": req.khoa,
-            "latency_ms": latency_ms, **answer.timings,
-            "model": llm.model if llm else None,
-            "cached": llm.cached if llm else None,
-            "tokens": (llm.input_tokens + llm.output_tokens + llm.thinking_tokens) if llm else 0,
-            "tool_calls": [c["name"] for c in llm.tool_calls] if llm else [],
-            "retrieved": answer.retrieved,
-        })
+        requests_log.write(
+            {
+                "request_id": request_id,
+                "status": answer.status,
+                "khoa": req.khoa,
+                "latency_ms": latency_ms,
+                **answer.timings,
+                "model": llm.model if llm else None,
+                "cached": llm.cached if llm else None,
+                "tokens": (llm.input_tokens + llm.output_tokens + llm.thinking_tokens)
+                if llm
+                else 0,
+                "tool_calls": [c["name"] for c in llm.tool_calls] if llm else [],
+                "retrieved": answer.retrieved,
+            }
+        )
         with recent_lock:
-            recent[request_id] = {"question": req.question, "khoa": req.khoa,
-                                  "status": answer.status, "answer": answer.text,
-                                  "citations": [c.label for c in citations]}
+            recent[request_id] = {
+                "question": req.question,
+                "khoa": req.khoa,
+                "status": answer.status,
+                "answer": answer.text,
+                "citations": [c.label for c in citations],
+            }
             while len(recent) > RECENT_ANSWERS:
                 recent.popitem(last=False)
         return response
@@ -176,8 +212,9 @@ def create_app(qa_factory: Callable[[], QA] | None = None, data_dir: Path | None
             entry = recent.get(req.request_id)
         if entry is None:
             raise HTTPException(404, "Không tìm thấy câu trả lời này (có thể đã quá cũ).")
-        feedback_log.write({"request_id": req.request_id, "helpful": req.helpful,
-                            "comment": req.comment, **entry})
+        feedback_log.write(
+            {"request_id": req.request_id, "helpful": req.helpful, "comment": req.comment, **entry}
+        )
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:

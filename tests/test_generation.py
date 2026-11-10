@@ -10,10 +10,26 @@ from ingestion.registry import Document
 from retrieval.corpus import Passage, Unit
 
 DOCS = {
-    "new": Document(doc_id="new", chunk_prefix="n", doc_title="Quy chế mới", so_hieu="1",
-                    file="x", sha256="x", hieu_luc_tu="2022-09-23", khoa_tu=67),
-    "old": Document(doc_id="old", chunk_prefix="o", doc_title="Quy chế cũ", so_hieu="2",
-                    file="x", sha256="x", hieu_luc_tu="2016-01-07", khoa_den=66),
+    "new": Document(
+        doc_id="new",
+        chunk_prefix="n",
+        doc_title="Quy chế mới",
+        so_hieu="1",
+        file="x",
+        sha256="x",
+        hieu_luc_tu="2022-09-23",
+        khoa_tu=67,
+    ),
+    "old": Document(
+        doc_id="old",
+        chunk_prefix="o",
+        doc_title="Quy chế cũ",
+        so_hieu="2",
+        file="x",
+        sha256="x",
+        hieu_luc_tu="2016-01-07",
+        khoa_den=66,
+    ),
 }
 P_NEW = Passage("n-d11-k2", "new", "Điều 11. Buộc thôi học ...", (Unit("new", 11, 2),), 67, None)
 P_OLD = Passage("o-d16-k2", "old", "Điều 16. Buộc thôi học ...", (Unit("old", 16, 2),), None, 66)
@@ -133,8 +149,10 @@ class RecordingTools:
 
 def test_tool_call_uses_asker_cohort_and_becomes_citation():
     tools = RecordingTools()
-    llm = FakeLLM(reply("Theo Điều 10, học lực loại Khá.", [1]),
-                  tool_requests=[("xep_loai_hoc_luc", {"khoa": 65, "diem_trung_binh": 3.15})])
+    llm = FakeLLM(
+        reply("Theo Điều 10, học lực loại Khá.", [1]),
+        tool_requests=[("xep_loai_hoc_luc", {"khoa": 65, "diem_trung_binh": 3.15})],
+    )
     qa = QA(StubRetriever([P_NEW, P_OLD]), llm, DOCS, QAConfig(), tools=tools)
     a = qa.answer("GPA 3,15 thì học lực loại gì?", 68)
     assert tools.received == [("xep_loai_hoc_luc", {"khoa": 68, "diem_trung_binh": 3.15})]
@@ -162,11 +180,14 @@ def test_cache_expires_when_tool_fingerprint_changes(tmp_path):
     assert len(inner.calls) == 2
 
 
-@pytest.mark.parametrize(("question", "expected"), [
-    ("GPA 3,15 thì học lực loại gì?", True),
-    ("Kỳ này em đăng ký 18 tín và trượt 10 tín", True),
-    ("GPA bao nhiêu thì được ra trường?", False),
-])
+@pytest.mark.parametrize(
+    ("question", "expected"),
+    [
+        ("GPA 3,15 thì học lực loại gì?", True),
+        ("Kỳ này em đăng ký 18 tín và trượt 10 tín", True),
+        ("GPA bao nhiêu thì được ra trường?", False),
+    ],
+)
 def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected):
     llm = FakeLLM(reply("x", [1]))
     QA(StubRetriever([P_NEW]), llm, DOCS, QAConfig(), tools=RecordingTools()).answer(question, 68)
@@ -176,13 +197,28 @@ def test_auto_mode_uses_tools_only_for_questions_with_numbers(question, expected
 def test_amended_passage_brings_in_amending_provision():
     from retrieval.corpus import Amendment
 
-    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
-                                     so_hieu="2026", file="x", sha256="x",
-                                     hieu_luc_tu="2026-03-12")}
+    docs = {
+        **DOCS,
+        "rule": Document(
+            doc_id="rule",
+            chunk_prefix="r",
+            doc_title="Quy định mới",
+            so_hieu="2026",
+            file="x",
+            sha256="x",
+            hieu_luc_tu="2026-03-12",
+        ),
+    }
     amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
-    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
-                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
-                                                      (Unit("rule", 6, 4),)),))
+    amended = Passage(
+        "n-d9-k1",
+        "new",
+        "Điều 9. Trọng số do đề cương",
+        (Unit("new", 9, 1),),
+        67,
+        None,
+        amended_by=(Amendment("rule", "trọng số 25/25/50", (Unit("rule", 6, 4),)),),
+    )
     retriever = StubRetriever([amended])
     retriever.passages = [amended, amending]
     llm = FakeLLM(reply("Cuối kỳ 50% theo Điều 6.", [2]))
@@ -200,10 +236,20 @@ def test_quota_error_reports_server_retry_delay():
 
     from generation.llm import _quota_detail
 
-    body = json.dumps({"error": {"details": [
-        {"violations": [{"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}]},
-        {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "31s"},
-    ]}}).encode()
+    body = json.dumps(
+        {
+            "error": {
+                "details": [
+                    {
+                        "violations": [
+                            {"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}
+                        ]
+                    },
+                    {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "31s"},
+                ]
+            }
+        }
+    ).encode()
     err = urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(body))
     detail, delay = _quota_detail(err)
     assert "PerMinute" in detail and delay == 32.0
@@ -212,13 +258,28 @@ def test_quota_error_reports_server_retry_delay():
 def test_superseded_passage_is_dropped_when_amending_one_is_cited():
     from retrieval.corpus import Amendment
 
-    docs = {**DOCS, "rule": Document(doc_id="rule", chunk_prefix="r", doc_title="Quy định mới",
-                                     so_hieu="2026", file="x", sha256="x",
-                                     hieu_luc_tu="2026-03-12")}
+    docs = {
+        **DOCS,
+        "rule": Document(
+            doc_id="rule",
+            chunk_prefix="r",
+            doc_title="Quy định mới",
+            so_hieu="2026",
+            file="x",
+            sha256="x",
+            hieu_luc_tu="2026-03-12",
+        ),
+    }
     amending = Passage("r-d6-k4", "rule", "Điều 6. Cuối kỳ 50%", (Unit("rule", 6, 4),), None, None)
-    amended = Passage("n-d9-k1", "new", "Điều 9. Trọng số do đề cương", (Unit("new", 9, 1),),
-                      67, None, amended_by=(Amendment("rule", "trọng số 25/25/50",
-                                                      (Unit("rule", 6, 4),)),))
+    amended = Passage(
+        "n-d9-k1",
+        "new",
+        "Điều 9. Trọng số do đề cương",
+        (Unit("new", 9, 1),),
+        67,
+        None,
+        amended_by=(Amendment("rule", "trọng số 25/25/50", (Unit("rule", 6, 4),)),),
+    )
     retriever = StubRetriever([amended])
     retriever.passages = [amended, amending]
     llm = FakeLLM(reply("Cuối kỳ 50%.", [1, 2]))
@@ -242,8 +303,10 @@ def test_concurrent_calls_keep_min_interval(monkeypatch):
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     client = GeminiClient(["mo-hinh-thu-khoang-cach"], api_key="x", min_interval_s=0.1)
-    threads = [threading.Thread(target=client._post, args=("mo-hinh-thu-khoang-cach", {}))
-               for _ in range(3)]
+    threads = [
+        threading.Thread(target=client._post, args=("mo-hinh-thu-khoang-cach", {}))
+        for _ in range(3)
+    ]
     for t in threads:
         t.start()
     for t in threads:

@@ -34,8 +34,11 @@ def test_synonym_expansion_uses_word_boundaries():
 
 
 def test_long_khoan_is_split_on_diem_and_keeps_intro():
-    doc = next(d for d in load_registry(ROOT / "data/registry.yaml").documents
-               if d.doc_id == "qc-dhxd-2022")
+    doc = next(
+        d
+        for d in load_registry(ROOT / "data/registry.yaml").documents
+        if d.doc_id == "qc-dhxd-2022"
+    )
     chunks = chunk_document(doc, parse_registered(doc, ROOT))
     parts = [c for c in chunks if c.dieu == 3 and c.khoan == 2]
     assert len(parts) > 1
@@ -85,7 +88,11 @@ def test_sub_queries_split_compound_questions_only():
     from retrieval.pipeline import sub_queries
 
     q = "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không? Với dưới bao nhiêu điểm là nợ môn ạ?"
-    assert sub_queries(q) == [q, "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
-                              "Với dưới bao nhiêu điểm là nợ môn ạ"]
+    assert sub_queries(q) == [
+        q,
+        "Bị cấm thi kỳ 1 thì kỳ 2 có bị cấm nữa không",
+        "Với dưới bao nhiêu điểm là nợ môn ạ",
+    ]
     assert sub_queries("Học lại và cải thiện điểm thì sao?") == [
-        "Học lại và cải thiện điểm thì sao?"]
+        "Học lại và cải thiện điểm thì sao?"
+    ]

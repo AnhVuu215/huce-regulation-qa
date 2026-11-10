@@ -49,8 +49,10 @@ class Judge:
         self.llm = llm
 
     def grade(self, question: str, reference: str, answer: str) -> Verdict:
-        prompt = (f"Câu hỏi: {question}\n\nĐáp án chuẩn: {reference}\n\n"
-                  f"Câu trả lời của hệ thống: {answer}")
+        prompt = (
+            f"Câu hỏi: {question}\n\nĐáp án chuẩn: {reference}\n\n"
+            f"Câu trả lời của hệ thống: {answer}"
+        )
         response = self.llm.generate(JUDGE_SYSTEM, prompt, JUDGE_SCHEMA)
         try:
             text = re.sub(r"^```(?:json)?|```$", "", response.text.strip(), flags=re.MULTILINE)

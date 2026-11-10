@@ -20,8 +20,11 @@ def build_qa(root: Path) -> QA:
     embedder = Embedder(cache_dir=cache / "embeddings", seed_dir=root / "data" / "embeddings")
     retriever = build.build_retriever(presets.PRODUCTION, docs, parsed, embedder, None, root)
     if embedder.computed:
-        log.warning("Đã tính mới %d đoạn không có trong data/embeddings; chạy "
-                    "scripts/export_embeddings.py để cập nhật.", embedder.computed)
+        log.warning(
+            "Đã tính mới %d đoạn không có trong data/embeddings; chạy "
+            "scripts/export_embeddings.py để cập nhật.",
+            embedder.computed,
+        )
     # Mô hình vẫn cần để mã hóa câu hỏi; nạp sẵn lúc khởi động (khoảng 20 giây) để người hỏi đầu
     # tiên không phải chờ.
     embedder.warm_up()

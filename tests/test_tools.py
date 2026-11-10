@@ -62,8 +62,10 @@ def test_letter_grade_boundaries_after_rounding(hv, diem, chu):
     assert hv.quy_doi_diem(68, diem)["diem_chu"] == chu
 
 
-@pytest.mark.parametrize(("gpa", "loai"), [(3.2, "Giỏi"), (3.19, "Khá"), (3.15, "Khá"),
-                                           (2.0, "Trung bình"), (0.99, "Kém")])
+@pytest.mark.parametrize(
+    ("gpa", "loai"),
+    [(3.2, "Giỏi"), (3.19, "Khá"), (3.15, "Khá"), (2.0, "Trung bình"), (0.99, "Kém")],
+)
 def test_academic_standing_2022(hv, gpa, loai):
     assert hv.xep_loai_hoc_luc(68, gpa)["xep_loai"] == loai
 
@@ -75,9 +77,14 @@ def test_academic_standing_2016_has_two_levels(hv):
 
 def test_semester_gpa_matches_test_set_q035(hv):
     # q035: 8,2 (3 tín), 6,7 (2 tín), 5,2 (3 tín) -> B+, C+, D+ -> 2,50
-    r = hv.tinh_diem_trung_binh(68, [{"diem_10": 8.2, "tin_chi": 3},
-                                     {"diem_10": 6.7, "tin_chi": 2},
-                                     {"diem_10": 5.2, "tin_chi": 3}])
+    r = hv.tinh_diem_trung_binh(
+        68,
+        [
+            {"diem_10": 8.2, "tin_chi": 3},
+            {"diem_10": 6.7, "tin_chi": 2},
+            {"diem_10": 5.2, "tin_chi": 3},
+        ],
+    )
     assert r["diem_trung_binh"] == 2.5
     assert [d["diem_chu"] for d in r["chi_tiet"]] == ["B+", "C+", "D+"]
 
@@ -136,16 +143,22 @@ def test_current_weights_apply_to_every_cohort(hv):
 
 
 def test_custom_weights_are_computed_but_flagged(hv):
-    r = hv.tinh_diem_hoc_phan(68, diem_thanh_phan=[{"diem": 6.0, "trong_so": 0.4},
-                                                   {"diem": 2.0, "trong_so": 0.6}])
+    r = hv.tinh_diem_hoc_phan(
+        68, diem_thanh_phan=[{"diem": 6.0, "trong_so": 0.4}, {"diem": 2.0, "trong_so": 0.6}]
+    )
     assert (r["diem_hoc_phan"], r["diem_chu"]) == (3.6, "F")
     assert "25%" in r["canh_bao"] and "50%" in r["canh_bao"]
 
 
 def test_custom_weights_equal_to_current_are_not_flagged(hv):
-    r = hv.tinh_diem_hoc_phan(68, diem_thanh_phan=[{"diem": 7, "trong_so": 0.25},
-                                                   {"diem": 7, "trong_so": 0.25},
-                                                   {"diem": 7, "trong_so": 0.5}])
+    r = hv.tinh_diem_hoc_phan(
+        68,
+        diem_thanh_phan=[
+            {"diem": 7, "trong_so": 0.25},
+            {"diem": 7, "trong_so": 0.25},
+            {"diem": 7, "trong_so": 0.5},
+        ],
+    )
     assert "canh_bao" not in r
 
 
@@ -179,5 +192,8 @@ def test_graduation_rank_cites_the_thresholds_it_used(hv):
 def test_module_score_cites_weights_and_letter_scale_only(hv):
     r = hv.tinh_diem_hoc_phan(68, diem_thuong_xuyen=6.0, diem_giua_ky=5.0, diem_cuoi_ky=2.0)
     assert {(c["doc_id"], c["dieu"], c["khoan"]) for c in r["can_cu"]} == {
-        ("qd-danh-gia-cdr-2026", 5, 2), ("qd-danh-gia-cdr-2026", 6, 3),
-        ("qd-danh-gia-cdr-2026", 6, 4), ("qc-dhxd-2022", 9, 4)}
+        ("qd-danh-gia-cdr-2026", 5, 2),
+        ("qd-danh-gia-cdr-2026", 6, 3),
+        ("qd-danh-gia-cdr-2026", 6, 4),
+        ("qc-dhxd-2022", 9, 4),
+    }

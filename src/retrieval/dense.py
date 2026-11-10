@@ -14,8 +14,13 @@ QUERY_CACHE_SIZE = 512
 
 
 class Embedder:
-    def __init__(self, model_name: str = DEFAULT_MODEL, cache_dir: Path | None = None,
-                 max_seq_length: int = 1024, seed_dir: Path | None = None):
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        cache_dir: Path | None = None,
+        max_seq_length: int = 1024,
+        seed_dir: Path | None = None,
+    ):
         """`seed_dir`: embedding dựng sẵn, chỉ đọc (data/embeddings trong repo), để máy mới không
         phải tính lại các đoạn văn bản; `cache_dir` là cache ghi được cho phần còn lại."""
         self.model_name = model_name

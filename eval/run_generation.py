@@ -68,16 +68,22 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--no-fallback", action="store_true",
-                        help="đo riêng một mô hình, không chuyển sang dự phòng")
-    parser.add_argument("--tools", action="store_true",
-                        help="cho LLM gọi công cụ tính toán học vụ")
+    parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help="đo riêng một mô hình, không chuyển sang dự phòng",
+    )
+    parser.add_argument("--tools", action="store_true", help="cho LLM gọi công cụ tính toán học vụ")
     parser.add_argument("--only", default="", help="chỉ chạy các loại câu, ví dụ tinh_toan")
     parser.add_argument("--limit", type=int, default=0)
-    parser.add_argument("--testset", default="testset.jsonl",
-                        help="file trong eval/, ví dụ testset_holdout.jsonl (tập kiểm tra độc lập)")
-    parser.add_argument("--judge", action="store_true",
-                        help="chấm độ đúng nội dung bằng giám khảo LLM")
+    parser.add_argument(
+        "--testset",
+        default="testset.jsonl",
+        help="file trong eval/, ví dụ testset_holdout.jsonl (tập kiểm tra độc lập)",
+    )
+    parser.add_argument(
+        "--judge", action="store_true", help="chấm độ đúng nội dung bằng giám khảo LLM"
+    )
     args = parser.parse_args()
 
     load_env(ROOT / ".env")
@@ -85,13 +91,17 @@ def main() -> None:
     models = [args.model] + ([FALLBACK] if use_fallback else [])
     llm = CachedLLM(GeminiClient(models), CACHE / "llm", namespace=args.model)
     docs, parsed = load_corpus()
-    retriever = build_retriever(EXTRA[RETRIEVAL], docs, parsed,
-                                Embedder(cache_dir=CACHE / "embeddings"), None)
+    retriever = build_retriever(
+        EXTRA[RETRIEVAL], docs, parsed, Embedder(cache_dir=CACHE / "embeddings"), None
+    )
     tools = HocVu(ROOT / "data" / "rules" / "hoc-vu.yaml", docs) if args.tools else None
     qa = QA(retriever, llm, docs, QAConfig(), tools=tools)
     # Giám khảo không dùng mô hình dự phòng: mọi câu phải được chấm bởi cùng một mô hình.
-    judge = (Judge(CachedLLM(GeminiClient([JUDGE_MODEL]), CACHE / "judge", JUDGE_MODEL))
-             if args.judge else None)
+    judge = (
+        Judge(CachedLLM(GeminiClient([JUDGE_MODEL]), CACHE / "judge", JUDGE_MODEL))
+        if args.judge
+        else None
+    )
     questions = load_testset(ROOT / "eval" / args.testset)
     if args.only:
         questions = [q for q in questions if q.loai in args.only.split(",")]
@@ -109,20 +119,29 @@ def main() -> None:
             print(f"[{i}/{len(questions)}] {q.id} LỖI: {e}", flush=True)
             continue
         row = {
-            "id": q.id, "loai": q.loai, "nguon": q.nguon, "nen_tu_choi": q.nen_tu_choi,
+            "id": q.id,
+            "loai": q.loai,
+            "nguon": q.nguon,
+            "nen_tu_choi": q.nen_tu_choi,
             "status": a.status,
-            "refused": a.status == "tu_choi", "uncertain": a.uncertain,
-            "relevance": round(a.relevance, 3), "answer": a.text,
-            "cited": a.cited_passages, "warnings": a.warnings,
-            "citations": [f"{u.doc_id} Điều {u.dieu}" + (f" Khoản {u.khoan}" if u.khoan else "")
-                          for u in a.citations],
+            "refused": a.status == "tu_choi",
+            "uncertain": a.uncertain,
+            "relevance": round(a.relevance, 3),
+            "answer": a.text,
+            "cited": a.cited_passages,
+            "warnings": a.warnings,
+            "citations": [
+                f"{u.doc_id} Điều {u.dieu}" + (f" Khoản {u.khoan}" if u.khoan else "")
+                for u in a.citations
+            ],
             "model": a.llm.model if a.llm else None,
             "latency_s": round(a.llm.latency_s, 2) if a.llm else 0.0,
             "cached": a.llm.cached if a.llm else None,
             "llm_errors": a.llm.errors if a.llm else [],
             "tool_calls": [c["name"] for c in a.llm.tool_calls] if a.llm else [],
             "tokens": (a.llm.input_tokens + a.llm.output_tokens + a.llm.thinking_tokens)
-            if a.llm else 0,
+            if a.llm
+            else 0,
         }
         if not q.nen_tu_choi:
             row.update(score_citations(a, q.can_cu))
@@ -132,8 +151,11 @@ def main() -> None:
             row["judge"], row["judge_reason"] = verdict
             row["judge_score"] = SCORE[row["judge"]]
         rows.append(row)
-        print(f"[{i}/{len(questions)}] {q.id} {a.status}"
-              f"{' (cache)' if a.llm and a.llm.cached else ''}", flush=True)
+        print(
+            f"[{i}/{len(questions)}] {q.id} {a.status}"
+            f"{' (cache)' if a.llm and a.llm.cached else ''}",
+            flush=True,
+        )
 
     if failed:
         # Không ghi kết quả thiếu câu: con số sẽ bị hiểu nhầm là của cả bộ test.
@@ -150,12 +172,19 @@ def main() -> None:
         return round(statistics.mean(r[key] for r in items), 3) if items else None
 
     summary = {
-        "model": args.model, "retrieval": RETRIEVAL, "tools": args.tools,
-        "testset": args.testset, "n": len(rows),
-        "tinh_toan_dung": mean([r for r in rows if "short_answer_correct" in r
-                                and r["loai"] == "tinh_toan"], "short_answer_correct"),
-        "dap_an_ngan_phien_ban": mean([r for r in rows if "short_answer_correct" in r
-                                       and r["loai"] == "phien_ban"], "short_answer_correct"),
+        "model": args.model,
+        "retrieval": RETRIEVAL,
+        "tools": args.tools,
+        "testset": args.testset,
+        "n": len(rows),
+        "tinh_toan_dung": mean(
+            [r for r in rows if "short_answer_correct" in r and r["loai"] == "tinh_toan"],
+            "short_answer_correct",
+        ),
+        "dap_an_ngan_phien_ban": mean(
+            [r for r in rows if "short_answer_correct" in r and r["loai"] == "phien_ban"],
+            "short_answer_correct",
+        ),
         "cau_goi_cong_cu": sum(bool(r["tool_calls"]) for r in rows),
         "trich_dan_dung": mean(answerable, "citation_correct"),
         "citation_precision": mean(answerable, "citation_precision"),
@@ -167,8 +196,14 @@ def main() -> None:
         "latency_s_p50": fresh[len(fresh) // 2] if fresh else None,
         "latency_s_p95": fresh[int(len(fresh) * 0.95)] if fresh else None,
         "tokens_per_question": mean([r for r in rows if r["tokens"]], "tokens"),
-        "by_type": {k: {"n": len(v), "trich_dan_dung": mean(v, "citation_correct"),
-                        "tu_choi_nham": sum(r["refused"] for r in v)} for k, v in by_type.items()},
+        "by_type": {
+            k: {
+                "n": len(v),
+                "trich_dan_dung": mean(v, "citation_correct"),
+                "tu_choi_nham": sum(r["refused"] for r in v),
+            }
+            for k, v in by_type.items()
+        },
     }
     # Câu tự viết và câu thật của sinh viên báo cáo riêng: câu tự viết dễ lạc quan.
     summary["by_source"] = {}
@@ -177,7 +212,8 @@ def main() -> None:
         src_ans = [r for r in src if not r["nen_tu_choi"]]
         src_out = [r for r in src if r["nen_tu_choi"]]
         summary["by_source"][nguon] = {
-            "n": len(src), "trich_dan_dung": mean(src_ans, "citation_correct"),
+            "n": len(src),
+            "trich_dan_dung": mean(src_ans, "citation_correct"),
             "tu_choi_dung": f"{sum(r['refused'] for r in src_out)}/{len(src_out)}",
             "tu_choi_nham": f"{sum(r['refused'] for r in src_ans)}/{len(src_ans)}",
         }
@@ -189,7 +225,8 @@ def main() -> None:
         for k, v in by_type.items():
             summary["by_type"][k]["do_dung_noi_dung"] = mean(v, "judge_score")
     suffix = ("-tools" if args.tools else "") + (
-        "" if args.testset == "testset.jsonl" else "-" + Path(args.testset).stem)
+        "" if args.testset == "testset.jsonl" else "-" + Path(args.testset).stem
+    )
     stamp = f"{datetime.now().astimezone():%Y%m%d-%H%M%S}"
     out = ROOT / "eval" / "results" / f"{stamp}-generation-{args.model}{suffix}.json"
     payload = {"summary": summary, "questions": rows, "qa_config": asdict(QAConfig())}

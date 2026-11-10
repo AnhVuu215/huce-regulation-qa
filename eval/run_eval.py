@@ -1,7 +1,7 @@
 """Chạy bộ test qua các cấu hình truy xuất, in bảng theo loại câu và lưu kết quả.
 
-    uv run --group ml python eval/run_eval.py --config baseline
-    uv run --group ml python eval/run_eval.py --ablation     # mọi cấu hình, cộng dồn
+uv run --group ml python eval/run_eval.py --config baseline
+uv run --group ml python eval/run_eval.py --ablation     # mọi cấu hình, cộng dồn
 """
 
 import argparse
@@ -76,8 +76,16 @@ def run(config: RetrievalConfig, questions, docs, parsed, embedder, reranker) ->
         ranked = retriever.search(q.question, q.khoa, k=10)
         latencies.append(time.perf_counter() - t)
         s = score(ranked, q.can_cu, q.khoa, k=K)
-        rows.append({"id": q.id, "loai": q.loai, "nguon": q.nguon, "khoa": q.khoa, **asdict(s),
-                     "top": [p.passage_id for p in ranked[:K]]})
+        rows.append(
+            {
+                "id": q.id,
+                "loai": q.loai,
+                "nguon": q.nguon,
+                "khoa": q.khoa,
+                **asdict(s),
+                "top": [p.passage_id for p in ranked[:K]],
+            }
+        )
     latencies.sort()
     return {
         "config": asdict(config),
@@ -118,8 +126,10 @@ def main() -> None:
             json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8"
         )
         overall[config.name] = result["summary"]["TẤT CẢ"]
-        print(f"\n## {config.name} ({result['n_passages']} đoạn, "
-              f"p50 {result['search_latency_ms']['p50']} ms)")
+        print(
+            f"\n## {config.name} ({result['n_passages']} đoạn, "
+            f"p50 {result['search_latency_ms']['p50']} ms)"
+        )
         print(table("loại", result["summary"]))
 
     if args.ablation:

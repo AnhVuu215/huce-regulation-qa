@@ -99,12 +99,19 @@ def amendment_matches(sd: SuaDoi, dieu: int, khoan: int | None) -> bool:
     return sd.dieu == dieu and (sd.khoan is None or khoan is None or sd.khoan == khoan)
 
 
-def chunk_document(doc: Document, dieus: list[Dieu], max_words: int = MAX_WORDS,
-                   amendments: list[tuple[str, SuaDoi]] = ()) -> list[Chunk]:
+def chunk_document(
+    doc: Document,
+    dieus: list[Dieu],
+    max_words: int = MAX_WORDS,
+    amendments: list[tuple[str, SuaDoi]] = (),
+) -> list[Chunk]:
     """`amendments`: các sửa đổi nhắm vào văn bản này (registry.amendments_to)."""
     chunks = [chunk for dieu in dieus for chunk in chunk_dieu(doc, dieu, max_words)]
     for chunk in chunks:
-        hits = [f"{by}: {sd.noi_dung}" for by, sd in amendments
-                if amendment_matches(sd, chunk.dieu, chunk.khoan)]
+        hits = [
+            f"{by}: {sd.noi_dung}"
+            for by, sd in amendments
+            if amendment_matches(sd, chunk.dieu, chunk.khoan)
+        ]
         chunk.sua_doi_boi = "; ".join(hits) or None
     return chunks

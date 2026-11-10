@@ -31,9 +31,14 @@ class LLMResponse:
 
 
 class LLM(Protocol):
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
-                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
-        ...
+    def generate(
+        self,
+        system: str,
+        prompt: str,
+        json_schema: dict | None = None,
+        tools: list[dict] | None = None,
+        tool_handler=None,
+    ) -> LLMResponse: ...
 
 
 class LLMError(RuntimeError):
@@ -66,8 +71,14 @@ class GeminiClient:
 
     BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
-    def __init__(self, models: list[str], api_key: str | None = None, timeout_s: float = 60,
-                 retries: int = 2, min_interval_s: float = 4.0):
+    def __init__(
+        self,
+        models: list[str],
+        api_key: str | None = None,
+        timeout_s: float = 60,
+        retries: int = 2,
+        min_interval_s: float = 4.0,
+    ):
         self.models = models
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
@@ -107,14 +118,20 @@ class GeminiClient:
                     # Lỗi cấu hình hoặc hết hạn mức theo ngày: thử lại vô ích.
                     raise _SwitchModel from e
                 # Hạn mức theo phút: chờ đúng thời gian máy chủ yêu cầu, không đoán.
-                time.sleep(retry_after if retry_after else 2 ** attempt * 5)
+                time.sleep(retry_after if retry_after else 2**attempt * 5)
             except (TimeoutError, urllib.error.URLError, OSError) as e:
                 errors.append(f"{model}: {type(e).__name__}")
-                time.sleep(2 ** attempt * 2)
+                time.sleep(2**attempt * 2)
         raise _SwitchModel
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
-                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
+    def generate(
+        self,
+        system: str,
+        prompt: str,
+        json_schema: dict | None = None,
+        tools: list[dict] | None = None,
+        tool_handler=None,
+    ) -> LLMResponse:
         """Sinh câu trả lời. Có `tools` thì chạy vòng gọi công cụ: mô hình yêu cầu, `tool_handler`
         thực thi, kết quả gửi lại cho tới khi mô hình trả lời (tối đa MAX_TOOL_ROUNDS vòng)."""
         base: dict = {"systemInstruction": {"parts": [{"text": system}]}}
@@ -128,8 +145,11 @@ class GeminiClient:
         errors: list[str] = []
         for model in self.models:
             contents = [{"role": "user", "parts": [{"text": prompt}]}]
-            usage_total = {"promptTokenCount": 0, "candidatesTokenCount": 0,
-                           "thoughtsTokenCount": 0}
+            usage_total = {
+                "promptTokenCount": 0,
+                "candidatesTokenCount": 0,
+                "thoughtsTokenCount": 0,
+            }
             calls: list[dict] = []
             start = time.perf_counter()
             try:
@@ -143,19 +163,23 @@ class GeminiClient:
                     if not requested or tool_handler is None:
                         text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
                         return LLMResponse(
-                            text=text, model=model, latency_s=time.perf_counter() - start,
+                            text=text,
+                            model=model,
+                            latency_s=time.perf_counter() - start,
                             input_tokens=usage_total["promptTokenCount"],
                             output_tokens=usage_total["candidatesTokenCount"],
                             thinking_tokens=usage_total["thoughtsTokenCount"],
-                            errors=errors, tool_calls=calls,
+                            errors=errors,
+                            tool_calls=calls,
                         )
                     # Gửi lại nguyên nội dung mô hình (kèm thoughtSignature), rồi kết quả công cụ.
                     contents.append(content)
                     responses = []
                     for fc in requested:
                         result = tool_handler(fc["name"], dict(fc.get("args", {})))
-                        calls.append({"name": fc["name"], "args": fc.get("args", {}),
-                                      "result": result})
+                        calls.append(
+                            {"name": fc["name"], "args": fc.get("args", {}), "result": result}
+                        )
                         reply = {"name": fc["name"], "response": result}
                         if "id" in fc:
                             reply["id"] = fc["id"]
@@ -207,8 +231,14 @@ class CachedLLM:
         self.dir = cache_dir / namespace
         self.dir.mkdir(parents=True, exist_ok=True)
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
-                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
+    def generate(
+        self,
+        system: str,
+        prompt: str,
+        json_schema: dict | None = None,
+        tools: list[dict] | None = None,
+        tool_handler=None,
+    ) -> LLMResponse:
         # Không có công cụ thì khóa giữ như cũ để cache đã có vẫn dùng được. Có công cụ thì
         # khóa gồm cả dấu vân tay của công cụ: đổi quy tắc hay code công cụ là cache tự hết hạn.
         parts = [system, prompt, json_schema]
@@ -237,13 +267,21 @@ class FakeLLM:
         self.tool_requests = tool_requests or []
         self.calls: list[tuple[str, str]] = []
 
-    def generate(self, system: str, prompt: str, json_schema: dict | None = None,
-                 tools: list[dict] | None = None, tool_handler=None) -> LLMResponse:
+    def generate(
+        self,
+        system: str,
+        prompt: str,
+        json_schema: dict | None = None,
+        tools: list[dict] | None = None,
+        tool_handler=None,
+    ) -> LLMResponse:
         self.calls.append((system, prompt))
         tool_calls = []
         if tools and tool_handler:
             for name, args in self.tool_requests:
-                tool_calls.append({"name": name, "args": args,
-                                   "result": tool_handler(name, dict(args))})
-        return LLMResponse(text=self.respond(prompt), model="fake", latency_s=0.0,
-                           tool_calls=tool_calls)
+                tool_calls.append(
+                    {"name": name, "args": args, "result": tool_handler(name, dict(args))}
+                )
+        return LLMResponse(
+            text=self.respond(prompt), model="fake", latency_s=0.0, tool_calls=tool_calls
+        )
