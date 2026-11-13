@@ -1,5 +1,15 @@
 # Hỏi đáp quy chế đào tạo HUCE
 
+> **English summary.** A RAG system that answers students' questions about the academic regulations of
+> Hanoi University of Civil Engineering (HUCE). Each answer cites the Article and Clause of the regulation
+> version that applies to the student's cohort, and the system refuses when the regulations give no basis.
+> Retrieval combines structure-aware chunking, hybrid vector (bge-m3) + BM25 search and cohort-based version
+> filtering (Recall@5 0.75 → 0.94; wrong-version results in the top 5 down from 44% to 0%). GPA and grading
+> are computed by code through function calling, and every cited Article is checked by code against the
+> retrieved passages. On a held-out set of real student questions it refuses all 9 out-of-scope questions
+> but answers only about 4 in 10 answerable ones correctly; see [docs/EVALUATION.md](docs/EVALUATION.md).
+> Stack: Python, FastAPI, sentence-transformers, Gemini, Docker, GitHub Actions (ruff, mypy, 128 tests).
+
 Hệ thống RAG trả lời câu hỏi của sinh viên Trường Đại học Xây dựng Hà Nội về quy chế đào tạo, mỗi câu
 trả lời dẫn Điều, Khoản của đúng phiên bản quy chế áp dụng cho khóa của người hỏi, và từ chối khi quy
 chế không có căn cứ. Kèm bộ đánh giá có số liệu: ablation từng bước, câu hỏi thật của sinh viên, tập
